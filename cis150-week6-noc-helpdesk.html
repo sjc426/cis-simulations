@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 150 — NOC Help Desk Simulation</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: #2e3350;
+    --blue: #4f8ef7;
+    --blue-dim: #1e2d4f;
+    --green: #3ecf8e;
+    --green-dim: #0d2e1f;
+    --red: #f87171;
+    --red-dim: #2e1010;
+    --yellow: #fbbf24;
+    --yellow-dim: #2e2208;
+    --orange: #fb923c;
+    --orange-dim: #2e1a08;
+    --text: #e8eaf6;
+    --text2: #8b92b8;
+    --text3: #4a5080;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; padding: 24px 16px; }
+  .wrap { max-width: 780px; margin: 0 auto; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .logo { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--blue); letter-spacing: .08em; }
+  .pills { display: flex; gap: 8px; }
+  .pill { font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .pill-score { background: var(--green-dim); color: var(--green); border: 1px solid #1a5c3a; }
+  .pill-xp { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #5c4208; }
+
+  .prog-wrap { height: 3px; background: var(--surface2); border-radius: 2px; margin-bottom: 20px; }
+  .prog-bar { height: 3px; background: var(--blue); border-radius: 2px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+  .dots { display: flex; gap: 8px; align-items: center; margin-bottom: 20px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background .3s; }
+  .dot.done { background: var(--green); }
+  .dot.active { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+  .dot-lbl { font-size: 12px; color: var(--text3); font-family: var(--mono); margin-left: 6px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+  .card-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); margin-bottom: 8px; }
+  .card-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .card-body { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 12px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11px; font-family: var(--mono); padding: 3px 10px; border-radius: 20px; }
+  .tag-warn { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #5c4208; }
+  .tag-danger { background: var(--red-dim); color: var(--red); border: 1px solid #5c1c1c; }
+  .tag-info { background: var(--blue-dim); color: var(--blue); border: 1px solid #2a3d70; }
+  .tag-ok { background: var(--green-dim); color: var(--green); border: 1px solid #1a5c3a; }
+
+  .action-btns { display: flex; flex-direction: column; gap: 8px; }
+  .abtn { font-family: var(--sans); font-size: 13px; padding: 11px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; text-align: left; line-height: 1.5; transition: all .15s; }
+  .abtn:hover { border-color: var(--blue); color: var(--text); }
+  .abtn.correct { background: var(--green-dim); color: var(--green); border-color: #1a5c3a; }
+  .abtn.wrong { background: var(--red-dim); color: var(--red); border-color: #5c1c1c; }
+
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .btn { font-family: var(--sans); font-size: 13px; font-weight: 500; padding: 9px 18px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); transition: all .15s; }
+  .btn:hover { border-color: var(--blue); color: var(--blue); }
+  .btn.primary { background: var(--blue-dim); color: var(--blue); border-color: #2a3d70; font-weight: 600; }
+  .btn.primary:hover { background: var(--blue); color: #fff; }
+  .btn.success { background: var(--green-dim); color: var(--green); border-color: #1a5c3a; font-weight: 600; }
+
+  .feedback { border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.7; display: none; }
+  .feedback.success { background: var(--green-dim); border: 1px solid #1a5c3a; color: #7ef5be; }
+  .feedback.error { background: var(--red-dim); border: 1px solid #5c1c1c; color: #fca5a5; }
+  .feedback.hint { background: var(--blue-dim); border: 1px solid #2a3d70; color: #93c5fd; }
+  .feedback.lesson { background: var(--orange-dim); border: 1px solid #5c3208; color: #fdba74; }
+  .fb-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+
+  .protocol-badge { display: inline-block; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; }
+  .proto-dhcp { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #5c4208; }
+  .proto-dns { background: var(--blue-dim); color: var(--blue); border: 1px solid #2a3d70; }
+  .proto-vlan { background: var(--orange-dim); color: var(--orange); border: 1px solid #5c3208; }
+
+  .finish-score { font-family: var(--mono); font-size: 36px; font-weight: 600; color: var(--green); margin: 12px 0; }
+
+  @media(max-width:520px){ .header{flex-direction:column;gap:10px;align-items:flex-start;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div>
+      <div class="logo">CIS 150 // NOC HELP DESK</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;font-family:var(--mono)" id="ticket-badge">Ticket #3001</div>
+    </div>
+    <div class="pills">
+      <span class="pill pill-score" id="score-el">Score: 0</span>
+      <span class="pill pill-xp" id="xp-el">XP: 0</span>
+    </div>
+  </div>
+
+  <div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0%"></div></div>
+  <div class="dots" id="dots"></div>
+
+  <div id="main-card" class="card"></div>
+  <div class="feedback" id="feedback"></div>
+  <div id="action-area"></div>
+
+</div>
+
+<script>
+const tickets=[
+  {
+    id:"#3001", protocol:"DHCP", protocolClass:"proto-dhcp",
+    title:"Entire floor can't get on the network",
+    body:"30 workstations on the 3rd floor show 'Limited connectivity'. All machines display 169.254.x.x addresses. Switches have been checked and are healthy.",
+    symptoms:[{t:"169.254.x.x addresses",c:"tag-danger"},{t:"Limited connectivity",c:"tag-danger"},{t:"Affects entire floor",c:"tag-warn"},{t:"Switches healthy",c:"tag-ok"}],
+    steps:["investigate","diagnose","fix"],
+    actions:{
+      investigate:[
+        {l:"Run ipconfig on an affected PC",r:"IP: 169.254.88.14 — this is an APIPA address. The PC broadcast for a DHCP server, got no response, and Windows self-assigned a link-local address.",correct:true},
+        {l:"Ping the default gateway",r:"Request timed out. With an APIPA address the PC cannot route beyond its local subnet.",correct:false},
+        {l:"Check all physical cable connections",r:"All cables are firmly seated — physical layer is not the issue.",correct:false}
+      ],
+      diagnose:[
+        {l:"Check if the DHCP service is running on the server",r:"The DHCP service is stopped! A Windows Update restarted the server but did not restart the DHCP service automatically.",correct:true},
+        {l:"Look for a rogue DHCP server on the segment",r:"No rogue server detected. The problem is the legitimate DHCP server is not responding.",correct:false},
+        {l:"Replace the core switch",r:"Replacing the switch has no effect — the issue is a stopped service, not hardware.",correct:false}
+      ],
+      fix:[
+        {l:"Restart the DHCP service, then run ipconfig /release /renew on clients",r:"DHCP service restarted. All 30 workstations renewed their leases and received valid IPs. Network fully restored. Ticket closed!",correct:true},
+        {l:"Manually assign static IPs to all 30 machines",r:"This works as an emergency workaround but is not scalable and does not fix the root cause.",correct:false},
+        {l:"Reboot all floor switches",r:"Rebooting switches will not start a stopped DHCP service on the server.",correct:false}
+      ]
+    },
+    hint:"169.254.x.x is an APIPA (Automatic Private IP Addressing) address — it means the PC broadcast for DHCP and got no response. Focus on why the DHCP server is silent.",
+    lesson:"DHCP failure causes APIPA self-assignment (169.254.x.x). Always verify the DHCP service is running before assuming hardware failure. Key command: ipconfig /release then ipconfig /renew. Network+ Objective 5.2 — Troubleshoot common network issues."
+  },
+  {
+    id:"#3002", protocol:"DNS", protocolClass:"proto-dns",
+    title:"Websites load by IP but not by name",
+    body:"Users report that typing www.company.com fails with 'Server not found'. However, entering the IP address 203.0.113.50 directly loads the site. Corporate email has also stopped working.",
+    symptoms:[{t:"IP access works",c:"tag-ok"},{t:"Name resolution fails",c:"tag-danger"},{t:"Email stopped working",c:"tag-danger"},{t:"All users affected",c:"tag-warn"}],
+    steps:["investigate","diagnose","fix"],
+    actions:{
+      investigate:[
+        {l:"Run nslookup www.company.com",r:"nslookup times out with no response. The configured DNS server at 8.8.8.8 is listed but not responding to queries from this network.",correct:true},
+        {l:"Ping www.company.com by name",r:"Ping fails: 'could not find host www.company.com'. This confirms name resolution is broken but does not tell us why.",correct:false},
+        {l:"Check the router and firewall configuration",r:"Router is healthy — routing table is correct, internet traffic is flowing to IP addresses fine.",correct:false}
+      ],
+      diagnose:[
+        {l:"Test DNS using an alternate server: nslookup www.company.com 1.1.1.1",r:"Works! nslookup resolves correctly using Cloudflare 1.1.1.1. The problem is specifically that the configured DNS server 8.8.8.8 is unreachable from this network segment.",correct:true},
+        {l:"Scan for malware on client machines",r:"No malware found. This is a DNS infrastructure issue, not a client-side infection.",correct:false},
+        {l:"Reinstall browsers on affected machines",r:"DNS resolution is an operating system service — reinstalling browsers has no effect.",correct:false}
+      ],
+      fix:[
+        {l:"Update the DHCP scope to push DNS server 1.1.1.1 to all clients",r:"DNS updated to 1.1.1.1 via DHCP options. At next lease renewal all clients receive the working DNS server. Websites and email immediately restored. Ticket closed!",correct:true},
+        {l:"Flush the DNS cache on every workstation",r:"Flushing cache forces a fresh lookup — but if the DNS server is unreachable the query will fail again immediately.",correct:false},
+        {l:"Set static DNS on each individual workstation",r:"This works but is not scalable or maintainable. Fixing it at the DHCP server level is the correct enterprise approach.",correct:false}
+      ]
+    },
+    hint:"The critical clue: IP addresses work but names do not. That is a textbook DNS failure. Run nslookup first — it tells you exactly whether the DNS server is responding.",
+    lesson:"When IP access works but hostname resolution fails, DNS is always the culprit. nslookup is the primary diagnostic tool. Fix at the DHCP scope level to push correct DNS to all clients. Network+ Objective 5.2 — Troubleshoot common issues: DNS."
+  },
+  {
+    id:"#3003", protocol:"Inter-VLAN Routing", protocolClass:"proto-vlan",
+    title:"New VLAN can't reach other departments",
+    body:"IT provisioned VLAN 20 for the marketing department. PCs on VLAN 20 can reach each other but cannot ping VLAN 10 (admin) or access the internet. VLAN 10 users are unaffected.",
+    symptoms:[{t:"VLAN 20 internal works",c:"tag-ok"},{t:"Cross-VLAN traffic fails",c:"tag-danger"},{t:"No internet on VLAN 20",c:"tag-danger"},{t:"VLAN 10 unaffected",c:"tag-info"}],
+    steps:["investigate","diagnose","fix"],
+    actions:{
+      investigate:[
+        {l:"Ping from a VLAN 20 PC to a VLAN 10 PC",r:"Request timed out. VLAN 20 cannot reach VLAN 10, confirming inter-VLAN routing is the failure point.",correct:true},
+        {l:"Check all trunk links between switches",r:"All trunk ports are up and tagging traffic correctly — Layer 2 is fine.",correct:false},
+        {l:"Verify IP configuration on VLAN 20 PCs",r:"VLAN 20 PCs have correct 192.168.20.x addresses and gateway 192.168.20.1. IPs look right.",correct:false}
+      ],
+      diagnose:[
+        {l:"Check the router for a VLAN 20 sub-interface or SVI",r:"The router has no sub-interface configured for VLAN 20! Inter-VLAN routing requires a Layer 3 interface on each VLAN. VLAN 20 has no gateway on the router.",correct:true},
+        {l:"Review firewall ACL rules for VLAN 20",r:"No ACL is blocking VLAN 20 traffic — the problem is upstream at the routing layer, not security policy.",correct:false},
+        {l:"Reboot all switches",r:"Rebooting switches does not create missing router interfaces. The problem is a configuration gap, not a device crash.",correct:false}
+      ],
+      fix:[
+        {l:"Create router sub-interface: encapsulation dot1Q 20 / ip address 192.168.20.1 255.255.255.0",r:"Sub-interface created for VLAN 20. The router now has a Layer 3 gateway for VLAN 20 and can route between all VLANs. Internet and cross-VLAN access fully restored. Ticket closed!",correct:true},
+        {l:"Move all VLAN 20 machines to VLAN 10",r:"This would restore connectivity but eliminates the network segmentation — defeating the purpose of creating VLAN 20.",correct:false},
+        {l:"Add static routes on each VLAN 20 workstation",r:"Static routes on clients cannot substitute for a missing router interface on VLAN 20. The router must have a Layer 3 presence on the VLAN.",correct:false}
+      ]
+    },
+    hint:"Hosts on the same VLAN communicate at Layer 2 and don't need a router. Cross-VLAN traffic must pass through a Layer 3 device. Ask yourself: does the router have an interface (sub-interface or SVI) on VLAN 20?",
+    lesson:"Inter-VLAN routing requires a Layer 3 interface for every VLAN — either a router sub-interface (router-on-a-stick) or an SVI on a Layer 3 switch. Without it, traffic cannot leave the VLAN. Network+ Objective 2.3 — Configure and troubleshoot VLANs."
+  }
+];
+
+let st={t:0,step:0,score:0,xp:0,phase:"intro",done:{}};
+function cur(){return tickets[st.t];}
+function curStep(){return cur().steps[st.step];}
+
+function renderDots(){
+  const total=1+cur().steps.length;
+  let h="";
+  for(let i=0;i<total;i++){
+    const adj=st.phase==="intro"?-1:(st.phase==="done"?total:st.step);
+    let cls="dot"+(i<adj||st.phase==="done"?" done":i===adj?" active":"");
+    h+=`<div class="${cls}"></div>`;
+  }
+  const labels=["Read ticket","Investigate","Diagnose","Fix"];
+  const ci=st.phase==="intro"?0:st.step+1;
+  h+=`<span class="dot-lbl">${labels[Math.min(ci,labels.length-1)]} — Ticket ${st.t+1} of ${tickets.length}</span>`;
+  document.getElementById("dots").innerHTML=h;
+  const pct=st.phase==="done"?100:Math.round(((st.t*4)+(st.phase==="intro"?0:st.step+1))/(tickets.length*4)*100);
+  document.getElementById("prog").style.width=pct+"%";
+  document.getElementById("ticket-badge").textContent=cur().id;
+}
+
+function tagHtml(t){return`<span class="tag ${t.c}">${t.t}</span>`;}
+
+function renderIntro(){
+  st.phase="intro";
+  const t=cur();
+  document.getElementById("main-card").innerHTML=`
+    <span class="protocol-badge ${t.protocolClass}">${t.protocol}</span>
+    <div class="card-label">${t.id} — Incoming ticket</div>
+    <div class="card-title">${t.title}</div>
+    <div class="card-body">${t.body}</div>
+    <div class="tags">${t.symptoms.map(tagHtml).join("")}</div>`;
+  document.getElementById("action-area").innerHTML=`
+    <div class="btns">
+      <button class="btn primary" onclick="startTicket()">Start investigation →</button>
+      <button class="btn" onclick="showHint()">Show hint</button>
+    </div>`;
+  document.getElementById("feedback").style.display="none";
+  renderDots();
+}
+
+function startTicket(){st.step=0;st.done={};st.phase="steps";renderStep();}
+
+function renderStep(){
+  const t=cur();const step=curStep();const acts=t.actions[step];
+  document.getElementById("main-card").innerHTML=`
+    <span class="protocol-badge ${t.protocolClass}">${t.protocol}</span>
+    <div class="card-label">${t.id} — ${step.charAt(0).toUpperCase()+step.slice(1)} phase</div>
+    <div class="card-title">${t.title}</div>
+    <div class="card-body">${t.body}</div>
+    <div class="tags">${t.symptoms.map(tagHtml).join("")}</div>`;
+  const btns=acts.map((a,i)=>{
+    const d=st.done[step]&&st.done[step][i];
+    let cls="abtn"+(d?(a.correct?" correct":" wrong"):"");
+    return`<button class="${cls}" onclick="doAction(${i})">${a.l}</button>`;
+  }).join("");
+  document.getElementById("action-area").innerHTML=`
+    <div style="font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:8px;">Choose your action</div>
+    <div class="action-btns">${btns}</div>
+    <div class="btns"><button class="btn" onclick="nextStep()">Next step →</button></div>`;
+  document.getElementById("feedback").style.display="none";
+  renderDots();
+}
+
+function doAction(i){
+  const t=cur();const step=curStep();const a=t.actions[step][i];
+  if(!st.done[step])st.done[step]={};
+  st.done[step][i]=true;
+  const fb=document.getElementById("feedback");
+  fb.style.display="block";
+  if(a.correct){
+    st.score+=10;st.xp+=15;
+    fb.className="feedback success";
+    fb.innerHTML=`<div class="fb-title">✅ Good diagnostic step!</div>${a.r}`;
+  } else {
+    st.score=Math.max(0,st.score-2);
+    fb.className="feedback error";
+    fb.innerHTML=`<div class="fb-title">❌ Not the right move</div>${a.r}`;
+  }
+  document.getElementById("score-el").textContent="Score: "+st.score;
+  document.getElementById("xp-el").textContent="XP: "+st.xp;
+  renderStep();
+}
+
+function nextStep(){
+  const t=cur();
+  if(st.step<t.steps.length-1){st.step++;renderStep();}
+  else{endTicket();}
+}
+
+function endTicket(){
+  st.xp+=25;st.phase="done";
+  document.getElementById("score-el").textContent="Score: "+st.score;
+  document.getElementById("xp-el").textContent="XP: "+st.xp;
+  const isLast=st.t>=tickets.length-1;
+  document.getElementById("main-card").innerHTML=`
+    <span class="protocol-badge ${cur().protocolClass}">${cur().protocol}</span>
+    <div class="card-label">${cur().id} — Ticket resolved</div>
+    <div class="card-title">Root cause identified: ${cur().protocol} misconfiguration</div>`;
+  const fb=document.getElementById("feedback");
+  fb.style.display="block";
+  fb.className="feedback lesson";
+  fb.innerHTML=`<div class="fb-title">📘 Lesson</div>${cur().lesson}`;
+  document.getElementById("action-area").innerHTML=`<div class="btns">
+    ${!isLast
+      ?`<button class="btn primary" onclick="nextTicket()">Next ticket →</button>`
+      :`<button class="btn success" onclick="showFinish()">View final score →</button>`}
+    <button class="btn" onclick="restartTicket()">Redo this ticket</button>
+  </div>`;
+  renderDots();
+}
+
+function nextTicket(){st.t++;st.step=0;st.done={};renderIntro();}
+function restartTicket(){st.step=0;st.done={};renderIntro();}
+
+function showFinish(){
+  document.getElementById("prog").style.width="100%";
+  document.getElementById("dots").innerHTML=`<span class="dot-lbl" style="color:var(--green);font-size:13px">All 3 tickets resolved!</span>`;
+  document.getElementById("main-card").innerHTML=`
+    <div class="card-label">All tickets closed</div>
+    <div class="card-title">Nice work, NOC technician!</div>
+    <div class="card-body">You worked through DHCP failure, DNS misconfiguration, and inter-VLAN routing — three of the most common real-world network issues and core CompTIA Network+ exam topics.</div>
+    <div class="finish-score">${st.score} / 90</div>
+    <div style="font-size:13px;color:var(--text2)">XP earned: ${st.xp}</div>`;
+  document.getElementById("feedback").style.display="none";
+  document.getElementById("action-area").innerHTML=`<div class="btns"><button class="btn success" onclick="location.reload()">Restart simulation</button></div>`;
+}
+
+function showHint(){
+  const fb=document.getElementById("feedback");
+  fb.style.display="block";
+  fb.className="feedback hint";
+  fb.innerHTML=`<div class="fb-title">💡 Hint</div>${cur().hint}`;
+}
+
+renderIntro();
+</script>
+</body>
+</html>
