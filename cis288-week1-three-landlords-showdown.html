@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 288 — Three Landlords Showdown</title>
+<link href="CIS%20288%20%E2%80%94%20Three%20Landlords%20Showdown_files/css2.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+  --blue:#4f8ef7;--blue-dim:#1e2d4f;
+  --green:#3ecf8e;--green-dim:#0d2e1f;
+  --red:#f87171;--red-dim:#2e1010;
+  --yellow:#fbbf24;--yellow-dim:#2e2208;
+  --aws:#FF9900;--aws-dim:#2e1c00;--aws-border:#6b3f00;
+  --azure:#0078D4;--azure-dim:#001e3c;--azure-border:#004080;
+  --gcp:#34A853;--gcp-dim:#0a2410;--gcp-border:#1a5c2a;
+  --text:#e8eaf6;--text2:#8b92b8;--text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:24px 16px}
+.wrap{max-width:860px;margin:0 auto}
+
+/* ── Header ── */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);letter-spacing:.08em}
+.logo-dots{display:inline-flex;gap:5px;margin-right:8px;vertical-align:middle}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+.pills{display:flex;gap:8px}
+.pill{font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
+.pill-score{background:var(--green-dim);color:var(--green);border:1px solid #1a5c3a}
+.pill-round{background:var(--blue-dim);color:var(--blue);border:1px solid #2a3d70}
+.pill-streak{background:var(--yellow-dim);color:var(--yellow);border:1px solid #5c4400}
+
+/* ── Progress ── */
+.prog-wrap{height:3px;background:var(--surface2);border-radius:2px;margin-bottom:24px}
+.prog-bar{height:3px;background:var(--blue);border-radius:2px;transition:width .4s}
+
+/* ── Round card ── */
+.round-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.round-label{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:8px}
+.round-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.4}
+.round-body{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* ── Concept badge ── */
+.concept-badge{display:inline-flex;align-items:center;gap:8px;margin:14px 0 4px;padding:10px 18px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.concept-emoji{font-size:22px}
+.concept-text{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text)}
+.concept-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── Three columns ── */
+.columns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0}
+@media(max-width:600px){.columns{grid-template-columns:1fr}}
+.col-header{border-radius:10px 10px 0 0;padding:10px 12px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em}
+.col-aws .col-header{background:var(--aws-dim);color:var(--aws);border:1px solid var(--aws-border);border-bottom:none}
+.col-azure .col-header{background:var(--azure-dim);color:var(--azure);border:1px solid var(--azure-border);border-bottom:none}
+.col-gcp .col-header{background:var(--gcp-dim);color:var(--gcp);border:1px solid var(--gcp-border);border-bottom:none}
+.col-body{border-radius:0 0 10px 10px;padding:12px;background:var(--surface2);display:flex;flex-direction:column;gap:8px}
+.col-aws .col-body{border:1px solid var(--aws-border);border-top:none}
+.col-azure .col-body{border:1px solid var(--azure-border);border-top:none}
+.col-gcp .col-body{border:1px solid var(--gcp-border);border-top:none}
+
+/* ── Answer buttons ── */
+.ans-btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s;text-align:left;width:100%}
+.col-aws .ans-btn:hover:not(:disabled){border-color:var(--aws);color:var(--aws);background:var(--aws-dim)}
+.col-azure .ans-btn:hover:not(:disabled){border-color:var(--azure);color:var(--azure);background:var(--azure-dim)}
+.col-gcp .ans-btn:hover:not(:disabled){border-color:var(--gcp);color:var(--gcp);background:var(--gcp-dim)}
+.ans-btn.correct{background:var(--green-dim);border-color:#1a5c3a;color:var(--green);font-weight:600}
+.ans-btn.wrong{background:var(--red-dim);border-color:#5c1c1c;color:var(--red)}
+.ans-btn.reveal{background:var(--green-dim);border-color:#1a5c3a;color:var(--green)}
+.ans-btn:disabled{cursor:default;opacity:.7}
+.col-label-inline{font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;padding:0 2px}
+.col-aws .col-label-inline{color:var(--aws)}
+.col-azure .col-label-inline{color:var(--azure)}
+.col-gcp .col-label-inline{color:var(--gcp)}
+
+/* ── Feedback ── */
+.fb{border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.7;display:none}
+.fb.success{background:var(--green-dim);border:1px solid #1a5c3a;color:#7ef5be}
+.fb.error{background:var(--red-dim);border:1px solid #5c1c1c;color:#fca5a5}
+.fb.partial{background:var(--yellow-dim);border:1px solid #5c4400;color:#fde68a}
+.fb-title{font-weight:600;font-size:14px;margin-bottom:6px}
+.fb-breakdown{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.fb-row{font-size:12px;font-family:var(--mono);display:flex;gap:8px;align-items:center}
+.fb-check{width:16px;text-align:center}
+
+/* ── Buttons ── */
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--blue-dim);color:var(--blue);border-color:#2a3d70;font-weight:600}
+.btn.primary:hover{background:var(--blue);color:#fff}
+.btn.success{background:var(--green-dim);color:var(--green);border-color:#1a5c3a;font-weight:600}
+
+/* ── Finish ── */
+.finish-score{font-family:var(--mono);font-size:42px;font-weight:600;color:var(--green);margin:12px 0 4px}
+.finish-sub{font-size:13px;color:var(--text2);margin-bottom:16px}
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.stat-val{font-size:20px;font-weight:600;color:var(--text);display:block;margin-bottom:2px}
+
+/* ── Streak flash ── */
+.streak-flash{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--yellow-dim);border:1px solid var(--yellow);color:var(--yellow);font-family:var(--mono);font-size:13px;font-weight:600;padding:8px 20px;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:999}
+.streak-flash.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div>
+    <div class="logo">
+      <span class="logo-dots">
+        <span class="dot" style="background:var(--aws)"></span>
+        <span class="dot" style="background:var(--azure)"></span>
+        <span class="dot" style="background:var(--gcp)"></span>
+      </span>
+      CIS 288 // THREE LANDLORDS SHOWDOWN
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-top:3px;font-family:var(--mono)">Week 1 — Cloud Foundations · Match the service across all three landlords</div>
+  </div>
+  <div class="pills">
+    <span class="pill pill-score" id="score-el">Score: 0</span>
+    <span class="pill pill-round" id="round-el">Round 1 of 8</span>
+    <span class="pill pill-streak" id="streak-el" style="display:none">🔥 ×0</span>
+  </div>
+</div>
+
+<div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0%"></div></div>
+
+<div id="game-area">
+    <div class="round-card">
+      <div class="round-label">Round 1 — Virtual Machines</div>
+      <div class="round-title">Launch a Virtual Machine</div>
+      <div class="round-body">Your team needs a cloud-hosted server to run a web application. Which service does each landlord use?</div>
+      <div class="concept-badge">
+        <span class="concept-emoji">🖥️</span>
+        <div><div class="concept-text">Launch a Virtual Machine</div><div class="concept-sub">Match this concept → AWS · Azure · GCP</div></div>
+      </div>
+    </div>
+    <div class="columns" id="cols">
+      
+      <div class="col-aws">
+        <div class="col-header">☁️&nbsp;&nbsp;AWS</div>
+        <div class="col-body">
+          <div class="col-label-inline">Pick the right service ↓</div>
+          <button class="ans-btn" id="aws-0" onclick="answerCol('aws',0,'Lambda','EC2')">
+        Lambda
+      </button><button class="ans-btn" id="aws-1" onclick="answerCol('aws',1,'S3','EC2')">
+        S3
+      </button><button class="ans-btn" id="aws-2" onclick="answerCol('aws',2,'EC2','EC2')">
+        EC2
+      </button><button class="ans-btn" id="aws-3" onclick="answerCol('aws',3,'RDS','EC2')">
+        RDS
+      </button>
+        </div>
+      </div>
+      
+      <div class="col-azure">
+        <div class="col-header">🔷&nbsp;&nbsp;Azure</div>
+        <div class="col-body">
+          <div class="col-label-inline">Pick the right service ↓</div>
+          <button class="ans-btn" id="azure-0" onclick="answerCol('azure',0,'Blob Storage','Azure Virtual Machine')">
+        Blob Storage
+      </button><button class="ans-btn" id="azure-1" onclick="answerCol('azure',1,'Azure Virtual Machine','Azure Virtual Machine')">
+        Azure Virtual Machine
+      </button><button class="ans-btn" id="azure-2" onclick="answerCol('azure',2,'Azure Functions','Azure Virtual Machine')">
+        Azure Functions
+      </button><button class="ans-btn" id="azure-3" onclick="answerCol('azure',3,'Azure SQL','Azure Virtual Machine')">
+        Azure SQL
+      </button>
+        </div>
+      </div>
+      
+      <div class="col-gcp">
+        <div class="col-header">🟢&nbsp;&nbsp;GCP</div>
+        <div class="col-body">
+          <div class="col-label-inline">Pick the right service ↓</div>
+          <button class="ans-btn" id="gcp-0" onclick="answerCol('gcp',0,'Cloud Run','Compute Engine')">
+        Cloud Run
+      </button><button class="ans-btn" id="gcp-1" onclick="answerCol('gcp',1,'Compute Engine','Compute Engine')">
+        Compute Engine
+      </button><button class="ans-btn" id="gcp-2" onclick="answerCol('gcp',2,'Cloud Storage','Compute Engine')">
+        Cloud Storage
+      </button><button class="ans-btn" id="gcp-3" onclick="answerCol('gcp',3,'BigQuery','Compute Engine')">
+        BigQuery
+      </button>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:4px 0">
+      ▲ Select the correct service in each column — all three before you can continue
+    </div></div>
+<div class="fb" id="fb" style="display: none;"></div>
+<div class="btns" id="btn-area"></div>
+
+</div>
+
+<div class="streak-flash" id="streak-flash"></div>
+
+<script>
+// ── Game data: 8 rounds, each with a concept + 3 columns of shuffled options ──
+const ROUNDS = [
+  {
+    label: "Round 1 — Virtual Machines",
+    concept: "🖥️",
+    conceptName: "Launch a Virtual Machine",
+    conceptDesc: "Your team needs a cloud-hosted server to run a web application. Which service does each landlord use?",
+    aws:   { answer: "EC2",             distractors: ["Lambda","S3","RDS"] },
+    azure: { answer: "Azure Virtual Machine", distractors: ["Azure Functions","Blob Storage","Azure SQL"] },
+    gcp:   { answer: "Compute Engine",  distractors: ["Cloud Run","Cloud Storage","BigQuery"] },
+    explain: "EC2 (Elastic Compute Cloud) = Azure Virtual Machine = Compute Engine. All three are IaaS virtual machine services — you rent the server, the landlord owns the building."
+  },
+  {
+    label: "Round 2 — Object Storage",
+    concept: "🪣",
+    conceptName: "Store Files at Scale",
+    conceptDesc: "You need to store images, backups, and static assets that can be accessed from anywhere. Which service do you use?",
+    aws:   { answer: "S3",              distractors: ["EBS","EFS","Glacier"] },
+    azure: { answer: "Blob Storage",    distractors: ["Azure Files","Azure Disk","Data Lake"] },
+    gcp:   { answer: "Cloud Storage",   distractors: ["Filestore","Persistent Disk","Cloud SQL"] },
+    explain: "S3 (Simple Storage Service) = Blob Storage = Cloud Storage. These are all object storage services — flat namespace, massively scalable, billed per GB used. The Rosetta Stone entry you'll use most."
+  },
+  {
+    label: "Round 3 — Identity & Access",
+    concept: "🔑",
+    conceptName: "Control Who Gets In",
+    conceptDesc: "You need to manage users, roles, and permissions for your cloud resources. Which IAM service does each landlord use?",
+    aws:   { answer: "IAM",             distractors: ["Cognito","GuardDuty","Shield"] },
+    azure: { answer: "Entra ID",        distractors: ["Azure Defender","Key Vault","Active Directory DS"] },
+    gcp:   { answer: "Cloud IAM",       distractors: ["BeyondCorp","Cloud Identity","Firebase Auth"] },
+    explain: "AWS IAM = Azure Entra ID = GCP Cloud IAM. Every cloud resource has a bouncer at the door — these are the bouncer control systems. Different names, same job: who gets in and what can they do."
+  },
+  {
+    label: "Round 4 — Serverless Functions",
+    concept: "⚡",
+    conceptName: "Run Code Without Servers",
+    conceptDesc: "You want to run a small piece of code in response to an event — without managing any servers or paying for idle time.",
+    aws:   { answer: "Lambda",          distractors: ["EC2","Elastic Beanstalk","Fargate"] },
+    azure: { answer: "Azure Functions", distractors: ["App Service","Container Apps","Logic Apps"] },
+    gcp:   { answer: "Cloud Functions", distractors: ["Cloud Run","App Engine","Cloud Tasks"] },
+    explain: "Lambda = Azure Functions = Cloud Functions. The TaskRabbit of the cloud — show up, do the job, disappear. No server to manage, no idle costs. You only pay when your code actually runs."
+  },
+  {
+    label: "Round 5 — Virtual Networks",
+    concept: "🔒",
+    conceptName: "Build a Private Network",
+    conceptDesc: "You need to create an isolated, private network in the cloud where your resources can communicate securely.",
+    aws:   { answer: "VPC",             distractors: ["Subnet","Security Group","Route Table"] },
+    azure: { answer: "Virtual Network (VNet)", distractors: ["NSG","ExpressRoute","Azure Firewall"] },
+    gcp:   { answer: "VPC",             distractors: ["Cloud Router","Cloud Armor","Cloud NAT"] },
+    explain: "AWS VPC = Azure VNet = GCP VPC. Your private apartment inside the landlord's building. You control who can enter, which rooms connect to each other, and what can reach the internet."
+  },
+  {
+    label: "Round 6 — Managed Databases",
+    concept: "🗄️",
+    conceptName: "Host a Managed SQL Database",
+    conceptDesc: "You need a fully managed relational database — no patching, no backups, no server maintenance.",
+    aws:   { answer: "RDS",             distractors: ["DynamoDB","Redshift","ElastiCache"] },
+    azure: { answer: "Azure SQL Database", distractors: ["Cosmos DB","Azure Table Storage","Azure Cache"] },
+    gcp:   { answer: "Cloud SQL",       distractors: ["BigQuery","Firestore","Cloud Spanner"] },
+    explain: "RDS = Azure SQL Database = Cloud SQL. Managed relational databases — MySQL, PostgreSQL, SQL Server — without touching the underlying server. The landlord handles patching, backups, and failover."
+  },
+  {
+    label: "Round 7 — Service Models",
+    concept: "🏗️",
+    conceptName: "IaaS — Most Control",
+    conceptDesc: "You want maximum control over the infrastructure: choose the OS, install your own software, manage networking yourself.",
+    aws:   { answer: "EC2 (IaaS)",      distractors: ["Lambda (FaaS)","Elastic Beanstalk (PaaS)","S3 (Storage)"] },
+    azure: { answer: "Azure VM (IaaS)", distractors: ["Azure Functions (FaaS)","App Service (PaaS)","Blob Storage"] },
+    gcp:   { answer: "Compute Engine (IaaS)", distractors: ["Cloud Functions (FaaS)","App Engine (PaaS)","Cloud Storage"] },
+    explain: "IaaS (Infrastructure as a Service) gives you the most control — you manage the OS, runtime, and software. EC2, Azure VM, and Compute Engine are all IaaS. You're renting the physical space, but furnishing it yourself."
+  },
+  {
+    label: "Round 8 — The Rosetta Stone",
+    concept: "🗿",
+    conceptName: "Translate Everything",
+    conceptDesc: "Final round! You're on a job interview and asked: 'What's the Azure equivalent of AWS Lambda?' Which answer is correct?",
+    aws:   { answer: "Lambda → serverless functions", distractors: ["Lambda → managed containers","Lambda → cron scheduler","Lambda → messaging queue"] },
+    azure: { answer: "Azure Functions → serverless", distractors: ["App Service → serverless","Logic Apps → serverless","Container Apps → serverless"] },
+    gcp:   { answer: "Cloud Functions → serverless",  distractors: ["Cloud Run → serverless","App Engine → serverless","Cloud Tasks → serverless"] },
+    explain: "Lambda = Azure Functions = Cloud Functions. All three are serverless function platforms — event-triggered, short-lived, no server management. This is the Rosetta Stone in action: same concept, three landlord names."
+  }
+];
+
+// ── State ──
+const st = { round: 0, score: 0, streak: 0, maxStreak: 0, correct: 0, answered: false };
+const POINTS_PER_CORRECT_COL = 5; // 3 columns × 5 = 15 pts per round, 120 total
+
+// ── Shuffle helper ──
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-.5); }
+
+// ── Build options for one column ──
+function buildOpts(col){ return shuffle([col.answer, ...col.distractors.slice(0,3)]); }
+
+// ── Update header ──
+function updateHeader(){
+  document.getElementById("score-el").textContent = "Score: " + st.score;
+  document.getElementById("round-el").textContent = "Round " + (st.round+1) + " of " + ROUNDS.length;
+  const pct = (st.round / ROUNDS.length) * 100;
+  document.getElementById("prog").style.width = Math.round(pct) + "%";
+  const sEl = document.getElementById("streak-el");
+  if(st.streak >= 2){ sEl.style.display=""; sEl.textContent="🔥 ×"+st.streak; }
+  else { sEl.style.display="none"; }
+}
+
+// ── Render round ──
+function render(){
+  updateHeader();
+  const r = ROUNDS[st.round];
+  const awsOpts   = buildOpts(r.aws);
+  const azureOpts = buildOpts(r.azure);
+  const gcpOpts   = buildOpts(r.gcp);
+
+  const makeCol = (cls, label, icon, color, opts, key) => {
+    const btns = opts.map((o,i) =>
+      `<button class="ans-btn" id="${key}-${i}" onclick="answerCol('${key}',${i},'${o.replace(/'/g,"\\'")}','${r[key].answer.replace(/'/g,"\\'")}')">
+        ${o}
+      </button>`
+    ).join('');
+    return `
+      <div class="${cls}">
+        <div class="col-header">${icon}&nbsp;&nbsp;${label}</div>
+        <div class="col-body">
+          <div class="col-label-inline">Pick the right service ↓</div>
+          ${btns}
+        </div>
+      </div>`;
+  };
+
+  const html = `
+    <div class="round-card">
+      <div class="round-label">${r.label}</div>
+      <div class="round-title">${r.conceptName}</div>
+      <div class="round-body">${r.conceptDesc}</div>
+      <div class="concept-badge">
+        <span class="concept-emoji">${r.concept}</span>
+        <div><div class="concept-text">${r.conceptName}</div><div class="concept-sub">Match this concept → AWS · Azure · GCP</div></div>
+      </div>
+    </div>
+    <div class="columns" id="cols">
+      ${makeCol('col-aws',   'AWS',   '☁️',  'aws',   awsOpts,   'aws')}
+      ${makeCol('col-azure', 'Azure', '🔷', 'azure', azureOpts, 'azure')}
+      ${makeCol('col-gcp',   'GCP',   '🟢', 'gcp',   gcpOpts,   'gcp')}
+    </div>
+    <div style="font-size:12px;color:var(--text3);font-family:var(--mono);padding:4px 0">
+      ▲ Select the correct service in each column — all three before you can continue
+    </div>`;
+
+  document.getElementById("game-area").innerHTML = html;
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = "";
+
+  // Per-column answer tracking
+  window._colState = { aws: null, azure: null, gcp: null };
+}
+
+// ── Answer a single column ──
+function answerCol(key, idx, chosen, correct){
+  if(st.answered) return;
+  if(window._colState[key] !== null) return; // already answered this column
+
+  const isOk = chosen === correct;
+  window._colState[key] = isOk;
+
+  // Disable all buttons in this column, highlight
+  const allBtns = document.querySelectorAll(`#${key}-0, #${key}-1, #${key}-2, #${key}-3`);
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if(b.id === `${key}-${idx}`) b.className = "ans-btn " + (isOk ? "correct" : "wrong");
+    // reveal correct
+    const bText = b.textContent.trim();
+    if(bText === correct && !isOk) b.className = "ans-btn reveal";
+  });
+
+  // Check if all three columns answered
+  const cs = window._colState;
+  if(cs.aws !== null && cs.azure !== null && cs.gcp !== null){
+    finishRound(cs.aws, cs.azure, cs.gcp);
+  }
+}
+
+// ── Finish round after all three columns answered ──
+function finishRound(awsOk, azureOk, gcpOk){
+  st.answered = true;
+  const numCorrect = [awsOk, azureOk, gcpOk].filter(Boolean).length;
+  const allRight = numCorrect === 3;
+  const pts = numCorrect * POINTS_PER_CORRECT_COL;
+  let bonus = 0;
+
+  if(allRight){
+    st.streak++;
+    if(st.streak >= 2){ bonus = 5; }
+    if(st.streak > st.maxStreak) st.maxStreak = st.streak;
+    if(st.streak >= 2) showStreakFlash("🔥 " + st.streak + "× Streak! +" + bonus + " bonus");
+    st.correct++;
+  } else {
+    st.streak = 0;
+  }
+
+  st.score += pts + bonus;
+  updateHeader();
+
+  const r = ROUNDS[st.round];
+  const fb = document.getElementById("fb");
+  fb.style.display = "block";
+
+  const breakdownRows = [
+    `<div class="fb-row"><span class="fb-check">${awsOk?"✅":"❌"}</span><span style="color:var(--aws)">AWS:</span>&nbsp;${r.aws.answer}</div>`,
+    `<div class="fb-row"><span class="fb-check">${azureOk?"✅":"❌"}</span><span style="color:var(--azure)">Azure:</span>&nbsp;${r.azure.answer}</div>`,
+    `<div class="fb-row"><span class="fb-check">${gcpOk?"✅":"❌"}</span><span style="color:var(--gcp)">GCP:</span>&nbsp;${r.gcp.answer}</div>`,
+  ].join('');
+
+  if(allRight){
+    fb.className = "fb success";
+    fb.innerHTML = `<div class="fb-title">🎯 Perfect round! +${pts}${bonus?` +${bonus} streak bonus`:''} pts</div>${r.explain}<div class="fb-breakdown">${breakdownRows}</div>`;
+  } else if(numCorrect > 0){
+    fb.className = "fb partial";
+    fb.innerHTML = `<div class="fb-title">Almost — ${numCorrect}/3 correct (+${pts} pts)</div>${r.explain}<div class="fb-breakdown">${breakdownRows}</div>`;
+  } else {
+    fb.className = "fb error";
+    fb.innerHTML = `<div class="fb-title">Not quite — keep building that Rosetta Stone 🗿</div>${r.explain}<div class="fb-breakdown">${breakdownRows}</div>`;
+  }
+
+  const isLast = st.round >= ROUNDS.length - 1;
+  document.getElementById("btn-area").innerHTML = isLast
+    ? `<button class="btn success" onclick="showFinish()">See final score →</button>`
+    : `<button class="btn primary" onclick="nextRound()">Next round →</button>`;
+}
+
+// ── Next round ──
+function nextRound(){
+  st.round++;
+  st.answered = false;
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = "";
+  render();
+}
+
+// ── Streak flash ──
+function showStreakFlash(msg){
+  const el = document.getElementById("streak-flash");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(()=>el.classList.remove("show"), 1800);
+}
+
+// ── Finish screen ──
+function showFinish(){
+  document.getElementById("prog").style.width = "100%";
+  const maxPts = ROUNDS.length * 3 * POINTS_PER_CORRECT_COL;
+  const pct = Math.round((st.score / maxPts) * 100);
+  let grade, gradeColor;
+  if(pct >= 90){ grade = "Cloud Architect 🏆"; gradeColor = "var(--green)"; }
+  else if(pct >= 70){ grade = "Cloud Engineer ⚡"; gradeColor = "var(--blue)"; }
+  else if(pct >= 50){ grade = "Cloud Apprentice 🌱"; gradeColor = "var(--yellow)"; }
+  else { grade = "Keep Studying 📖"; gradeColor = "var(--text2)"; }
+
+  document.getElementById("game-area").innerHTML = `
+    <div class="round-card">
+      <div class="round-label">Showdown complete — all 8 rounds</div>
+      <div class="round-title">You matched the Three Landlords!</div>
+      <div class="round-body">
+        You just built your Cloud Rosetta Stone — the mental map that translates services across AWS, Azure, and GCP.
+        Every concept you matched here will appear in Lab 1, Quiz 1, and every week going forward.
+      </div>
+      <div class="finish-score">${st.score} / ${maxPts}</div>
+      <div class="finish-sub" style="color:${gradeColor};font-weight:600;font-size:15px">${grade}</div>
+      <div class="stat-row">
+        <div class="stat-box"><span class="stat-val">${st.correct}/${ROUNDS.length}</span>perfect rounds</div>
+        <div class="stat-box"><span class="stat-val">${pct}%</span>accuracy</div>
+        <div class="stat-box"><span class="stat-val">${st.maxStreak}×</span>best streak</div>
+      </div>
+    </div>`;
+
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = `
+    <button class="btn success" onclick="location.reload()">Play again 🔄</button>
+    <button class="btn" onclick="window.close()">Done</button>`;
+}
+
+// ── Start ──
+render();
+</script>
+
+
+</body></html>
