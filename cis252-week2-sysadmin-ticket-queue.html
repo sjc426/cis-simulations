@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Sysadmin Ticket Queue</title>
+<link href="CIS%20252%20%E2%80%94%20Sysadmin%20Ticket%20Queue_files/css2.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3350;
+  --blue:#4f8ef7;--blue-dim:#1e2d4f;--blue-border:#2a3d70;
+  --green:#3ecf8e;--green-dim:#0d2e1f;--green-border:#1a5c3a;
+  --red:#f87171;--red-dim:#2e1010;--red-border:#5c1c1c;
+  --yellow:#fbbf24;--yellow-dim:#2e2208;--yellow-border:#5c4208;
+  --orange:#fb923c;--orange-dim:#2e1800;--orange-border:#6b3500;
+  --text:#e8eaf6;--text2:#8b92b8;--text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:24px 16px}
+.wrap{max-width:820px;margin:0 auto}
+
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.logo{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);letter-spacing:.08em}
+.logo-sub{font-size:12px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.pills{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 12px;border-radius:20px}
+.pill-score{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.pill-ticket{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+.pill-sla{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-border)}
+
+/* Progress */
+.prog-wrap{height:3px;background:var(--surface2);border-radius:2px;margin-bottom:24px}
+.prog-bar{height:3px;background:var(--blue);border-radius:2px;transition:width .4s}
+
+/* Queue header */
+.queue-header{background:var(--surface);border:1px solid var(--border);border-radius:12px 12px 0 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:0}
+.queue-title{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3)}
+.queue-status{display:flex;gap:10px;font-family:var(--mono);font-size:11px}
+.status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+.dot-open{background:var(--orange)}
+.dot-closed{background:var(--green)}
+
+/* Ticket card */
+.ticket{background:var(--surface);border:1px solid var(--border);border-radius:0;padding:20px;margin-bottom:0;border-top:none;transition:all .2s}
+.ticket:last-of-type{border-radius:0 0 12px 12px}
+.ticket.active{border-left:3px solid var(--blue);background:#1c2133}
+.ticket.resolved{border-left:3px solid var(--green);opacity:.6}
+.ticket-meta{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.ticket-id{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text3)}
+.ticket-badge{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px}
+.badge-critical{background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)}
+.badge-high{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-border)}
+.badge-medium{background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow-border)}
+.badge-low{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-border)}
+.badge-closed{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.ticket-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+.ticket-from{font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:10px}
+.ticket-body{font-size:13px;color:var(--text2);line-height:1.6;background:var(--surface2);border-radius:8px;padding:12px 14px;margin-bottom:12px;border-left:2px solid var(--border)}
+.ticket-syslog{font-family:var(--mono);font-size:11px;color:var(--text3);background:#0a0d14;border-radius:6px;padding:10px 12px;margin-bottom:12px;line-height:1.8;border:1px solid #1a1d27}
+.syslog-line{display:block}
+.syslog-err{color:var(--red)}
+.syslog-warn{color:var(--yellow)}
+.syslog-ok{color:var(--green)}
+.syslog-info{color:var(--text3)}
+
+/* Question */
+.q-label{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:8px}
+.q-text{font-size:14px;font-weight:600;color:var(--text);margin-bottom:12px;line-height:1.5}
+.q-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.q-opt{font-size:13px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;text-align:left;transition:all .15s;width:100%}
+.q-opt:hover:not(:disabled){border-color:var(--blue);background:var(--blue-dim);color:var(--blue)}
+.q-opt.ok{background:var(--green-dim);border-color:var(--green-border);color:var(--green);font-weight:600}
+.q-opt.bad{background:var(--red-dim);border-color:var(--red-border);color:var(--red)}
+.q-opt.reveal{background:var(--green-dim);border-color:var(--green-border);color:var(--green)}
+.q-opt:disabled{cursor:default}
+
+/* Consequence banner */
+.consequence{border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;font-family:var(--mono);line-height:1.6;display:none}
+.consequence.good{background:var(--green-dim);border:1px solid var(--green-border);color:#7ef5be}
+.consequence.bad{background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5}
+
+/* Feedback */
+.fb{border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.7;display:none}
+.fb.success{background:var(--green-dim);border:1px solid var(--green-border);color:#7ef5be}
+.fb.error{background:var(--red-dim);border:1px solid var(--red-border);color:#fca5a5}
+.fb-title{font-weight:600;font-size:14px;margin-bottom:5px}
+
+/* Closed stamp */
+.closed-stamp{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;color:var(--green);border:2px solid var(--green);border-radius:4px;padding:2px 10px;letter-spacing:.1em;transform:rotate(-2deg);margin-left:8px}
+
+/* Buttons */
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:9px 18px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text2);transition:all .15s}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--blue-dim);color:var(--blue);border-color:var(--blue-border);font-weight:600}
+.btn.primary:hover{background:var(--blue);color:#fff}
+.btn.success{background:var(--green-dim);color:var(--green);border-color:var(--green-border);font-weight:600}
+
+/* Finish */
+.finish-score{font-family:var(--mono);font-size:42px;font-weight:600;color:var(--green);margin:12px 0 4px}
+.stat-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.stat-val{font-size:20px;font-weight:600;color:var(--text);display:block;margin-bottom:2px}
+
+@media(max-width:540px){.header{flex-direction:column;gap:10px}.pills{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div>
+    <div class="logo">CIS 252 // SYSADMIN TICKET QUEUE</div>
+    <div class="logo-sub" id="sub-lbl">Week 2 — Virtualization &amp; Cloud Servers · Clear your ticket queue</div>
+  </div>
+  <div class="pills">
+    <span class="pill pill-score" id="score-el">Score: 0</span>
+    <span class="pill pill-ticket" id="ticket-el">Ticket 1 of 4</span>
+    <span class="pill pill-sla" id="sla-el">⚠ 4 open</span>
+  </div>
+</div>
+
+<div class="prog-wrap"><div class="prog-bar" id="prog" style="width:0%"></div></div>
+<div id="game-area">
+    <div class="queue-header">
+      <span class="queue-title">🎫 Help Desk Queue — 4 tickets remaining</span>
+      <div class="queue-status">
+        <span><span class="status-dot dot-open"></span>Open</span>
+        <span><span class="status-dot dot-closed"></span>Resolved</span>
+      </div>
+    </div>
+    <div class="ticket active">
+      <div class="ticket-meta">
+        <span class="ticket-id">TKT-0042</span>
+        <span class="ticket-badge badge-critical">CRITICAL</span>
+      </div>
+      <div class="ticket-title">Production VM won't start after host reboot</div>
+      <div class="ticket-from">From: Maria Chen <m.chen@company.com></m.chen@company.com></div>
+      <div class="ticket-body">Our main web server VM (WEB-PROD-01) is 
+offline after last night's scheduled host reboot. The website is down. 
+I've been trying for 20 minutes. Please help ASAP.</div>
+      <div class="ticket-syslog"><span class="syslog-line syslog-info">--- System Log Excerpt ---</span><span class="syslog-line syslog-info">[08:14:02] Hypervisor host reboot completed successfully</span><span class="syslog-line syslog-err">[08:14:18] VM WEB-PROD-01: Failed to start — error code 0x80004005</span><span class="syslog-line syslog-err">[08:14:18] VM WEB-PROD-01: Cannot find virtual hard disk file</span><span class="syslog-line syslog-warn">[08:14:18] Path: D:\VMs\WEB-PROD-01\disk.vhdx — file not found</span><span class="syslog-line syslog-info">[08:14:19] All other VMs started successfully</span></div>
+      <div class="q-label">Diagnose and resolve ↓</div>
+      <div class="q-text">The VM fails to start with 'Cannot find virtual hard disk file.' What is the most likely root cause?</div>
+      <div class="q-opts"><button class="q-opt" id="qo-0" onclick="answer(0)">The VM needs more RAM allocated — increase memory and restart</button><button class="q-opt" id="qo-1" onclick="answer(1)">The virtual hard disk (.vhdx) file path is wrong or the file was moved/deleted — fix the disk path in VM settings</button><button class="q-opt" id="qo-2" onclick="answer(2)">The hypervisor service crashed — reinstall the hypervisor</button><button class="q-opt" id="qo-3" onclick="answer(3)">The VM's network adapter is misconfigured — reconfigure the NIC</button></div>
+      <div class="consequence" id="consequence"></div>
+    </div></div>
+<div class="fb" id="fb" style="display: none;"></div>
+<div class="btns" id="btn-area"></div>
+
+</div>
+<script>
+const TICKETS = [
+  {
+    id: "TKT-0042",
+    priority: "critical",
+    priorityLabel: "CRITICAL",
+    from: "Maria Chen <m.chen@company.com>",
+    title: "Production VM won't start after host reboot",
+    body: "Our main web server VM (WEB-PROD-01) is offline after last night's scheduled host reboot. The website is down. I've been trying for 20 minutes. Please help ASAP.",
+    syslog: [
+      { cls: "syslog-info", text: "[08:14:02] Hypervisor host reboot completed successfully" },
+      { cls: "syslog-err",  text: "[08:14:18] VM WEB-PROD-01: Failed to start — error code 0x80004005" },
+      { cls: "syslog-err",  text: "[08:14:18] VM WEB-PROD-01: Cannot find virtual hard disk file" },
+      { cls: "syslog-warn", text: "[08:14:18] Path: D:\\VMs\\WEB-PROD-01\\disk.vhdx — file not found" },
+      { cls: "syslog-info", text: "[08:14:19] All other VMs started successfully" },
+    ],
+    q: "The VM fails to start with 'Cannot find virtual hard disk file.' What is the most likely root cause?",
+    opts: [
+      "The VM needs more RAM allocated — increase memory and restart",
+      "The virtual hard disk (.vhdx) file path is wrong or the file was moved/deleted — fix the disk path in VM settings",
+      "The hypervisor service crashed — reinstall the hypervisor",
+      "The VM's network adapter is misconfigured — reconfigure the NIC"
+    ],
+    ans: 1,
+    consequence_bad: "You increase RAM. The VM still won't start — the disk file is still missing. Maria is not happy. Website still down. 💥",
+    consequence_good: "You check the VM settings, find the .vhdx path is pointing to D:\\ but the disk was moved to E:\\ after the host reboot. You update the path — VM starts. Website back online. ✅",
+    explain: "When a VM fails with 'cannot find virtual hard disk,' the .vhdx file path in the VM configuration is broken. This often happens when a drive letter changes after a reboot, or when storage was moved. Fix: open VM settings → Hard Drive → update the path to the correct location."
+  },
+  {
+    id: "TKT-0047",
+    priority: "high",
+    priorityLabel: "HIGH",
+    from: "James Park <j.park@company.com>",
+    title: "New cloud VM has no internet — can reach local network only",
+    body: "I just spun up a new VM on our Azure subscription for the dev team. I can ping other VMs on the same subnet just fine, but the VM has no internet access at all. Can't install packages, can't reach external APIs.",
+    syslog: [
+      { cls: "syslog-ok",   text: "[10:30:01] VM DEV-03 provisioned successfully in East US region" },
+      { cls: "syslog-ok",   text: "[10:30:04] NIC attached to subnet: dev-subnet-10.0.1.0/24" },
+      { cls: "syslog-info", text: "[10:30:04] Public IP: None assigned" },
+      { cls: "syslog-warn", text: "[10:30:04] NAT Gateway: Not configured on subnet" },
+      { cls: "syslog-info", text: "[10:31:00] Ping to 10.0.1.5 (internal): SUCCESS" },
+      { cls: "syslog-err",  text: "[10:31:05] Ping to 8.8.8.8 (external): TIMEOUT" },
+    ],
+    q: "The VM can reach internal resources but not the internet. Looking at the logs, what is the root cause?",
+    opts: [
+      "The VM's firewall is blocking all outbound traffic — disable Windows Firewall",
+      "The VM needs a larger disk — the OS drive is full",
+      "No public IP and no NAT Gateway — the VM has no route to the internet from the private subnet",
+      "DNS is not configured — add 8.8.8.8 as a DNS server"
+    ],
+    ans: 2,
+    consequence_bad: "You disable the Windows Firewall. Still no internet. Now the VM has no firewall either — security risk added, problem still exists. 💥",
+    consequence_good: "You attach a NAT Gateway to the dev subnet and associate it with the route table. Outbound internet traffic now routes through NAT. The dev team can install packages. ✅",
+    explain: "In cloud VPCs, private subnet VMs don't have direct internet access by design. They need either a Public IP (direct inbound + outbound) or a NAT Gateway (outbound only, no inbound). The logs show no public IP and no NAT — the subnet has no path out. Fix: add a NAT Gateway to the subnet's route table."
+  },
+  {
+    id: "TKT-0051",
+    priority: "high",
+    priorityLabel: "HIGH",
+    from: "Alerts System <alerts@monitoring.company.com>",
+    title: "Host server CPU at 98% — VMs becoming unresponsive",
+    body: "Automated alert: Hyper-V host SERVER-HV-02 has been at 95-98% CPU for the past 45 minutes. Three VMs on this host are responding very slowly. No changes were made today according to the change log.",
+    syslog: [
+      { cls: "syslog-warn", text: "[11:02:14] SERVER-HV-02: CPU utilization 97% — threshold exceeded" },
+      { cls: "syslog-info", text: "[11:02:14] VMs on host: DB-01, APP-02, BACKUP-01, DEV-SANDBOX-07" },
+      { cls: "syslog-info", text: "[11:02:15] DB-01 vCPU: 45%  APP-02 vCPU: 12%  BACKUP-01 vCPU: 78%  DEV-SANDBOX-07 vCPU: 62%" },
+      { cls: "syslog-warn", text: "[11:02:15] BACKUP-01: backup job 'Full_System_Backup' running since 09:45" },
+      { cls: "syslog-info", text: "[11:02:16] Backup job estimated completion: 14:30" },
+      { cls: "syslog-err",  text: "[11:02:20] APP-02: response time degraded — SLA at risk" },
+    ],
+    q: "The host CPU is maxed out and the logs point to a likely cause. What is the correct diagnosis and fix?",
+    opts: [
+      "DB-01 is the problem — kill the database service immediately",
+      "The host needs more RAM — add physical memory to the server",
+      "BACKUP-01 is running a full backup job consuming 78% vCPU, starving other VMs — throttle the backup job or reschedule it to off-hours",
+      "DEV-SANDBOX-07 should be migrated to another host — development VMs shouldn't share hosts with production"
+    ],
+    ans: 2,
+    consequence_bad: "You add RAM to the ticket — but RAM isn't the bottleneck, CPU is. The backup job keeps running. APP-02 misses SLA. Your manager asks why you didn't check the logs. 💥",
+    consequence_good: "You throttle BACKUP-01's CPU limit to 20% via Hyper-V settings and reschedule full backups to 2 AM. Host CPU drops to 45% within 10 minutes. APP-02 recovers. ✅",
+    explain: "Always read the logs before acting. BACKUP-01 was consuming 78% vCPU on a full backup job — a classic resource contention problem. Best practice: schedule full backups during off-hours (nights/weekends) and set CPU limits on backup VMs so they can't starve production workloads. Live migration to another host is also an option."
+  },
+  {
+    id: "TKT-0058",
+    priority: "medium",
+    priorityLabel: "MEDIUM",
+    from: "Tom Baker <t.baker@company.com>",
+    title: "Can't RDP into new Windows Server — connection refused",
+    body: "I just set up a new Windows Server 2022 VM from a fresh install. I configured an IP address and can ping it from my workstation. But when I try to Remote Desktop into it, I get 'connection refused.' I need to manage it remotely.",
+    syslog: [
+      { cls: "syslog-ok",   text: "[14:05:10] Windows Server 2022 installation completed" },
+      { cls: "syslog-ok",   text: "[14:06:00] IP configured: 192.168.10.50 — ping from workstation: SUCCESS" },
+      { cls: "syslog-info", text: "[14:08:22] RDP connection attempt from 192.168.10.10 — REFUSED" },
+      { cls: "syslog-info", text: "[14:08:22] Remote Desktop Services: Not started" },
+      { cls: "syslog-info", text: "[14:08:23] Windows Firewall Rule 'Remote Desktop - In': Disabled" },
+      { cls: "syslog-ok",   text: "[14:08:24] Local administrator account: Active" },
+    ],
+    q: "The server is reachable by ping but RDP is refused. The logs show two things. What is the correct fix?",
+    opts: [
+      "Reinstall Windows Server — something went wrong with the installation",
+      "The administrator password needs to be reset before RDP will work",
+      "Enable Remote Desktop in System Settings AND enable the RDP firewall rule — both are disabled by default on fresh installs",
+      "Install the Remote Desktop role from Server Manager — it is not installed by default"
+    ],
+    ans: 2,
+    consequence_bad: "You reinstall Windows Server. After an hour, exact same problem — RDP still won't connect because you didn't address the actual issue: RDP is disabled by default. Tom is not amused. 💥",
+    consequence_good: "You enable Remote Desktop in System Properties → Remote, and enable the 'Remote Desktop - In' firewall rule. Tom can now RDP in and start configuring the server. ✅",
+    explain: "On fresh Windows Server installs, Remote Desktop is DISABLED by default — you must explicitly enable it in System Properties → Remote tab → 'Allow remote connections to this computer.' The Windows Firewall rule also needs to be enabled. This is by design: least privilege — no services open unless intentionally configured. Always check both: the service AND the firewall rule."
+  }
+];
+
+const st = { ticket: 0, score: 0, correct: 0, answered: false };
+
+function updateHeader() {
+  const open = TICKETS.length - st.ticket;
+  document.getElementById("score-el").textContent = "Score: " + st.score;
+  document.getElementById("ticket-el").textContent = "Ticket " + (st.ticket + 1) + " of " + TICKETS.length;
+  document.getElementById("sla-el").textContent = open > 0 ? "⚠ " + open + " open" : "✅ Queue clear";
+  const pct = (st.ticket / TICKETS.length) * 100;
+  document.getElementById("prog").style.width = Math.round(pct) + "%";
+}
+
+function render() {
+  updateHeader();
+  const t = TICKETS[st.ticket];
+
+  const priorityClass = "badge-" + t.priority;
+  const syslogHTML = t.syslog.map(l =>
+    `<span class="syslog-line ${l.cls}">${l.text}</span>`
+  ).join('');
+
+  const optsHTML = t.opts.map((o, i) =>
+    `<button class="q-opt" id="qo-${i}" onclick="answer(${i})">${o}</button>`
+  ).join('');
+
+  document.getElementById("game-area").innerHTML = `
+    <div class="queue-header">
+      <span class="queue-title">🎫 Help Desk Queue — ${TICKETS.length - st.ticket} ticket${TICKETS.length - st.ticket !== 1 ? 's' : ''} remaining</span>
+      <div class="queue-status">
+        <span><span class="status-dot dot-open"></span>Open</span>
+        <span><span class="status-dot dot-closed"></span>Resolved</span>
+      </div>
+    </div>
+    <div class="ticket active">
+      <div class="ticket-meta">
+        <span class="ticket-id">${t.id}</span>
+        <span class="ticket-badge ${priorityClass}">${t.priorityLabel}</span>
+      </div>
+      <div class="ticket-title">${t.title}</div>
+      <div class="ticket-from">From: ${t.from}</div>
+      <div class="ticket-body">${t.body}</div>
+      <div class="ticket-syslog"><span class="syslog-line syslog-info">--- System Log Excerpt ---</span>${syslogHTML}</div>
+      <div class="q-label">Diagnose and resolve ↓</div>
+      <div class="q-text">${t.q}</div>
+      <div class="q-opts">${optsHTML}</div>
+      <div class="consequence" id="consequence"></div>
+    </div>`;
+
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = "";
+}
+
+function answer(i) {
+  if (st.answered) return;
+  st.answered = true;
+
+  const t = TICKETS[st.ticket];
+  const ok = i === t.ans;
+
+  // Style buttons
+  for (let x = 0; x < t.opts.length; x++) {
+    const btn = document.getElementById("qo-" + x);
+    btn.disabled = true;
+    if (x === t.ans) btn.className = "q-opt reveal";
+  }
+  document.getElementById("qo-" + i).className = "q-opt " + (ok ? "ok" : "bad");
+
+  // Consequence
+  const cEl = document.getElementById("consequence");
+  cEl.style.display = "block";
+  cEl.className = "consequence " + (ok ? "good" : "bad");
+  cEl.textContent = ok ? t.consequence_good : t.consequence_bad;
+
+  if (ok) { st.score += 25; st.correct++; }
+  updateHeader();
+
+  // Feedback
+  const fb = document.getElementById("fb");
+  fb.style.display = "block";
+  fb.className = "fb " + (ok ? "success" : "error");
+  fb.innerHTML = `<div class="fb-title">${ok ? "✅ Ticket resolved!" : "❌ Wrong diagnosis"}</div>${t.explain}`;
+
+  const isLast = st.ticket >= TICKETS.length - 1;
+  document.getElementById("btn-area").innerHTML = isLast
+    ? `<button class="btn success" onclick="showFinish()">View shift summary →</button>`
+    : `<button class="btn primary" onclick="nextTicket()">Next ticket →</button>`;
+}
+
+function nextTicket() {
+  st.ticket++;
+  st.answered = false;
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = "";
+  render();
+}
+
+function showFinish() {
+  document.getElementById("prog").style.width = "100%";
+  document.getElementById("sla-el").textContent = "✅ Queue clear";
+
+  const pct = Math.round((st.score / 100) * 100);
+  let grade, gradeColor;
+  if (pct >= 90) { grade = "Senior Sysadmin 🏆"; gradeColor = "var(--green)"; }
+  else if (pct >= 75) { grade = "Sysadmin ⚡"; gradeColor = "var(--blue)"; }
+  else if (pct >= 50) { grade = "Junior Sysadmin 🌱"; gradeColor = "var(--yellow)"; }
+  else { grade = "Keep Studying 📖"; gradeColor = "var(--text2)"; }
+
+  const closedTickets = TICKETS.slice(0, st.correct).map((t, i) =>
+    `<div class="ticket resolved" style="border-radius:8px;margin-bottom:6px;padding:12px 16px">
+      <div class="ticket-meta">
+        <span class="ticket-id">${t.id}</span>
+        <span class="ticket-badge badge-closed">CLOSED</span>
+        <span class="closed-stamp">RESOLVED</span>
+      </div>
+      <div class="ticket-title" style="font-size:13px">${t.title}</div>
+    </div>`
+  ).join('');
+
+  document.getElementById("game-area").innerHTML = `
+    <div class="queue-header" style="border-radius:12px 12px 0 0">
+      <span class="queue-title">📋 Shift Summary — Ticket Queue Cleared</span>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:0 0 12px 12px;padding:20px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
+        You worked through ${TICKETS.length} tickets covering VM failures, cloud networking, resource contention, and server configuration.
+        These are the kinds of issues you'll encounter in real sysadmin roles — and on the CompTIA Server+ exam.
+      </div>
+      <div class="finish-score">${st.score} / 100</div>
+      <div style="color:${gradeColor};font-weight:600;font-size:15px;margin-bottom:12px">${grade}</div>
+      <div class="stat-row">
+        <div class="stat-box"><span class="stat-val">${st.correct}/${TICKETS.length}</span>correct diagnoses</div>
+        <div class="stat-box"><span class="stat-val">${pct}%</span>accuracy</div>
+        <div class="stat-box"><span class="stat-val">${TICKETS.length - st.correct}</span>misdiagnoses</div>
+      </div>
+      ${closedTickets}
+    </div>`;
+
+  document.getElementById("fb").style.display = "none";
+  document.getElementById("btn-area").innerHTML = `
+    <button class="btn success" onclick="location.reload()">Work another shift 🔄</button>
+    <button class="btn" onclick="window.close()">Done</button>`;
+}
+
+render();
+</script>
+
+
+</body></html>
