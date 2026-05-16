@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Week 4: Security Operations Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --navy:    #0D1B2A;
+    --navy2:   #0A1520;
+    --navy3:   #162236;
+    --blue:    #1B4F72;
+    --accent:  #2E86C1;
+    --cyan:    #5DADE2;
+    --white:   #F4F8FC;
+    --gray:    #8B9BB4;
+    --green:   #27AE60;
+    --green2:  #1E8449;
+    --red:     #C0392B;
+    --red2:    #E74C3C;
+    --amber:   #E67E22;
+    --amber2:  #F39C12;
+    --purple:  #7D3C98;
+    --border:  rgba(46,134,193,0.25);
+    --card-bg: rgba(22,34,54,0.95);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy2);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(46,134,193,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(46,134,193,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 12px; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    padding: 4px 10px; border-radius: 3px; text-transform: uppercase;
+  }
+  .badge-cis { background: var(--accent); color: #fff; }
+  .badge-w4  { background: var(--navy3); color: var(--cyan); border: 1px solid var(--border); }
+  .topbar-title { font-size: 13px; color: var(--gray); font-weight: 400; }
+  #global-score-display {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--cyan); display: none;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── LANDING ── */
+  .landing-hero {
+    text-align: center; padding: 48px 0 40px;
+  }
+  .landing-hero .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--cyan); letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .landing-hero h1 {
+    font-size: clamp(28px,5vw,48px); font-weight: 700; line-height: 1.15;
+    color: #fff; margin-bottom: 12px;
+  }
+  .landing-hero h1 span { color: var(--cyan); }
+  .landing-hero p {
+    font-size: 15px; color: var(--gray); max-width: 580px;
+    margin: 0 auto 36px; line-height: 1.7;
+  }
+
+  .phase-cards {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+    margin-bottom: 36px;
+  }
+  @media(max-width:600px){ .phase-cards { grid-template-columns: 1fr; } }
+
+  .phase-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 16px; text-align: left;
+    position: relative; overflow: hidden;
+  }
+  .phase-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%; background: var(--card-color);
+  }
+  .phase-card .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--card-color);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .phase-card h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .phase-card p  { font-size: 12px; color: var(--gray); line-height: 1.5; }
+  .phase-card .phase-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--card-color);
+    margin-top: 10px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+    padding: 12px 28px; border-radius: 6px; border: none;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #2471A3; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(46,134,193,0.35); }
+  .btn-outline {
+    background: transparent; color: var(--cyan);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--navy3); border-color: var(--cyan); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: var(--green2); }
+  .btn-lg { font-size: 16px; padding: 15px 36px; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .progress-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--cyan); letter-spacing: 1px; text-transform: uppercase;
+  }
+  .progress-fraction { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--gray); }
+  .progress-bar-track {
+    height: 4px; background: var(--navy3);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--accent);
+    border-radius: 2px; transition: width 0.4s ease;
+  }
+
+  /* ── PHASE HEADER ── */
+  .phase-header {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px; margin-bottom: 24px;
+  }
+  .phase-icon {
+    width: 48px; height: 48px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .phase-header-text h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .phase-header-text p  { font-size: 13px; color: var(--gray); line-height: 1.5; }
+
+  /* ── SCENARIO CARD ── */
+  .scenario-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; margin-bottom: 20px;
+  }
+  .scenario-header {
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .scenario-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+  }
+  .scenario-title { font-size: 14px; font-weight: 600; color: #fff; }
+  .scenario-body { padding: 20px; }
+  .scenario-visual {
+    background: var(--navy2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px; margin-bottom: 16px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    line-height: 1.8; color: var(--cyan);
+  }
+  .scenario-visual .label { color: var(--gray); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+  .scenario-question { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 18px; line-height: 1.55; }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--navy3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+    cursor: pointer; transition: all 0.18s; text-align: left;
+    width: 100%;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--cyan); background: rgba(46,134,193,0.1);
+    transform: translateX(2px);
+  }
+  .option-btn:disabled { cursor: default; }
+  .option-letter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; color: var(--gray);
+    background: var(--navy2); border: 1px solid var(--border);
+    width: 26px; height: 26px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .option-text { font-size: 14px; color: var(--white); line-height: 1.45; }
+  .option-btn.correct { border-color: var(--green); background: rgba(39,174,96,0.1); }
+  .option-btn.correct .option-letter { background: var(--green); color: #fff; border-color: var(--green); }
+  .option-btn.wrong   { border-color: var(--red2); background: rgba(231,76,60,0.1); }
+  .option-btn.wrong .option-letter { background: var(--red2); color: #fff; border-color: var(--red2); }
+  .option-btn.reveal  { border-color: var(--green); background: rgba(39,174,96,0.06); }
+  .option-btn.reveal .option-letter { background: var(--green); color: #fff; border-color: var(--green); }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    border-radius: 8px; padding: 14px 16px;
+    margin-top: 16px; display: none; animation: fadeIn 0.25s ease;
+  }
+  .feedback.show { display: flex; gap: 12px; align-items: flex-start; }
+  .feedback-correct { background: rgba(39,174,96,0.12); border: 1px solid rgba(39,174,96,0.3); }
+  .feedback-wrong   { background: rgba(231,76,60,0.1);  border: 1px solid rgba(231,76,60,0.3); }
+  .feedback-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .feedback-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .feedback-correct .feedback-title { color: var(--green); }
+  .feedback-wrong   .feedback-title { color: var(--red2); }
+  .feedback-body { font-size: 13px; color: #ccc; line-height: 1.55; }
+
+  .next-btn-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
+
+  /* ── PHASE SCORECARD ── */
+  .scorecard {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 14px; padding: 36px 32px; text-align: center;
+  }
+  .scorecard .sc-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--cyan); letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .scorecard h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .big-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px; font-weight: 700; line-height: 1;
+    margin: 24px 0 4px;
+  }
+  .score-label { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+  .score-detail {
+    display: flex; justify-content: center; gap: 32px;
+    margin-bottom: 32px;
+  }
+  .score-detail-item { text-align: center; }
+  .score-detail-item .val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px; font-weight: 700; display: block; margin-bottom: 4px;
+  }
+  .score-detail-item .lbl { font-size: 12px; color: var(--gray); }
+  .scorecard-msg {
+    background: var(--navy2); border-radius: 8px;
+    padding: 14px 18px; font-size: 14px; color: var(--gray);
+    line-height: 1.6; margin-bottom: 28px; text-align: left;
+  }
+
+  /* ── FINAL REPORT ── */
+  .report-header {
+    text-align: center; padding: 40px 0 32px;
+  }
+  .report-header .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--cyan); letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .report-header h2 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .report-header .subtitle { font-size: 14px; color: var(--gray); }
+
+  .report-total {
+    background: linear-gradient(135deg, var(--navy3) 0%, var(--blue) 100%);
+    border: 1px solid var(--accent); border-radius: 14px;
+    padding: 32px; text-align: center; margin-bottom: 24px;
+  }
+  .report-total .total-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 80px; font-weight: 700; line-height: 1; color: #fff;
+  }
+  .report-total .total-denom { font-size: 28px; color: var(--cyan); }
+  .report-total .total-label { font-size: 14px; color: var(--gray); margin-top: 6px; }
+  .report-total .grade-badge {
+    display: inline-block; margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    padding: 6px 18px; border-radius: 20px; text-transform: uppercase;
+  }
+
+  .phase-breakdown {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media(max-width:600px){ .phase-breakdown { grid-template-columns: 1fr; } }
+
+  .breakdown-card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px 16px;
+  }
+  .breakdown-card .bc-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--gray); letter-spacing: 1.5px;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .breakdown-card h4 { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+  .breakdown-card .bc-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 32px; font-weight: 700;
+  }
+  .breakdown-card .bc-total { font-size: 14px; color: var(--gray); }
+  .bc-bar { height: 3px; border-radius: 2px; margin-top: 12px; }
+
+  .review-table {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+  }
+  .review-table-header {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--cyan); letter-spacing: 1.5px; text-transform: uppercase;
+  }
+  .review-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; border-bottom: 1px solid rgba(46,134,193,0.1);
+  }
+  .review-row:last-child { border-bottom: none; }
+  .review-icon { font-size: 16px; flex-shrink: 0; }
+  .review-topic { font-size: 13px; color: #ddd; flex: 1; line-height: 1.4; }
+  .review-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .rv-correct { color: var(--green); }
+  .rv-wrong   { color: var(--red2); }
+
+  .report-footer {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 22px;
+    font-size: 14px; color: var(--gray); line-height: 1.65; margin-bottom: 28px;
+  }
+  .report-footer strong { color: var(--white); }
+
+  .final-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+  /* ── INLINE STATUS BAR ── */
+  .status-bar {
+    display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .status-pip {
+    height: 4px; flex: 1; border-radius: 2px; min-width: 24px;
+    background: var(--navy3); transition: background 0.3s;
+  }
+  .status-pip.done-correct { background: var(--green); }
+  .status-pip.done-wrong   { background: var(--red2); }
+  .status-pip.current      { background: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="badge badge-cis">CIS 252</span>
+      <span class="badge badge-w4">Week 4</span>
+      <span class="topbar-title">Security Operations Simulation</span>
+    </div>
+    <span id="global-score-display">Score: <span id="gs-num">0</span> / <span id="gs-den">0</span></span>
+  </div>
+
+  <!-- ══ SCREEN: LANDING ══ -->
+  <div class="screen active" id="screen-landing">
+    <div class="landing-hero">
+      <div class="eyebrow">Interactive Simulation · Week 4</div>
+      <h1>Security Operations<br><span>Shift Simulator</span></h1>
+      <p>You are a new sysadmin starting your first day. Work through 
+three phases covering physical security, network threat identification, 
+and firewall decision-making. Your score carries through all phases.</p>
+    </div>
+
+    <div class="phase-cards">
+      <div class="phase-card" style="--card-color:#E67E22;">
+        <div class="phase-num">Phase 1 · 5 scenarios</div>
+        <h3>🏛️ Data Center Tour</h3>
+        <p>Walk through the facility and spot physical security violations before going live.</p>
+        <div class="phase-count">Physical Security</div>
+      </div>
+      <div class="phase-card" style="--card-color:#8E44AD;">
+        <div class="phase-num">Phase 2 · 5 tickets</div>
+        <h3>⚡ Threat Triage</h3>
+        <p>Incoming security alerts hit the console. Identify each attack type and the right response.</p>
+        <div class="phase-count">Network Security</div>
+      </div>
+      <div class="phase-card" style="--card-color:#2E86C1;">
+        <div class="phase-num">Phase 3 · 5 decisions</div>
+        <h3>🔥 Firewall Console</h3>
+        <p>Configure firewall rules. Each wrong call either blocks legitimate users or lets attacks through.</p>
+        <div class="phase-count">Firewall &amp; IDS/IPS</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;">
+      <button class="btn btn-primary btn-lg" onclick="startPhase(1)">
+        Start Simulation →
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: PHASE 1 ══ -->
+  <div class="screen" id="screen-p1">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(230,126,34,0.15);">🏛️</div>
+      <div class="phase-header-text">
+        <h2>Phase 1 — Data Center Physical Security Tour</h2>
+        <p>You are being walked through the facility by your manager. 
+Spot each security issue and identify the correct control or response.</p>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Phase 1 Progress</span>
+        <span class="progress-fraction" id="p1-frac">1 / 5</span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="p1-bar" style="width:20%"></div></div>
+    </div>
+    <div class="status-bar" id="p1-pips"></div>
+    <div id="p1-question"></div>
+  </div>
+
+  <!-- ══ SCREEN: PHASE 1 SCORE ══ -->
+  <div class="screen" id="screen-p1-score">
+    <div class="scorecard">
+      <div class="sc-phase">Phase 1 Complete · Physical Security</div>
+      <h2>Data Center Tour — Results</h2>
+      <div class="big-score" id="p1-score-num" style="color:var(--amber)">0</div>
+      <div class="score-label">out of 5 questions</div>
+      <div class="score-detail">
+        <div class="score-detail-item">
+          <span class="val" id="p1-correct" style="color:var(--green)">0</span>
+          <span class="lbl">Correct</span>
+        </div>
+        <div class="score-detail-item">
+          <span class="val" id="p1-wrong" style="color:var(--red2)">0</span>
+          <span class="lbl">Missed</span>
+        </div>
+      </div>
+      <div class="scorecard-msg" id="p1-msg"></div>
+      <button class="btn btn-primary" onclick="startPhase(2)">Continue to Phase 2 — Threat Triage →</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: PHASE 2 ══ -->
+  <div class="screen" id="screen-p2">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(142,68,173,0.15);">⚡</div>
+      <div class="phase-header-text">
+        <h2>Phase 2 — Network Threat Triage Console</h2>
+        <p>Security alerts are coming in. For each ticket, identify the attack type and the correct defensive response.</p>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Phase 2 Progress</span>
+        <span class="progress-fraction" id="p2-frac">1 / 5</span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="p2-bar" style="width:20%"></div></div>
+    </div>
+    <div class="status-bar" id="p2-pips"></div>
+    <div id="p2-question"></div>
+  </div>
+
+  <!-- ══ SCREEN: PHASE 2 SCORE ══ -->
+  <div class="screen" id="screen-p2-score">
+    <div class="scorecard">
+      <div class="sc-phase">Phase 2 Complete · Network Threats</div>
+      <h2>Threat Triage — Results</h2>
+      <div class="big-score" id="p2-score-num" style="color:var(--purple)">0</div>
+      <div class="score-label">out of 5 questions</div>
+      <div class="score-detail">
+        <div class="score-detail-item">
+          <span class="val" id="p2-correct" style="color:var(--green)">0</span>
+          <span class="lbl">Correct</span>
+        </div>
+        <div class="score-detail-item">
+          <span class="val" id="p2-wrong" style="color:var(--red2)">0</span>
+          <span class="lbl">Missed</span>
+        </div>
+      </div>
+      <div class="scorecard-msg" id="p2-msg"></div>
+      <button class="btn btn-primary" onclick="startPhase(3)">Continue to Phase 3 — Firewall Console →</button>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN: PHASE 3 ══ -->
+  <div class="screen" id="screen-p3">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(46,134,193,0.15);">🔥</div>
+      <div class="phase-header-text">
+        <h2>Phase 3 — Firewall Rules Console</h2>
+        <p>You are configuring Windows Defender Firewall on the 
+company's server. Each decision has real consequences — wrong rules 
+either block legitimate users or let attackers through.</p>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span class="progress-label">Phase 3 Progress</span>
+        <span class="progress-fraction" id="p3-frac">1 / 5</span>
+      </div>
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="p3-bar" style="width:20%"></div></div>
+    </div>
+    <div class="status-bar" id="p3-pips"></div>
+    <div id="p3-question"></div>
+  </div>
+
+  <!-- ══ SCREEN: FINAL REPORT ══ -->
+  <div class="screen" id="screen-final">
+    <div class="report-header">
+      <div class="eyebrow">Simulation Complete</div>
+      <h2>Security Operations Report Card</h2>
+      <div class="subtitle">CIS 252 Week 4 · Physical &amp; Network Security</div>
+    </div>
+
+    <div class="report-total">
+      <div>
+        <span class="total-num" id="final-score">0</span>
+        <span class="total-denom"> / 15</span>
+      </div>
+      <div class="total-label">Total Score</div>
+      <div class="grade-badge" id="grade-badge">—</div>
+    </div>
+
+    <div class="phase-breakdown">
+      <div class="breakdown-card">
+        <div class="bc-phase">Phase 1</div>
+        <h4>🏛️ Physical Security</h4>
+        <span class="bc-score" id="bc1" style="color:var(--amber)">0</span>
+        <span class="bc-total"> / 5</span>
+        <div class="bc-bar" id="bc1-bar" style="background:var(--amber)"></div>
+      </div>
+      <div class="breakdown-card">
+        <div class="bc-phase">Phase 2</div>
+        <h4>⚡ Threat Triage</h4>
+        <span class="bc-score" id="bc2" style="color:var(--purple)">0</span>
+        <span class="bc-total"> / 5</span>
+        <div class="bc-bar" id="bc2-bar" style="background:var(--purple)"></div>
+      </div>
+      <div class="breakdown-card">
+        <div class="bc-phase">Phase 3</div>
+        <h4>🔥 Firewall Rules</h4>
+        <span class="bc-score" id="bc3" style="color:var(--cyan)">0</span>
+        <span class="bc-total"> / 5</span>
+        <div class="bc-bar" id="bc3-bar" style="background:var(--cyan)"></div>
+      </div>
+    </div>
+
+    <div class="review-table">
+      <div class="review-table-header">Question-by-Question Review</div>
+      <div id="review-rows"></div>
+    </div>
+
+    <div class="report-footer" id="report-footer"></div>
+
+    <div class="final-actions">
+      <button class="btn btn-primary btn-lg" onclick="resetGame()">🔄 Play Again</button>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════
+
+const phase1 = [
+  {
+    tag:"PHYSICAL VIOLATION",tagColor:"#E67E22",
+    title:"Scenario 1 — Loading Dock",
+    visual:`Location: Loading Dock — Rear Entrance\nTime: 14:23\nObservation: Delivery driver unloading equipment.\n               Door propped open with a box.\n               No escort visible.`,
+    question:"What physical security violation is occurring and which control directly addresses it?",
+    options:[
+      {l:"A",t:"The CCTV camera is not positioned correctly — install a second camera covering this angle."},
+      {l:"B",t:"Tailgating risk — the propped door bypasses access controls. All visitors must be escorted and doors must self-close and lock."},
+      {l:"C",t:"The driver should have signed a visitor log but didn't — require signature before delivery."},
+      {l:"D",t:"The delivery should happen during business hours only — restrict delivery window to 9AM–5PM."}
+    ],
+    correct:1,
+    feedback:{
+      right:"Correct! The propped door creates a tailgating vulnerability — any unauthorized person can walk in while the door is open. Self-closing locks and mandatory escort policies directly address this. This is exactly what a mantrap prevents by design.",
+      wrong:"The core issue here is the propped door bypassing physical access controls — it creates a tailgating risk. Cameras and visitor logs help but don't solve the open door. Mantraps and self-locking doors are the correct physical control."
+    }
+  },
+  {
+    tag:"PHYSICAL VIOLATION",tagColor:"#E67E22",
+    title:"Scenario 2 — Server Room Entrance",
+    visual:`Location: Server Room — Main Entry\nTime: 09:47\nObservation: Entry requires badge reader scan.\n               Employee swipes badge, door opens.\n               Two people walk through on one swipe.`,
+    question:"What is this attack called and what physical control is specifically designed to prevent it?",
+    options:[
+      {l:"A",t:"Shoulder surfing — install privacy screens on all workstations near the entrance."},
+      {l:"B",t:"Badge cloning — require biometric verification in addition to badge swipe."},
+      {l:"C",t:"Tailgating — a mantrap (airlock vestibule) prevents more than one person from entering on a single badge swipe."},
+      {l:"D",t:"Dumpster diving — shred all documents before disposal and install locked bins."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Exactly right. Following someone through a secured door on their badge swipe is called tailgating. The mantrap — a small room with two interlocking doors where only one opens at a time — is the physical control specifically engineered to stop it.",
+      wrong:"This is tailgating — following someone through a secured door on a single badge swipe. The mantrap is the control designed specifically for this: only one door can be open at a time, so each person must badge in individually."
+    }
+  },
+  {
+    tag:"PHYSICAL VIOLATION",tagColor:"#E67E22",
+    title:"Scenario 3 — Server Rack Aisle",
+    visual:`Location: Rack Aisle B — Row 4\nAsset Tag: SRV-0042\nObservation: Server rack door hanging open.\n               No lock on the rack.\n               Screws on panel appear disturbed.`,
+    question:"Which two physical security controls are missing or compromised here?",
+    options:[
+      {l:"A",t:"The rack needs a UPS backup system and environmental sensors for temperature monitoring."},
+      {l:"B",t:"The open rack requires a locking mechanism, and the disturbed screws suggest the tamper-evident seal was broken — both indicate unauthorized access."},
+      {l:"C",t:"A Faraday cage should be installed around the rack to prevent electromagnetic signal leakage."},
+      {l:"D",t:"Cable management needs improvement — loose cables could indicate someone tampered with network connections."}
+    ],
+    correct:1,
+    feedback:{
+      right:"Spot on. Locking server racks prevent unauthorized physical access even inside a secured data center. Tamper-evident seals on screws and panels provide audit evidence if a machine was opened. Both are missing or compromised here.",
+      wrong:"The two issues are: (1) no rack lock — even inside a secure facility, individual racks should be locked, and (2) the disturbed screws indicate a tamper-evident seal was broken, which means the machine may have been physically compromised."
+    }
+  },
+  {
+    tag:"PHYSICAL VIOLATION",tagColor:"#E67E22",
+    title:"Scenario 4 — Sensitive Equipment Room",
+    visual:`Location: SCIF Room — Classified Equipment\nAsset: High-sensitivity research workstation\nObservation: Equipment handles classified data.\n               Concern: RF signal leakage to adjacent office.\n               Standard server rack insufficient here.`,
+    question:"Which specialized physical security control is designed to prevent RF-based signal leakage from sensitive equipment?",
+    options:[
+      {l:"A",t:"Bollards — concrete posts installed around the building perimeter to stop vehicle-based physical attacks."},
+      {l:"B",t:"Biometric scanners — fingerprint or retinal scan authentication to restrict access to authorized personnel only."},
+      {l:"C",t:"Mantrap — an airlock vestibule that prevents more than one person from entering on a single access event."},
+      {l:"D",t:"Faraday cage — a metal enclosure that blocks electromagnetic signals, preventing RF-based data leakage or remote attacks."}
+    ],
+    correct:3,
+    feedback:{
+      right:"Correct. A Faraday cage is a metal enclosure that blocks electromagnetic signals in both directions — it prevents sensitive data from leaking out via RF emissions and blocks external RF-based attacks on equipment inside.",
+      wrong:"The answer is D — a Faraday cage. It's the control specifically designed for electromagnetic signal containment. Bollards stop vehicles, biometrics control identity access, mantraps prevent tailgating — none of those address RF leakage."
+    }
+  },
+  {
+    tag:"PHYSICAL VIOLATION",tagColor:"#E67E22",
+    title:"Scenario 5 — After-Hours Alert",
+    visual:`Security System Alert — 02:14 AM\nZone: Server Room B\nTrigger: Motion detected\nCamera: Footage available\nDoor Log: No badge swipe recorded\nStatus: No security guard on duty`,
+    question:"The motion sensor triggered but no badge swipe was logged. What combination of controls would have prevented this AND created an audit trail?",
+    options:[
+      {l:"A",t:"CCTV cameras provide visual evidence; badge reader logs provide the audit trail. Combined, unauthorized after-hours access is both detected and documented."},
+      {l:"B",t:"A UPS system would have kept the power on and the badge reader active during a potential power failure."},
+      {l:"C",t:"Perimeter bollards would have prevented the intruder from reaching the building by vehicle."},
+      {l:"D",t:"Biometric scanners at the building entrance would have stopped the intruder before they reached the server room."}
+    ],
+    correct:0,
+    feedback:{
+      right:"Correct. CCTV provides the visual record and motion detection triggers alerts. Badge reader logs create a timestamped audit trail of who entered and when. Together they detect unauthorized access and document evidence for investigation.",
+      wrong:"The correct combination is CCTV + badge reader logs. CCTV catches the motion and provides video evidence; badge reader logs provide the timestamped audit trail. Without both, you either have no recording or no identity record."
+    }
+  }
+];
+
+const phase2 = [
+  {
+    tag:"ALERT #001",tagColor:"#8E44AD",
+    title:"Ticket 1 — Traffic Flood",
+    visual:`ALERT: IDS-7712\nSource IPs: 45,000+ unique addresses\nTarget: Web Server (192.168.1.50 Port 80)\nPackets/sec: 2.4 million (normal: ~800)\nServer Status: Unresponsive to legitimate users\nBotnet signature: CONFIRMED`,
+    question:"What type of attack is this and what is the PRIMARY defense mechanism?",
+    options:[
+      {l:"A",t:"Man-in-the-Middle (MitM) — deploy HTTPS certificate pinning on the web server."},
+      {l:"B",t:"DDoS (Distributed Denial of Service) — the botnet floods the server with traffic from thousands of compromised machines. Defense: rate limiting and traffic scrubbing services like Cloudflare DDoS protection."},
+      {l:"C",t:"Brute Force — implement account lockout policy after 5 failed attempts."},
+      {l:"D",t:"Port Scanning — close unused ports and monitor IDS for scanning signatures."}
+    ],
+    correct:1,
+    feedback:{
+      right:"Correct. The 45,000+ source IPs and botnet signature confirm this is a DDoS attack — a Distributed Denial of Service using a botnet to overwhelm the target. Rate limiting, traffic scrubbing, and CDN absorbers (like Cloudflare) are the standard defenses.",
+      wrong:"This is DDoS — Distributed Denial of Service. The key indicators are thousands of source IPs (the botnet) and confirmed botnet signature. A regular DoS comes from one source; DDoS uses a network of compromised machines. Defense: rate limiting and traffic scrubbing."
+    }
+  },
+  {
+    tag:"ALERT #002",tagColor:"#8E44AD",
+    title:"Ticket 2 — Network Intercept",
+    visual:`ALERT: NET-INTERCEPT-3341\nProtocol: HTTP (not HTTPS)\nObservation: ARP table poisoned on local subnet\nEffect: Traffic from workstations rerouted\n          through attacker machine 192.168.1.99\nData: Credentials potentially exposed in transit`,
+    question:"What attack is this and which defensive measure directly addresses ARP poisoning on the local network?",
+    options:[
+      {l:"A",t:"DDoS attack — deploy rate limiting at the network perimeter to absorb the traffic flood."},
+      {l:"B",t:"Brute Force attack — enable account lockout policies and MFA to stop password guessing."},
+      {l:"C",t:"Man-in-the-Middle (MitM) via ARP poisoning — the attacker redirected local traffic through their machine. Defense: Dynamic ARP Inspection on managed switches, HTTPS everywhere, and network segmentation."},
+      {l:"D",t:"Port Scanning reconnaissance — block the scanning IP and implement firewall ACLs."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. ARP poisoning is the classic MitM setup on a local network — the attacker corrupts the ARP table so traffic routes through them. Dynamic ARP Inspection (DAI) on managed switches validates ARP packets and blocks poisoning attempts. HTTPS prevents credential exposure even if traffic is intercepted.",
+      wrong:"This is a Man-in-the-Middle attack via ARP poisoning. The attacker modified the ARP table to redirect local traffic through their machine. Dynamic ARP Inspection (DAI) on managed switches is the network-level defense. HTTPS ensures data is encrypted even if intercepted."
+    }
+  },
+  {
+    tag:"ALERT #003",tagColor:"#8E44AD",
+    title:"Ticket 3 — Login Spike",
+    visual:`ALERT: AUTH-FAIL-8821\nTarget Account: administrator@domain.local\nFailed Logins: 1,847 attempts in 6 minutes\nSource IP: 203.0.113.42\nPassword list detected: rockyou.txt signature\nCurrent Status: Account NOT locked out`,
+    question:"What attack type is this, and which TWO controls should have stopped it before it reached 1,847 attempts?",
+    options:[
+      {l:"A",t:"Port Scanning — close port 22 and 3389 and deploy a host-based IDS to detect scanning activity."},
+      {l:"B",t:"Man-in-the-Middle — enforce HTTPS and use certificate pinning to prevent traffic interception."},
+      {l:"C",t:"IP Spoofing — implement anti-spoofing filters and DNSSEC on the domain's DNS infrastructure."},
+      {l:"D",t:"Brute Force / Dictionary Attack using rockyou.txt. Should have been stopped by: (1) Account lockout policy — lock after 5 failed attempts, and (2) MFA — even with the correct password, login fails without the second factor."}
+    ],
+    correct:3,
+    feedback:{
+      right:"Exactly. rockyou.txt is a well-known password dictionary used in dictionary attacks — a form of brute force. The two controls that directly stop this: (1) account lockout after N failed attempts blocks automated guessing, and (2) MFA means even a correct password is useless without the second factor.",
+      wrong:"The rockyou.txt signature confirms this is a dictionary/brute force attack — automated password guessing. The two controls that stop it: account lockout policy (locks after 5 failures, preventing mass guessing) and MFA (even if they guess the right password, they can't log in without the second factor)."
+    }
+  },
+  {
+    tag:"ALERT #004",tagColor:"#8E44AD",
+    title:"Ticket 4 — Reconnaissance Activity",
+    visual:`ALERT: RECON-5512\nTool Signature: Nmap SYN scan detected\nTarget: 192.168.1.0/24 (entire subnet)\nPorts Probed: 1-65535\nOpen Ports Found: 22(SSH), 80(HTTP), 3389(RDP),\n                  23(TELNET), 8080(alt-HTTP)\nNote: No attack yet — this is pre-attack phase`,
+    question:"What is the attacker doing, and what is the correct response to the Telnet (port 23) finding?",
+    options:[
+      {l:"A",t:"This is a DDoS attack in progress — engage traffic scrubbing and rate limiting immediately."},
+      {l:"B",t:"Port Scanning — this is reconnaissance, not an attack itself. Port 23 (Telnet) must be closed immediately: Telnet sends all data including passwords in plain text with zero encryption."},
+      {l:"C",t:"This is credential stuffing — the attacker is testing known username/password pairs from a data breach list."},
+      {l:"D",t:"This is ARP poisoning — implement Dynamic ARP Inspection on all managed switches."}
+    ],
+    correct:1,
+    feedback:{
+      right:"Correct. Port scanning is reconnaissance — the attacker is mapping the attack surface before striking. Port 23 (Telnet) is critical: it transmits everything including credentials in plain text, making it the most dangerous open port found. Close it immediately. The principle of least connectivity: every open port you don't need is an unnecessary risk.",
+      wrong:"This is port scanning — pre-attack reconnaissance using Nmap. The most urgent finding is port 23 (Telnet): it transmits all data in plain text with no encryption, meaning any intercepted session exposes credentials. Close it immediately. Principle of least connectivity: if you don't need a port open, close it."
+    }
+  },
+  {
+    tag:"ALERT #005",tagColor:"#8E44AD",
+    title:"Ticket 5 — DNS Anomaly",
+    visual:`ALERT: DNS-SPOOF-2201\nEvent: DNS cache poisoned\nDomain: company-banking.internal\nLegitimate IP: 10.0.0.15\nAttacker-Injected IP: 198.51.100.77\nEffect: All users visiting banking portal\n        redirected to attacker's fake site\nCredentials: Potentially harvested`,
+    question:"What type of spoofing attack is this and which DNS security extension is specifically designed to prevent it?",
+    options:[
+      {l:"A",t:"IP Spoofing — apply anti-spoofing ingress/egress filters on the border router to block forged source IPs."},
+      {l:"B",t:"ARP Spoofing — implement Dynamic ARP Inspection on managed switches to validate ARP packets."},
+      {l:"C",t:"DNS Spoofing — the attacker poisoned the DNS cache to redirect domain traffic to a malicious IP. DNSSEC (DNS Security Extensions) cryptographically signs DNS records so forged responses are rejected."},
+      {l:"D",t:"MAC Spoofing — enable port security on switches to bind MAC addresses to specific switch ports."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. DNS spoofing (cache poisoning) corrupts the DNS resolver's cache so domain lookups return attacker-controlled IP addresses. DNSSEC adds cryptographic signatures to DNS records — resolvers can verify authenticity and reject forged responses, preventing cache poisoning.",
+      wrong:"This is DNS spoofing — cache poisoning. The attacker injected a fake IP for the domain so users are redirected to a malicious site. DNSSEC (DNS Security Extensions) is the specific defense: it cryptographically signs DNS records so fake responses fail signature verification and are rejected."
+    }
+  }
+];
+
+const phase3 = [
+  {
+    tag:"FIREWALL RULE",tagColor:"#2E86C1",
+    title:"Rule Decision 1 — Remote Administration",
+    visual:`Server: CORP-SRV-01 (Windows Server 2025)\nFirewall: Windows Defender Firewall\nContext: IT admins need to manage this server\n          remotely from their workstations.\nPort: TCP 3389 (RDP — Remote Desktop Protocol)\nDirection: Inbound`,
+    question:"Your IT team needs RDP access to manage this server remotely. What is the correct firewall decision and why?",
+    options:[
+      {l:"A",t:"Block all inbound RDP — remote management is too risky. Admins must physically be at the server."},
+      {l:"B",t:"Allow inbound TCP 3389 from any source — open it completely so admins can connect from anywhere."},
+      {l:"C",t:"Allow inbound TCP 3389 restricted to the IT management subnet only (e.g., 10.0.1.0/24) — enables remote management while limiting exposure."},
+      {l:"D",t:"Block inbound TCP 3389 but allow outbound — RDP only needs outbound connections to work."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. Least privilege applied to firewall rules: allow RDP but scope it to the IT management subnet only. Opening it to any source (0.0.0.0/0) exposes RDP to the entire internet — RDP is one of the most targeted protocols. Restricting to a known subnet dramatically reduces attack surface.",
+      wrong:"The correct answer is C — allow RDP but restricted to the IT management subnet. Never open RDP to 'any source' — RDP brute force attacks are extremely common. Blocking it entirely breaks legitimate administration. Scope the rule to the specific subnet your IT team uses."
+    }
+  },
+  {
+    tag:"FIREWALL RULE",tagColor:"#2E86C1",
+    title:"Rule Decision 2 — Legacy Protocol",
+    visual:`Server: CORP-SRV-01\nRequest: A vendor claims their monitoring\n          tool requires Telnet access.\nPort: TCP 23 (Telnet)\nDirection: Inbound\nNote: Telnet transmits all data in plain text.\n      SSH (port 22) provides encrypted alternative.`,
+    question:"The vendor wants you to open Telnet (port 23) inbound. What is the correct decision?",
+    options:[
+      {l:"A",t:"Allow inbound TCP 23 — if the vendor requires it, open it. Vendor requirements override security policy."},
+      {l:"B",t:"Block inbound TCP 23 and inform the vendor they must use SSH (port 22) instead — Telnet has no encryption and is not acceptable on a production server."},
+      {l:"C",t:"Allow inbound TCP 23 but only during business hours — restrict the time window to limit exposure."},
+      {l:"D",t:"Allow inbound TCP 23 but change the default port to 2323 — security through obscurity reduces risk."}
+    ],
+    correct:1,
+    feedback:{
+      right:"Correct. Telnet sends everything — including credentials and all session data — in plain text. Any attacker with network access can read every keystroke. Block it. SSH (port 22) provides the same remote access with strong encryption. No legitimate operational need justifies running Telnet on a production server.",
+      wrong:"Block Telnet entirely. It has zero encryption — credentials and all session data travel in plain text. Restricting hours or changing ports (security through obscurity) doesn't fix the fundamental problem. Direct the vendor to SSH (port 22) instead. This is non-negotiable on a production server."
+    }
+  },
+  {
+    tag:"FIREWALL RULE",tagColor:"#2E86C1",
+    title:"Rule Decision 3 — Web Server Traffic",
+    visual:`Server: WEB-SRV-01 (Public Web Server in DMZ)\nCurrent State: HTTP (port 80) is OPEN\nSituation: Company has migrated to HTTPS.\n            HTTP traffic is now being automatically\n            redirected to HTTPS (port 443).\nQuestion: Should port 80 stay open?`,
+    question:"The web server has fully migrated to HTTPS. What should you do with port 80 and why?",
+    options:[
+      {l:"A",t:"Keep port 80 open — users may still type http:// in their browser and need to reach the server."},
+      {l:"B",t:"Block port 80 completely and only allow port 443 — if HTTPS migration is complete, there is no need for port 80."},
+      {l:"C",t:"Keep port 80 open to receive traffic and redirect to 443 — this is standard practice and the redirect closes the HTTP gap. Port 443 must also be allowed."},
+      {l:"D",t:"Block both port 80 and 443 — force users to use a VPN before accessing the web server."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. This is standard web server configuration: keep port 80 open to catch HTTP traffic (users who type http:// or old bookmarks) but immediately redirect all of it to HTTPS (port 443). Port 80 with an HTTP-to-HTTPS redirect is not a security weakness — it's how you ensure nobody is accidentally using unencrypted HTTP.",
+      wrong:"C is correct. You need port 80 open to receive HTTP requests and redirect them to HTTPS — otherwise users who type http:// get a connection refused error. The redirect itself is not a security problem. What matters is that actual content is only served over HTTPS (port 443), which must also be allowed."
+    }
+  },
+  {
+    tag:"FIREWALL RULE",tagColor:"#2E86C1",
+    title:"Rule Decision 4 — Intrusion System Placement",
+    visual:`Scenario: You are designing security monitoring\n           for the company network.\nOption A: Place the system OUT-OF-BAND\n           (receives a copy of traffic, does not\n           sit in the traffic path)\nOption B: Place the system IN-LINE\n           (all traffic passes through it before\n           reaching the destination)\nGoal: Automatically BLOCK attacks in real time.`,
+    question:"Which system placement and type is required to automatically block attacks in real time?",
+    options:[
+      {l:"A",t:"Out-of-band IDS (Intrusion Detection System) — it monitors a copy of traffic and sends alerts, which your team then investigates."},
+      {l:"B",t:"Out-of-band IPS (Intrusion Prevention System) — since it receives all traffic it can block threats before they reach the server."},
+      {l:"C",t:"In-line IPS (Intrusion Prevention System) — traffic passes through it, so it can detect AND automatically block malicious traffic in real time."},
+      {l:"D",t:"In-line IDS (Intrusion Detection System) — placing IDS in-line gives it the ability to block while still only alerting."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. IPS = blocks automatically. IDS = alerts only, does not block. Placement matters: in-line means all traffic flows through the system, so it CAN intercept and block. Out-of-band only receives a copy — it can alert but cannot block because it's not in the traffic path.",
+      wrong:"C is the answer. Two things must both be true for automatic blocking: (1) IPS not IDS — IDS only alerts, IPS actively blocks. (2) In-line not out-of-band — in-line means traffic flows through the system so it can intercept it. Out-of-band only sees a copy and cannot block in real time."
+    }
+  },
+  {
+    tag:"FIREWALL RULE",tagColor:"#2E86C1",
+    title:"Rule Decision 5 — Default Policy",
+    visual:`Server: CORP-SRV-01\nWindows Defender Firewall Status: ACTIVE\nYou have configured these explicit rules:\n  ALLOW: TCP 443 inbound (HTTPS)\n  ALLOW: TCP 3389 inbound from 10.0.1.0/24\n  BLOCK: TCP 23 inbound (Telnet)\nQuestion: What happens to ALL other inbound\n          traffic with no matching rule?`,
+    question:"You have three explicit rules configured. What does Windows Defender Firewall do with ALL other inbound traffic that doesn't match any rule?",
+    options:[
+      {l:"A",t:"It is allowed through — Windows Firewall defaults to allow unless explicitly blocked (deny-list model)."},
+      {l:"B",t:"It is held in a queue and prompts the administrator to make a decision for each new connection type."},
+      {l:"C",t:"It is blocked by default — Windows Defender Firewall uses a default-deny model for inbound traffic: everything is blocked unless explicitly allowed."},
+      {l:"D",t:"It depends on whether the traffic is TCP or UDP — TCP is blocked by default but UDP is allowed."}
+    ],
+    correct:2,
+    feedback:{
+      right:"Correct. Windows Defender Firewall is a default-deny firewall for inbound traffic: block everything unless you explicitly allow it. This means you only need to create ALLOW rules for the services you want — all other inbound traffic is silently dropped. This is why the Block Telnet rule is technically redundant (it's already blocked) but still good practice for auditability.",
+      wrong:"C is correct. Windows Defender Firewall uses default-deny for inbound traffic — everything is blocked unless you have an explicit ALLOW rule for it. You don't need to write BLOCK rules for every unwanted port. The Block Telnet rule you created is actually redundant (Telnet was already blocked by default) but documents your intent explicitly."
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let state = {
+  phase: 0,
+  idx: 0,
+  scores: [0,0,0],
+  results: []   // {phase,q,correct,topic}
+};
+
+// ══════════════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════════════════
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE LAUNCHER
+// ══════════════════════════════════════════════════════
+function startPhase(n){
+  state.phase = n;
+  state.idx = 0;
+  document.getElementById('global-score-display').style.display = 'flex';
+  updateGlobalScore();
+  const data = [null,phase1,phase2,phase3][n];
+  const screenId = `screen-p${n}`;
+  buildPips(n, data.length);
+  show(screenId);
+  renderQuestion(n);
+}
+
+function buildPips(phase, count){
+  const el = document.getElementById(`p${phase}-pips`);
+  el.innerHTML = '';
+  for(let i=0;i<count;i++){
+    const d = document.createElement('div');
+    d.className = 'status-pip' + (i===0?' current':'');
+    d.id = `pip-p${phase}-${i}`;
+    el.appendChild(d);
+  }
+}
+
+function updatePips(phase, idx, correct){
+  const prev = document.getElementById(`pip-p${phase}-${idx}`);
+  if(prev) prev.className = `status-pip ${correct?'done-correct':'done-wrong'}`;
+  const next = document.getElementById(`pip-p${phase}-${idx+1}`);
+  if(next) next.className = 'status-pip current';
+}
+
+// ══════════════════════════════════════════════════════
+// QUESTION RENDERER
+// ══════════════════════════════════════════════════════
+function renderQuestion(phase){
+  const data = [null,phase1,phase2,phase3][phase];
+  const q = data[state.idx];
+  const total = data.length;
+  const frac = `${state.idx+1} / ${total}`;
+  const pct  = `${((state.idx+1)/total)*100}%`;
+
+  document.getElementById(`p${phase}-frac`).textContent = frac;
+  document.getElementById(`p${phase}-bar`).style.width = pct;
+
+  const letters = ['A','B','C','D'];
+  const html = `
+    <div class="scenario-card">
+      <div class="scenario-header">
+        <span class="scenario-tag" style="background:${q.tagColor}20;color:${q.tagColor};border:1px solid ${q.tagColor}40;">${q.tag}</span>
+        <span class="scenario-title">${q.title}</span>
+      </div>
+      <div class="scenario-body">
+        <div class="scenario-visual">
+          <div class="label">Situation</div>
+          ${q.visual.replace(/\n/g,'<br>')}
+        </div>
+        <div class="scenario-question">${q.question}</div>
+        <div class="options" id="options-${phase}">
+          ${q.options.map((o,i)=>`
+            <button class="option-btn" onclick="selectOption(${phase},${i})" id="opt-${phase}-${i}">
+              <span class="option-letter">${o.l}</span>
+              <span class="option-text">${o.t}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="feedback" id="feedback-${phase}">
+          <span class="feedback-icon" id="fb-icon-${phase}"></span>
+          <div>
+            <div class="feedback-title" id="fb-title-${phase}"></div>
+            <div class="feedback-body"  id="fb-body-${phase}"></div>
+          </div>
+        </div>
+        <div class="next-btn-wrap" id="next-wrap-${phase}" style="display:none;">
+          <button class="btn btn-primary" onclick="nextQuestion(${phase})">
+            ${state.idx+1 < total ? 'Next Scenario →' : 'See Phase Results →'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  document.getElementById(`p${phase}-question`).innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════
+// ANSWER HANDLER
+// ══════════════════════════════════════════════════════
+function selectOption(phase, chosen){
+  const data = [null,phase1,phase2,phase3][phase];
+  const q = data[state.idx];
+  const isCorrect = chosen === q.correct;
+
+  // Disable all buttons
+  for(let i=0;i<q.options.length;i++){
+    const btn = document.getElementById(`opt-${phase}-${i}`);
+    btn.disabled = true;
+    if(i === q.correct) btn.classList.add(isCorrect && chosen===i ? 'correct' : 'reveal');
+    else if(i === chosen && !isCorrect) btn.classList.add('wrong');
+  }
+
+  // Show feedback
+  const fb = document.getElementById(`feedback-${phase}`);
+  const fbIcon = document.getElementById(`fb-icon-${phase}`);
+  const fbTitle = document.getElementById(`fb-title-${phase}`);
+  const fbBody = document.getElementById(`fb-body-${phase}`);
+  fb.classList.add('show');
+  if(isCorrect){
+    fb.classList.add('feedback-correct');
+    fbIcon.textContent = '✓';
+    fbTitle.textContent = 'Correct!';
+    fbBody.textContent = q.feedback.right;
+    state.scores[phase-1]++;
+  } else {
+    fb.classList.add('feedback-wrong');
+    fbIcon.textContent = '✗';
+    fbTitle.textContent = 'Not quite.';
+    fbBody.textContent = q.feedback.wrong;
+  }
+
+  // Track result
+  state.results.push({
+    phase, idx: state.idx,
+    correct: isCorrect,
+    topic: q.title,
+    tag: q.tag
+  });
+
+  updatePips(phase, state.idx, isCorrect);
+  document.getElementById(`next-wrap-${phase}`).style.display = 'flex';
+  updateGlobalScore();
+}
+
+// ══════════════════════════════════════════════════════
+// NEXT QUESTION
+// ══════════════════════════════════════════════════════
+function nextQuestion(phase){
+  const data = [null,phase1,phase2,phase3][phase];
+  state.idx++;
+  if(state.idx < data.length){
+    renderQuestion(phase);
+  } else {
+    showPhaseScore(phase);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE SCORECARD
+// ══════════════════════════════════════════════════════
+function showPhaseScore(phase){
+  const s = state.scores[phase-1];
+  const colors = ['','var(--amber)','var(--purple)','var(--cyan)'];
+  const msgs = [
+    '',
+    ['Great start! You identified all the physical security violations correctly. You are ready for the server room.','Good work on the physical tour. Review the scenarios you missed — physical security is the foundation everything else depends on.','Physical security is the first layer of defense. Review the scenarios carefully before moving on.'],
+    ['Outstanding threat analysis. You identified every attack type and the correct response. Your SOC skills are sharp.','Solid threat triage. A few attacks slipped past you — review the ones you missed carefully before the quiz.','Network threats are a core Week 4 topic. Review each attack type and its tell-tale indicators carefully.'],
+    ['Perfect firewall instincts. Every rule decision was correct. You understand default-deny and least privilege deeply.','Good firewall work. Review the decisions you missed — understanding why each rule is right or wrong matters more than the answer.','Firewall rules require precision. Review the default-deny model and least privilege principle carefully before Quiz 4.']
+  ];
+
+  document.getElementById(`p${phase}-score-num`).textContent = s;
+  document.getElementById(`p${phase}-score-num`).style.color = colors[phase];
+  document.getElementById(`p${phase}-correct`).textContent = s;
+  document.getElementById(`p${phase}-wrong`).textContent = 5-s;
+
+  const tier = s >= 4 ? 0 : s >= 2 ? 1 : 2;
+  document.getElementById(`p${phase}-msg`).textContent = msgs[phase][tier];
+
+  show(`screen-p${phase}-score`);
+}
+
+// ══════════════════════════════════════════════════════
+// FINAL REPORT
+// ══════════════════════════════════════════════════════
+function showFinalReport(){
+  const [s1,s2,s3] = state.scores;
+  const total = s1+s2+s3;
+
+  document.getElementById('final-score').textContent = total;
+  document.getElementById('bc1').textContent = s1;
+  document.getElementById('bc2').textContent = s2;
+  document.getElementById('bc3').textContent = s3;
+  document.getElementById('bc1-bar').style.width = `${(s1/5)*100}%`;
+  document.getElementById('bc2-bar').style.width = `${(s2/5)*100}%`;
+  document.getElementById('bc3-bar').style.width = `${(s3/5)*100}%`;
+
+  const grade = total>=14?['🏆 Outstanding','background:#27AE60;color:#fff']:
+                total>=11?['⭐ Strong Pass','background:#2E86C1;color:#fff']:
+                total>=8 ?['✓ Passing','background:#E67E22;color:#fff']:
+                          ['📚 Needs Review','background:#C0392B;color:#fff'];
+  const gb = document.getElementById('grade-badge');
+  gb.textContent = grade[0];
+  gb.style.cssText = grade[1];
+
+  // Review rows
+  const rows = state.results.map(r=>`
+    <div class="review-row">
+      <span class="review-icon">${r.correct?'✅':'❌'}</span>
+      <span class="review-topic"><strong>Phase ${r.phase} — ${r.tag}</strong><br>${r.topic}</span>
+      <span class="review-result ${r.correct?'rv-correct':'rv-wrong'}">${r.correct?'CORRECT':'MISSED'}</span>
+    </div>`).join('');
+  document.getElementById('review-rows').innerHTML = rows;
+
+  // Footer message
+  const missed = state.results.filter(r=>!r.correct).map(r=>r.tag);
+  const uniqueMissed = [...new Set(missed)];
+  let footer = `<strong>Your total: ${total}/15</strong> — `;
+  if(total===15) footer += 'Perfect score! You are fully prepared for Quiz 4. Excellent understanding of physical security, network threats, and firewall design.';
+  else if(total>=11) footer += `Strong performance. Before Quiz 4, review: ${uniqueMissed.join(', ')}. Focus on the feedback explanations for the questions you missed.`;
+  else footer += `Review the Week 4 Reading & Resources page and the feedback for every question you missed before attempting Quiz 4. Topics needing attention: ${uniqueMissed.join(', ')}.`;
+
+  document.getElementById('report-footer').innerHTML = footer;
+  show('screen-final');
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE 3 END → FINAL
+// ══════════════════════════════════════════════════════
+const origShowPhaseScore = showPhaseScore;
+// Intercept phase 3 scorecard button to show final after
+document.addEventListener('click', e=>{
+  if(e.target.closest('#screen-p3-score .btn-primary')){
+    e.preventDefault();
+    e.stopPropagation();
+    showFinalReport();
+  }
+});
+
+// Fix: patch phase 3 scorecard "next" button
+const origP3ScoreHTML = `<button class="btn btn-primary" onclick="startPhase(3)">Continue to Phase 3 — Firewall Console →</button>`;
+
+// On Phase 3 scorecard, override button
+function patchP3Button(){
+  const sc = document.querySelector('#screen-p3-score .scorecard');
+  if(!sc) return;
+  const btn = sc.querySelector('.btn-primary');
+  if(btn){
+    btn.textContent = 'View Final Report Card →';
+    btn.onclick = showFinalReport;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// GLOBAL SCORE
+// ══════════════════════════════════════════════════════
+function updateGlobalScore(){
+  const total = state.scores.reduce((a,b)=>a+b,0);
+  const answered = state.results.length;
+  document.getElementById('gs-num').textContent = total;
+  document.getElementById('gs-den').textContent = answered;
+}
+
+// ══════════════════════════════════════════════════════
+// RESET
+// ══════════════════════════════════════════════════════
+function resetGame(){
+  state = { phase:0, idx:0, scores:[0,0,0], results:[] };
+  document.getElementById('global-score-display').style.display='none';
+  show('screen-landing');
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE 3 SCORE → FINAL PATCH (runs after render)
+// ══════════════════════════════════════════════════════
+const _origShowPS = showPhaseScore.toString();
+function showPhaseScore(phase){
+  const s = state.scores[phase-1];
+  const colors = ['','var(--amber)','var(--purple)','var(--cyan)'];
+  const msgs = ['',
+    ['Great start! You identified all the physical security violations correctly. You are ready for the server room.',
+     'Good work on the physical tour. Review the scenarios you missed — physical security is the foundation everything else depends on.',
+     'Physical security is the first layer of defense. Review the scenarios carefully before moving on.'],
+    ['Outstanding threat analysis. You identified every attack type and the correct response. Your SOC skills are sharp.',
+     'Solid threat triage. A few attacks slipped past you — review the ones you missed carefully before the quiz.',
+     'Network threats are a core Week 4 topic. Review each attack type and its tell-tale indicators carefully.'],
+    ['Perfect firewall instincts. Every rule decision was correct. You understand default-deny and least privilege deeply.',
+     'Good firewall work. Review the decisions you missed — understanding why each rule is right or wrong matters more than the answer.',
+     'Firewall rules require precision. Review the default-deny model and least privilege principle carefully before Quiz 4.']
+  ];
+  document.getElementById(`p${phase}-score-num`).textContent = s;
+  document.getElementById(`p${phase}-score-num`).style.color = colors[phase];
+  document.getElementById(`p${phase}-correct`).textContent = s;
+  document.getElementById(`p${phase}-wrong`).textContent = 5-s;
+  const tier = s>=4?0:s>=2?1:2;
+  document.getElementById(`p${phase}-msg`).textContent = msgs[phase][tier];
+  show(`screen-p${phase}-score`);
+  if(phase===3){
+    setTimeout(()=>{
+      const btn = document.querySelector('#screen-p3-score .btn-primary');
+      if(btn){ btn.textContent='View Final Report Card →'; btn.onclick=showFinalReport; }
+    },50);
+  }
+}
+</script>
+
+
+</body></html>
