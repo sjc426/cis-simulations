@@ -6,34 +6,15 @@
 <title>CIS Simulations — Community College of Philadelphia</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0f1117; --surface: #1a1d27; --border: #2e3350;
-    --blue: #4f8ef7; --blue-dim: #1e2d4f;
-    --green: #3ecf8e; --green-dim: #0d2e1f;
-    --yellow: #fbbf24; --yellow-dim: #2e2208;
-    --text: #e8eaf6; --text2: #8b92b8; --text3: #4a5080;
-    --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; padding: 40px 20px; }
-  .wrap { max-width: 700px; margin: 0 auto; }
-  .header { margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
-  .logo { font-family: var(--mono); font-size: 12px; color: var(--blue); letter-spacing: .1em; margin-bottom: 12px; }
-  h1 { font-size: 24px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-  .sub { font-size: 14px; color: var(--text2); }
-  .section-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text3); margin-bottom: 12px; margin-top: 32px; }
-  .sim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; transition: border-color .2s; }
-  .sim-card:hover { border-color: var(--blue); }
-  .sim-info { flex: 1; }
-  .sim-course { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .sim-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .sim-desc { font-size: 13px; color: var(--text2); }
-  .sim-badge { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-left: 16px; white-space: nowrap; }
-  .badge-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #2a3d70; }
-  .badge-green { background: var(--green-dim); color: var(--green); border: 1px solid #1a5c3a; }
-  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid #5c4208; }
-  .arrow { color: var(--text3); margin-left: 12px; font-size: 18px; }
-  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text3); font-family: var(--mono); }
+  :root{--bg:#0f1117;--surface:#1a1d27;--border:#2e3350;--blue:#4f8ef7;--blue-dim:#1e2d4f;--green:#3ecf8e;--green-dim:#0d2e1f;--yellow:#fbbf24;--yellow-dim:#2e2208;--orange:#fb923c;--orange-dim:#2e1a08;--text:#e8eaf6;--text2:#8b92b8;--text3:#4a5080;--mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif}
+  *{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:40px 20px}.wrap{max-width:700px;margin:0 auto}
+  .header{margin-bottom:40px;padding-bottom:20px;border-bottom:1px solid var(--border)}.logo{font-family:var(--mono);font-size:12px;color:var(--blue);letter-spacing:.1em;margin-bottom:12px}h1{font-size:24px;font-weight:600;color:var(--text);margin-bottom:6px}.sub{font-size:14px;color:var(--text2)}
+  .section-label{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin-bottom:12px;margin-top:32px}
+  .sim-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;text-decoration:none;transition:border-color .2s}.sim-card:hover{border-color:var(--blue)}.sim-info{flex:1}.sim-course{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:4px}.sim-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}.sim-desc{font-size:13px;color:var(--text2)}
+  .sim-badge{font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;margin-left:16px;white-space:nowrap}
+  .badge-blue{background:var(--blue-dim);color:var(--blue);border:1px solid #2a3d70}.badge-green{background:var(--green-dim);color:var(--green);border:1px solid #1a5c3a}.badge-yellow{background:var(--yellow-dim);color:var(--yellow);border:1px solid #5c4208}
+  .arrow{color:var(--text3);margin-left:12px;font-size:18px}
+  footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);font-family:var(--mono)}
 </style>
 </head>
 <body>
@@ -44,25 +25,57 @@
     <p class="sub">Hands-on simulations for CompTIA A+ and Network+ certification preparation</p>
   </div>
 
-  <div class="section-label">CIS 105 — Computer Systems Maintenance</div>
+  <div class="section-label">CIS 105 — Computer Systems Maintenance (CompTIA A+)</div>
 
   <a class="sim-card" href="cis105-week2-pc-hardware-sim.html">
     <div class="sim-info">
       <div class="sim-course">CIS 105 · Week 2</div>
       <div class="sim-title">IT Help Desk — PC Hardware Diagnosis</div>
-      <div class="sim-desc">Diagnose and fix broken PCs across 3 real help desk tickets</div>
+      <div class="sim-desc">Diagnose PSU, RAM, and GPU failures across 3 real help desk tickets</div>
     </div>
-    <span class="sim-badge badge-yellow">CompTIA A+</span>
+    <span class="sim-badge badge-yellow">A+ Core 1</span>
     <span class="arrow">→</span>
   </a>
 
-  <div class="section-label">CIS 150 — Network Technology</div>
+  <div class="section-label">CIS 252 — Server Management (CompTIA Server+)</div>
+
+  <a class="sim-card" href="cis252-week2-sysadmin-ticket-queue.html">
+    <div class="sim-info">
+      <div class="sim-course">CIS 252 · Week 2</div>
+      <div class="sim-title">Sysadmin Ticket Queue</div>
+      <div class="sim-desc">Triage and resolve 5 real-world sysadmin help desk tickets covering OS, networking, and access issues</div>
+    </div>
+    <span class="sim-badge badge-blue">Server+</span>
+    <span class="arrow">→</span>
+  </a>
+
+  <a class="sim-card" href="cis252-week4-security-ops-simulation.html">
+    <div class="sim-info">
+      <div class="sim-course">CIS 252 · Week 4</div>
+      <div class="sim-title">Security Operations Shift Simulator</div>
+      <div class="sim-desc">3-phase simulation: physical security violations, network threat triage, and firewall rule decisions</div>
+    </div>
+    <span class="sim-badge badge-blue">Server+</span>
+    <span class="arrow">→</span>
+  </a>
+
+  <a class="sim-card" href="cis252-week6-breach-response-simulation.html" style="border-color:rgba(231,76,60,0.4);">
+    <div class="sim-info">
+      <div class="sim-course">CIS 252 · Week 6</div>
+      <div class="sim-title">🔴 Operation: ShinyHunters — Breach Response</div>
+      <div class="sim-desc">Real-world incident: respond to the May 2026 ShinyHunters breach. Storage architecture, data exfiltration triage, and backup recovery — 15 scenarios</div>
+    </div>
+    <span class="sim-badge" style="background:rgba(192,57,43,0.2);color:#E74C3C;border:1px solid rgba(231,76,60,0.4);">🔴 LIVE</span>
+    <span class="arrow">→</span>
+  </a>
+
+  <div class="section-label">CIS 150 — Network Technology (CompTIA Network+)</div>
 
   <a class="sim-card" href="cis150-week4-subnet-challenge.html">
     <div class="sim-info">
       <div class="sim-course">CIS 150 · Week 4</div>
       <div class="sim-title">Subnet Calculator Challenge</div>
-      <div class="sim-desc">5 progressive IPv4 subnetting challenges — masks, hosts, VLSM</div>
+      <div class="sim-desc">5 progressive IPv4 subnetting challenges — masks, hosts, VLSM, and more</div>
     </div>
     <span class="sim-badge badge-blue">Network+</span>
     <span class="arrow">→</span>
@@ -78,33 +91,29 @@
     <span class="arrow">→</span>
   </a>
 
-
-  <div class="section-label">CIS 288 — Cloud Computing</div>
+  <div class="section-label">CIS 288 — Cloud Infrastructure</div>
 
   <a class="sim-card" href="cis288-week1-three-landlords-showdown.html">
     <div class="sim-info">
       <div class="sim-course">CIS 288 · Week 1</div>
       <div class="sim-title">Three Landlords Showdown</div>
-      <div class="sim-desc">Match AWS, Azure &amp; GCP services across 8 rounds — build your Cloud Rosetta Stone</div>
+      <div class="sim-desc">Compare AWS, Azure, and GCP across real enterprise scenarios — pick the right cloud for each use case</div>
     </div>
-    <span class="sim-badge badge-blue">Cloud Foundations</span>
+    <span class="sim-badge badge-green">Cloud+</span>
     <span class="arrow">→</span>
   </a>
 
-
-  <div class="section-label">CIS 252 — Managing Network Servers</div>
-
-  <a class="sim-card" href="cis252-week2-sysadmin-ticket-queue.html">
+  <a class="sim-card" href="cis288-week4-storage-wars.html">
     <div class="sim-info">
-      <div class="sim-course">CIS 252 · Week 2</div>
-      <div class="sim-title">Sysadmin Ticket Queue</div>
-      <div class="sim-desc">Diagnose and close 4 real server &amp; VM tickets — VMs, cloud networking, CPU contention, RDP</div>
+      <div class="sim-course">CIS 288 · Week 4</div>
+      <div class="sim-title">Storage Wars — Pick Your Landlord</div>
+      <div class="sim-desc">Match enterprise storage workloads to the right cloud provider and storage tier across 5 real-world scenarios</div>
     </div>
-    <span class="sim-badge badge-green">Server Admin</span>
+    <span class="sim-badge badge-green">Cloud+</span>
     <span class="arrow">→</span>
   </a>
 
-  <footer>Community College of Philadelphia · CIS Department · Built with Claude</footer>
+  <footer>Community College of Philadelphia · CIS Department · Built with Claude AI · github.com/CCP-CIS-Team</footer>
 </div>
 </body>
 </html>

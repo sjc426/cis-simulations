@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Week 6: Operation ShinyHunters · Breach Response Simulation</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --navy:    #0D1B2A;
+  --navy2:   #0A1520;
+  --navy3:   #162236;
+  --blue:    #1B4F72;
+  --accent:  #2E86C1;
+  --cyan:    #5DADE2;
+  --white:   #F4F8FC;
+  --gray:    #8B9BB4;
+  --green:   #27AE60;
+  --green2:  #1E8449;
+  --red:     #C0392B;
+  --red2:    #E74C3C;
+  --amber:   #E67E22;
+  --amber2:  #F39C12;
+  --purple:  #7D3C98;
+  --border:  rgba(46,134,193,0.25);
+  --card-bg: rgba(22,34,54,0.95);
+  --threat:  #E74C3C;
+  --threat2: rgba(231,76,60,0.15);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--navy2);
+  color: var(--white);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(46,134,193,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(46,134,193,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrapper { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 60px; }
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+  padding: 4px 10px; border-radius: 3px; text-transform: uppercase;
+}
+.badge-cis  { background: var(--accent); color: #fff; }
+.badge-w6   { background: var(--navy3); color: var(--cyan); border: 1px solid var(--border); }
+.badge-live { background: var(--red); color: #fff; animation: blink 1.4s infinite; }
+.topbar-title { font-size: 13px; color: var(--gray); font-weight: 400; }
+#global-score-display {
+  font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  color: var(--cyan); display: none; gap: 6px; align-items: center;
+}
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+/* ── SCREENS ── */
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.35s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── ALERT BANNER ── */
+.alert-banner {
+  background: linear-gradient(90deg, rgba(192,57,43,0.2) 0%, rgba(231,76,60,0.1) 100%);
+  border: 1px solid rgba(231,76,60,0.5);
+  border-left: 4px solid var(--red2);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.alert-icon { font-size: 20px; flex-shrink: 0; }
+.alert-text { font-size: 13px; line-height: 1.6; color: #ddd; }
+.alert-text strong { color: var(--red2); }
+
+/* ── DEFACEMENT CARD ── */
+.defacement-card {
+  background: #0d0f16;
+  border: 2px solid var(--red2);
+  border-radius: 12px;
+  padding: 28px 32px;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  margin: 24px 0;
+  box-shadow: 0 0 30px rgba(231,76,60,0.2);
+  position: relative;
+  overflow: hidden;
+}
+.defacement-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(231,76,60,0.02) 2px, rgba(231,76,60,0.02) 4px
+  );
+  pointer-events: none;
+}
+.defacement-title {
+  font-size: 18px; font-weight: 700; letter-spacing: 8px;
+  color: #a0c8a0; margin-bottom: 6px;
+}
+.defacement-sub {
+  font-size: 12px; color: #6a9a6a; margin-bottom: 20px; letter-spacing: 2px;
+}
+.defacement-body { font-size: 13px; color: #8fb8c0; line-height: 2.0; margin-bottom: 16px; }
+.defacement-warn {
+  font-size: 13px; color: #e8a87c; letter-spacing: 3px; margin: 14px 0 10px;
+}
+.defacement-threat {
+  font-size: 12px; color: #8fb8c0; line-height: 2.0; margin-bottom: 12px;
+}
+.defacement-redacted {
+  background: rgba(30,35,55,0.9);
+  border: 1px solid rgba(55,80,120,0.6);
+  border-radius: 4px;
+  padding: 6px 16px;
+  color: rgba(75,105,155,0.8);
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin: 4px auto;
+  display: block;
+  max-width: 360px;
+}
+
+/* ── LANDING ── */
+.landing-hero { text-align: center; padding: 36px 0 32px; }
+.landing-hero .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--red2); letter-spacing: 3px;
+  text-transform: uppercase; margin-bottom: 16px;
+}
+.landing-hero h1 {
+  font-size: clamp(26px,5vw,44px); font-weight: 700; line-height: 1.15;
+  color: #fff; margin-bottom: 12px;
+}
+.landing-hero h1 span { color: var(--cyan); }
+.landing-hero p {
+  font-size: 15px; color: var(--gray); max-width: 600px;
+  margin: 0 auto 32px; line-height: 1.7;
+}
+
+.phase-cards {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+  margin-bottom: 36px;
+}
+@media(max-width:620px){ .phase-cards { grid-template-columns: 1fr; } }
+
+.phase-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 16px; text-align: left;
+  position: relative; overflow: hidden;
+}
+.phase-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%; background: var(--card-color);
+}
+.phase-card .phase-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--card-color);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+.phase-card h3 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.phase-card p  { font-size: 12px; color: var(--gray); line-height: 1.55; }
+
+/* ── PHASE HEADER ── */
+.phase-header {
+  display: flex; gap: 16px; align-items: flex-start;
+  margin-bottom: 24px;
+}
+.phase-icon {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.phase-header-text h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+.phase-header-text p  { font-size: 13px; color: var(--gray); line-height: 1.5; }
+
+/* ── PROGRESS ── */
+.progress-wrap { margin-bottom: 12px; }
+.progress-info {
+  display: flex; justify-content: space-between;
+  margin-bottom: 6px; font-size: 12px; color: var(--gray);
+}
+.progress-label { font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; }
+.progress-bar-track { height: 4px; background: var(--navy3); border-radius: 2px; }
+.progress-bar-fill  { height: 4px; border-radius: 2px; transition: width 0.4s ease; }
+
+/* ── STATUS PIPS ── */
+.status-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.status-pip {
+  height: 4px; flex: 1; border-radius: 2px; min-width: 24px;
+  background: var(--navy3); transition: background 0.3s;
+}
+.status-pip.done-correct { background: var(--green); }
+.status-pip.done-wrong   { background: var(--red2); }
+.status-pip.current      { background: var(--accent); }
+
+/* ── SCENARIO CARD ── */
+.scenario-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin-bottom: 16px;
+}
+.scenario-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+  display: inline-block; margin-bottom: 14px;
+}
+.scenario-title { font-size: 15px; font-weight: 600; color: var(--cyan); margin-bottom: 12px; }
+.scenario-visual {
+  background: var(--navy2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px; margin-bottom: 16px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  line-height: 1.9; color: var(--cyan);
+}
+.scenario-visual .label { color: var(--gray); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.scenario-question { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 18px; line-height: 1.55; }
+
+/* ── OPTIONS ── */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option-btn {
+  background: var(--navy3); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  cursor: pointer; transition: all 0.18s; text-align: left; width: 100%;
+}
+.option-btn:hover:not(:disabled) {
+  border-color: var(--cyan); background: rgba(46,134,193,0.1);
+  transform: translateX(2px);
+}
+.option-btn:disabled { cursor: default; }
+.option-letter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; color: var(--gray);
+  background: var(--navy2); border: 1px solid var(--border);
+  width: 26px; height: 26px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.option-text { font-size: 14px; color: var(--white); line-height: 1.45; }
+.option-btn.correct { border-color: var(--green); background: rgba(39,174,96,0.1); }
+.option-btn.correct .option-letter { background: var(--green); color: #fff; border-color: var(--green); }
+.option-btn.wrong   { border-color: var(--red2); background: rgba(231,76,60,0.1); }
+.option-btn.wrong .option-letter { background: var(--red2); color: #fff; border-color: var(--red2); }
+.option-btn.reveal  { border-color: var(--green); background: rgba(39,174,96,0.06); }
+.option-btn.reveal .option-letter { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* ── FEEDBACK ── */
+.feedback {
+  border-radius: 8px; padding: 14px 16px;
+  margin-top: 16px; display: none; animation: fadeIn 0.25s ease;
+}
+.feedback.show { display: flex; gap: 12px; align-items: flex-start; }
+.feedback-correct { background: rgba(39,174,96,0.12); border: 1px solid rgba(39,174,96,0.3); }
+.feedback-wrong   { background: rgba(231,76,60,0.1);  border: 1px solid rgba(231,76,60,0.3); }
+.feedback-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.feedback-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.feedback-correct .feedback-title { color: var(--green); }
+.feedback-wrong   .feedback-title { color: var(--red2); }
+.feedback-body { font-size: 13px; color: #ccc; line-height: 1.55; }
+.next-btn-wrap { margin-top: 20px; display: flex; justify-content: flex-end; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+  padding: 12px 24px; border-radius: 8px; border: none;
+  cursor: pointer; transition: all 0.18s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary {
+  background: var(--accent); color: #fff;
+}
+.btn-primary:hover { background: #2475a8; transform: translateY(-1px); }
+.btn-lg { padding: 14px 32px; font-size: 15px; }
+.btn-ghost {
+  background: transparent; color: var(--gray);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--white); border-color: var(--cyan); }
+
+/* ── SCORECARD ── */
+.scorecard {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; padding: 36px 32px; text-align: center;
+}
+.scorecard .sc-phase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--cyan); letter-spacing: 2px;
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.scorecard h2 { font-size: 26px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.big-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 72px; font-weight: 700; line-height: 1; margin: 24px 0 4px;
+}
+.score-label { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+.score-detail { display: flex; justify-content: center; gap: 32px; margin-bottom: 32px; }
+.score-detail-item { text-align: center; }
+.score-detail-item .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px; font-weight: 700; display: block; margin-bottom: 4px;
+}
+.score-detail-item .lbl { font-size: 12px; color: var(--gray); }
+.scorecard-msg {
+  background: var(--navy2); border-radius: 8px;
+  padding: 14px 18px; font-size: 14px; color: var(--gray);
+  line-height: 1.6; margin-bottom: 28px; text-align: left;
+}
+
+/* ── FINAL REPORT ── */
+.report-header { text-align: center; padding: 40px 0 32px; }
+.report-header .eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--cyan); letter-spacing: 3px;
+  text-transform: uppercase; margin-bottom: 14px;
+}
+.report-header h2 { font-size: 32px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.report-header .subtitle { font-size: 14px; color: var(--gray); }
+
+.report-total {
+  background: linear-gradient(135deg, var(--navy3) 0%, var(--blue) 100%);
+  border: 1px solid var(--accent); border-radius: 14px;
+  padding: 32px; text-align: center; margin-bottom: 24px;
+}
+.report-total .total-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 80px; font-weight: 700; line-height: 1; color: #fff;
+}
+.report-total .total-denom { font-size: 28px; color: var(--cyan); }
+.report-total .total-label { font-size: 14px; color: var(--gray); margin-top: 6px; }
+.report-total .grade-badge {
+  display: inline-block; margin-top: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  padding: 6px 18px; border-radius: 20px; text-transform: uppercase;
+}
+
+.phase-breakdown {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+  margin-bottom: 24px;
+}
+@media(max-width:600px){ .phase-breakdown { grid-template-columns: 1fr; } }
+
+.breakdown-card {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 18px 16px;
+}
+.breakdown-card .bc-phase {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--gray); letter-spacing: 1.5px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.breakdown-card h4 { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 12px; }
+.breakdown-card .bc-score {
+  font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700;
+}
+.breakdown-card .bc-total { font-size: 14px; color: var(--gray); }
+.bc-bar { height: 3px; border-radius: 2px; margin-top: 12px; }
+
+.review-table {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+}
+.review-table-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--cyan); letter-spacing: 1.5px; text-transform: uppercase;
+}
+.review-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px; border-bottom: 1px solid rgba(46,134,193,0.1);
+}
+.review-row:last-child { border-bottom: none; }
+.review-icon { font-size: 16px; flex-shrink: 0; }
+.review-topic { font-size: 13px; color: #ddd; flex: 1; line-height: 1.4; }
+.review-result {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.rv-correct { color: var(--green); }
+.rv-wrong   { color: var(--red2); }
+
+.report-footer {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px 22px;
+  font-size: 14px; color: var(--gray); line-height: 1.65; margin-bottom: 28px;
+}
+.report-footer strong { color: var(--white); }
+.final-actions { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+/* ── INCIDENT TICKER ── */
+.ticker-wrap {
+  background: rgba(192,57,43,0.1); border: 1px solid rgba(231,76,60,0.3);
+  border-radius: 6px; padding: 8px 14px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px; overflow: hidden;
+}
+.ticker-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  color: var(--red2); letter-spacing: 2px; text-transform: uppercase;
+  flex-shrink: 0;
+}
+.ticker-text {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: #ccc; animation: tickerScroll 18s linear infinite;
+  white-space: nowrap;
+}
+@keyframes tickerScroll {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="badge badge-cis">CIS 252</span>
+    <span class="badge badge-w6">Week 6</span>
+    <span class="badge badge-live">🔴 LIVE INCIDENT</span>
+    <span class="topbar-title">Operation: ShinyHunters</span>
+  </div>
+  <span id="global-score-display">Score: <span id="gs-num">0</span> / <span id="gs-den">0</span></span>
+</div>
+
+<!-- ══ SCREEN: LANDING ══ -->
+<div class="screen active" id="screen-landing">
+
+  <div class="ticker-wrap">
+    <span class="ticker-label">⚡ ALERT</span>
+    <span class="ticker-text">BREACH DETECTED · ccp.instructure.com 
+defaced · ShinyHunters claims access to student data · Storage systems 
+at risk · All admins report to stations · BREACH DETECTED · 
+ccp.instructure.com defaced · ShinyHunters claims access to student data</span>
+  </div>
+
+  <div class="alert-banner">
+    <span class="alert-icon">🚨</span>
+    <div class="alert-text">
+      <strong>REAL-WORLD INCIDENT BRIEFING:</strong> In May 2026, threat
+ group ShinyHunters defaced ccp.instructure.com — your Canvas LMS — and 
+claimed to have breached Instructure's systems. They threatened to 
+release data from affected schools. <strong>You are the storage administrator.</strong> It's your job to understand how attackers exfiltrate data and what storage controls could have limited the damage.
+    </div>
+  </div>
+
+  <!-- The Defacement Card (sanitized reproduction for educational use) -->
+  <div class="defacement-card">
+    <div class="defacement-title">S H I N Y H U N T E R S</div>
+    <div class="defacement-sub">rooting your systems since '19 &nbsp;;)</div>
+    <div class="defacement-body">
+      ShinyHunters has breached Instructure (again).<br>
+      Instead of contacting us to resolve it they<br>
+      ignored us and did some "security patches".
+    </div>
+    <div class="defacement-warn">⚠ &nbsp;W A R N I N G&nbsp; ⚠</div>
+    <div class="defacement-threat">
+      If any of the schools in the affected list are<br>
+      interested in preventing the release of their data,<br>
+      please consult with a cyber advisory firm<br>
+      and contact us privately at TOX to negotiate a<br>
+      settlement. You have till the end of the day by<br>
+      12 May 2026 before everything is leaked.<br><br>
+      Instructure still has until EOD 12 May 2026<br>
+      to contact us.
+    </div>
+    <span class="defacement-redacted">▼ DOWNLOAD LINK — [ REDACTED ]</span>
+    <span class="defacement-redacted">[ REDACTED ]</span>
+    <span class="defacement-redacted">CONTACT ADDRESS — [ REDACTED ]</span>
+    <span class="defacement-redacted">[ REDACTED ]</span>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(100,130,100,0.4);margin-top:14px;letter-spacing:1px;">
+      ⚠ Sensitive contact details and links redacted for educational use · CIS 252 Week 6
+    </div>
+  </div>
+
+  <div class="landing-hero">
+    <div class="eyebrow">🔐 Breach Response Simulation · Week 6</div>
+    <h1>Operation:<br><span>ShinyHunters</span></h1>
+    <p>You are the storage administrator at PhilaTech College when the breach alert hits. Work through three phases to understand <em>how attackers steal data</em>, <em>what storage controls limit the blast radius</em>, and <em>how to recover</em>. Your score reflects your readiness to defend real systems.</p>
+  </div>
+
+  <div class="phase-cards">
+    <div class="phase-card" style="--card-color:#E74C3C;">
+      <div class="phase-num">Phase 1 · 5 scenarios</div>
+      <h3>🗄️ Storage Architecture</h3>
+      <p>Classify the college's storage systems and identify which ones were most exposed. RAID, DAS, NAS, SAN decisions under fire.</p>
+    </div>
+    <div class="phase-card" style="--card-color:#E67E22;">
+      <div class="phase-num">Phase 2 · 5 scenarios</div>
+      <h3>🔍 Data Exfiltration Triage</h3>
+      <p>ShinyHunters is inside the network. Identify what data they can reach and which storage controls would have blocked them.</p>
+    </div>
+    <div class="phase-card" style="--card-color:#2E86C1;">
+      <div class="phase-num">Phase 3 · 5 scenarios</div>
+      <h3>💾 Backup &amp; Recovery</h3>
+      <p>The college needs to restore from backup. Apply full/incremental/differential backup strategy to get systems back online.</p>
+    </div>
+  </div>
+
+  <div style="text-align:center;">
+    <button class="btn btn-primary btn-lg" onclick="startPhase(1)">
+      🚨 Begin Breach Response →
+    </button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: PHASE 1 ══ -->
+<div class="screen" id="screen-p1">
+  <div class="phase-header">
+    <div class="phase-icon" style="background:rgba(231,76,60,0.15);">🗄️</div>
+    <div class="phase-header-text">
+      <h2>Phase 1 — Storage Architecture Under Attack</h2>
+      <p>Before you can respond to the breach, you need to understand 
+what storage systems exist and which were most at risk. Answer each 
+scenario to map the college's storage exposure.</p>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-label">Phase 1 Progress</span>
+      <span class="progress-fraction" id="p1-frac">1 / 5</span>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="p1-bar" style="width:20%;background:var(--red2)"></div></div>
+  </div>
+  <div class="status-bar" id="p1-pips"></div>
+  <div id="p1-question"></div>
+</div>
+
+<!-- ══ SCREEN: PHASE 1 SCORE ══ -->
+<div class="screen" id="screen-p1-score">
+  <div class="scorecard">
+    <div class="sc-phase">Phase 1 Complete · Storage Architecture</div>
+    <h2>Architecture Assessment — Results</h2>
+    <div class="big-score" id="p1-score-num" style="color:var(--red2)">0</div>
+    <div class="score-label">out of 5 scenarios</div>
+    <div class="score-detail">
+      <div class="score-detail-item">
+        <span class="val" id="p1-correct" style="color:var(--green)">0</span>
+        <span class="lbl">Correct</span>
+      </div>
+      <div class="score-detail-item">
+        <span class="val" id="p1-wrong" style="color:var(--red2)">0</span>
+        <span class="lbl">Missed</span>
+      </div>
+    </div>
+    <div class="scorecard-msg" id="p1-msg"></div>
+    <button class="btn btn-primary" onclick="startPhase(2)">Continue to Phase 2 — Exfiltration Triage →</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: PHASE 2 ══ -->
+<div class="screen" id="screen-p2">
+  <div class="phase-header">
+    <div class="phase-icon" style="background:rgba(230,126,34,0.15);">🔍</div>
+    <div class="phase-header-text">
+      <h2>Phase 2 — Data Exfiltration Triage</h2>
+      <p>ShinyHunters is moving laterally through the network. Analyze 
+each threat scenario: identify what data they can access and what 
+storage control would have stopped them.</p>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-label">Phase 2 Progress</span>
+      <span class="progress-fraction" id="p2-frac">1 / 5</span>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="p2-bar" style="width:20%;background:var(--amber)"></div></div>
+  </div>
+  <div class="status-bar" id="p2-pips"></div>
+  <div id="p2-question"></div>
+</div>
+
+<!-- ══ SCREEN: PHASE 2 SCORE ══ -->
+<div class="screen" id="screen-p2-score">
+  <div class="scorecard">
+    <div class="sc-phase">Phase 2 Complete · Data Exfiltration</div>
+    <h2>Exfiltration Triage — Results</h2>
+    <div class="big-score" id="p2-score-num" style="color:var(--amber)">0</div>
+    <div class="score-label">out of 5 scenarios</div>
+    <div class="score-detail">
+      <div class="score-detail-item">
+        <span class="val" id="p2-correct" style="color:var(--green)">0</span>
+        <span class="lbl">Correct</span>
+      </div>
+      <div class="score-detail-item">
+        <span class="val" id="p2-wrong" style="color:var(--red2)">0</span>
+        <span class="lbl">Missed</span>
+      </div>
+    </div>
+    <div class="scorecard-msg" id="p2-msg"></div>
+    <button class="btn btn-primary" onclick="startPhase(3)">Continue to Phase 3 — Backup &amp; Recovery →</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: PHASE 3 ══ -->
+<div class="screen" id="screen-p3">
+  <div class="phase-header">
+    <div class="phase-icon" style="background:rgba(46,134,193,0.15);">💾</div>
+    <div class="phase-header-text">
+      <h2>Phase 3 — Backup &amp; Recovery Operations</h2>
+      <p>The college needs to restore compromised systems. Apply your 
+knowledge of backup types, rotation strategies, and recovery objectives 
+to get PhilaTech College back online.</p>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span class="progress-label">Phase 3 Progress</span>
+      <span class="progress-fraction" id="p3-frac">1 / 5</span>
+    </div>
+    <div class="progress-bar-track"><div class="progress-bar-fill" id="p3-bar" style="width:20%;background:var(--accent)"></div></div>
+  </div>
+  <div class="status-bar" id="p3-pips"></div>
+  <div id="p3-question"></div>
+</div>
+
+<!-- ══ SCREEN: PHASE 3 SCORE ══ -->
+<div class="screen" id="screen-p3-score">
+  <div class="scorecard">
+    <div class="sc-phase">Phase 3 Complete · Backup &amp; Recovery</div>
+    <h2>Recovery Operations — Results</h2>
+    <div class="big-score" id="p3-score-num" style="color:var(--cyan)">0</div>
+    <div class="score-label">out of 5 scenarios</div>
+    <div class="score-detail">
+      <div class="score-detail-item">
+        <span class="val" id="p3-correct" style="color:var(--green)">0</span>
+        <span class="lbl">Correct</span>
+      </div>
+      <div class="score-detail-item">
+        <span class="val" id="p3-wrong" style="color:var(--red2)">0</span>
+        <span class="lbl">Missed</span>
+      </div>
+    </div>
+    <div class="scorecard-msg" id="p3-msg"></div>
+    <button class="btn btn-primary" onclick="showFinalReport()">View Final Incident Report →</button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: FINAL REPORT ══ -->
+<div class="screen" id="screen-final">
+  <div class="report-header">
+    <div class="eyebrow">Operation Complete · Incident Report</div>
+    <h2>ShinyHunters Breach Response</h2>
+    <div class="subtitle">PhilaTech College — Storage Administrator After-Action Report</div>
+  </div>
+
+  <div class="report-total">
+    <div><span class="total-num" id="final-score">0</span><span class="total-denom"> / 15</span></div>
+    <div class="total-label">Total Score — All Three Phases</div>
+    <div><span class="grade-badge" id="grade-badge">—</span></div>
+  </div>
+
+  <div class="phase-breakdown">
+    <div class="breakdown-card">
+      <div class="bc-phase">Phase 1</div>
+      <h4>Storage Architecture</h4>
+      <span class="bc-score" id="bc1" style="color:var(--red2)">0</span><span class="bc-total"> / 5</span>
+      <div class="bc-bar" id="bc1-bar" style="background:var(--red2)"></div>
+    </div>
+    <div class="breakdown-card">
+      <div class="bc-phase">Phase 2</div>
+      <h4>Exfiltration Triage</h4>
+      <span class="bc-score" id="bc2" style="color:var(--amber)">0</span><span class="bc-total"> / 5</span>
+      <div class="bc-bar" id="bc2-bar" style="background:var(--amber)"></div>
+    </div>
+    <div class="breakdown-card">
+      <div class="bc-phase">Phase 3</div>
+      <h4>Backup &amp; Recovery</h4>
+      <span class="bc-score" id="bc3" style="color:var(--cyan)">0</span><span class="bc-total"> / 5</span>
+      <div class="bc-bar" id="bc3-bar" style="background:var(--accent)"></div>
+    </div>
+  </div>
+
+  <div class="review-table">
+    <div class="review-table-header">📋 Question-by-Question Review</div>
+    <div id="review-rows"></div>
+  </div>
+
+  <div class="report-footer" id="final-msg"></div>
+
+  <div class="final-actions">
+    <button class="btn btn-primary" onclick="restartSim()">🔄 Restart Simulation</button>
+    <button class="btn btn-ghost" onclick="window.print()">🖨️ Print Report</button>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// PHASE 1 — STORAGE ARCHITECTURE
+// ══════════════════════════════════════════════════════
+const phase1 = [
+  {
+    tag:"STORAGE ARCHITECTURE", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Scenario 1 — The File Server",
+    visual:`SYSTEM: PHILA-FILESVR-01\nRole: Faculty shared drive / student submissions\nStorage: 4TB SATA HDD, single disk, no redundancy\nNetwork: Connected directly to campus LAN\nAccess: Mapped drives, all faculty + all students`,
+    question:"ShinyHunters now has a network foothold. Which storage architecture type is PHILA-FILESVR-01 using, and why does this make data exfiltration particularly easy?",
+    options:[
+      {l:"A",t:"DAS (Direct Attached Storage) — the single local disk has no network segmentation, so any user or attacker with LAN access can reach the entire share simultaneously."},
+      {l:"B",t:"NAS (Network Attached Storage) — NAS devices always expose files over the network, making them inherently insecure against internal attackers."},
+      {l:"C",t:"SAN (Storage Area Network) — block-level storage is easier to exfiltrate because it bypasses the file system entirely."},
+      {l:"D",t:"RAID 0 — striped storage is readable by anyone on the network because data is spread across both disks."}
+    ],
+    correct:0,
+    topic:"DAS vs. NAS vs. SAN",
+    feedback:{
+      correct:"Correct. PHILA-FILESVR-01 uses DAS — a local disk attached directly to the server. The real vulnerability here isn't the storage type itself but the overly broad access: every faculty member and student has a mapped drive. Once ShinyHunters gains any valid credential, they can walk the entire share. Proper segmentation (separate shares per department, least-privilege permissions) limits what any single compromised account can reach.",
+      wrong:"The correct answer is A — DAS. The file server uses a single directly-attached local disk. The critical issue is the flat permission model: all faculty and all students share one drive. That's an access control problem on top of a storage architecture that has no network segmentation or redundancy. DAS itself isn't inherently insecure, but this configuration is."
+    }
+  },
+  {
+    tag:"RAID ANALYSIS", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Scenario 2 — The Database Server",
+    visual:`SYSTEM: PHILA-DB-01\nRole: Student records, grade database (Banner SIS)\nStorage: 3 × 2TB SAS HDD\nRAID Config: RAID 5\nStatus: 1 of 3 drives showing SMART warnings`,
+    question:"The database server uses RAID 5 across 3 drives. One drive is showing early failure warnings (SMART alerts). What is the CURRENT state of the array, and what is the IMMEDIATE risk?",
+    options:[
+      {l:"A",t:"RAID 5 requires all drives to be healthy — any drive failure immediately makes the array unavailable. You must shut down now."},
+      {l:"B",t:"The array is currently healthy and readable. RAID 5 can survive one drive failure. BUT if this degraded drive fails completely before replacement, the entire array is lost — there is zero fault tolerance in a degraded state."},
+      {l:"C",t:"RAID 5 mirrors all data, so even if two drives fail simultaneously, the data is safe because the third drive has a complete copy."},
+      {l:"D",t:"SMART warnings are cosmetic alerts only. RAID 5 has enough parity to survive any number of drive failures, so no immediate action is needed."}
+    ],
+    correct:1,
+    topic:"RAID 5 — Degraded State Risk",
+    feedback:{
+      correct:"Exactly right. RAID 5 distributes parity across all drives and tolerates exactly one drive failure. Right now the array is still online and readable — but it is operating in a degraded state. If that second drive fails before the first is replaced and the array is rebuilt, ALL data is lost. This is called the RAID 5 'URE problem' (Unrecoverable Read Error). The risk during the breach: ShinyHunters may be causing extra I/O stress on the array right now. Replace that drive immediately and trigger a rebuild.",
+      wrong:"B is correct. RAID 5 currently has redundancy — it can survive one drive failure. But once that failing drive dies, you are in a degraded state with zero fault tolerance. Any second failure, including read errors during rebuild, destroys the entire array. In a breach situation, the extra I/O load from an attacker scanning the system can push a degraded array over the edge. Act fast."
+    }
+  },
+  {
+    tag:"STORAGE ARCHITECTURE", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Scenario 3 — The HR Department",
+    visual:`SYSTEM: PHILA-NAS-HR\nRole: HR personnel files, salary data, SSNs\nStorage Type: NAS appliance (Synology DS923+)\nProtocol: SMB shares over campus LAN\nAccess: Domain group "HR_STAFF" only\nEncryption at rest: DISABLED`,
+    question:"ShinyHunters has compromised one HR staff account. The NAS has encryption at rest disabled. Which statement BEST describes the risk and the control that would have limited it?",
+    options:[
+      {l:"A",t:"NAS devices are inherently secure because they use proprietary operating systems that are immune to Windows-based attacks like credential theft."},
+      {l:"B",t:"The risk is minimal because the HR group is small — attackers would need to compromise all HR accounts to exfiltrate meaningful data."},
+      {l:"C",t:"With one compromised credential, attackers can read and exfiltrate every file on the share. Encryption at rest would not have prevented exfiltration, but it would have made stolen data unreadable without the key — protecting data even after it leaves the network."},
+      {l:"D",t:"The correct control is RAID 1 mirroring — mirroring the NAS to a second device would prevent unauthorized reads because the mirror copy is read-only."}
+    ],
+    correct:2,
+    topic:"NAS Security & Encryption at Rest",
+    feedback:{
+      correct:"Perfect. This is the critical lesson from real breaches like ShinyHunters: once an attacker has valid credentials, network-level controls fail. Encryption at rest means the data stored on disk is encrypted using a key managed by the system. Even if an attacker downloads gigabytes of HR files, they are encrypted blobs — useless without the decryption key. Windows Server 2025 supports BitLocker for volume-level encryption and EFS for file-level encryption. Enabling these on sensitive shares is now a baseline control.",
+      wrong:"C is correct. One compromised credential = full read access to the NAS share. The domain group 'HR_STAFF' provided good access restriction, but it failed when credentials were stolen. Encryption at rest doesn't prevent an authorized user (or impersonator) from reading files through normal access — but it protects data that is exfiltrated off the network. Stolen encrypted files are useless ciphertext."
+    }
+  },
+  {
+    tag:"STORAGE ARCHITECTURE", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Scenario 4 — IT Wants a SAN",
+    visual:`BUDGET MEETING — IT Director Proposal:\nCurrent: 6 separate DAS servers across campus\nProposed: Consolidate to iSCSI SAN\n          Centralized 40TB storage pool\n          All servers boot from SAN (diskless)\n          Single pane of glass management\nCost: $85,000\nSecurity concern raised: "Doesn't centralizing everything\n                          make a single breach worse?"`,
+    question:"The security officer raises a valid concern: centralizing to a SAN means a breach could expose all departments at once. How do you address this, and what is the correct control?",
+    options:[
+      {l:"A",t:"The security officer is right — SAN is always less secure than DAS because centralization is inherently a security anti-pattern. Reject the proposal."},
+      {l:"B",t:"A SAN with proper LUN masking and zoning can be MORE secure than 6 unmanaged DAS servers. LUN masking restricts which servers can see which storage volumes. Zoning at the FC/iSCSI switch level separates departments. The real risk is misconfiguration, not centralization itself."},
+      {l:"C",t:"The risk is offset by the cost savings. Security concerns about SAN are theoretical — no major SAN breach has ever occurred in an educational institution."},
+      {l:"D",t:"The solution is to deploy RAID 6 across the SAN, since dual-parity protection prevents unauthorized access as well as drive failures."}
+    ],
+    correct:1,
+    topic:"SAN Security — LUN Masking & Zoning",
+    feedback:{
+      correct:"Excellent. This is a nuanced but important point. A SAN with proper zoning and LUN masking is actually harder to breach than 6 separate DAS servers because: (1) centralized logging catches anomalous access patterns; (2) LUN masking ensures the HR server literally cannot see the finance server's volumes; (3) iSCSI CHAP authentication prevents unauthorized initiators. ShinyHunters attacking a well-segmented SAN still only gets the volumes of the one server they compromise. Misconfiguration — not centralization — is the real risk.",
+      wrong:"B is correct. Centralization ≠ insecurity. A properly zoned SAN with LUN masking gives each server access to only its assigned volumes — just like physical DAS, but with centralized management, snapshots, and monitoring. The ShinyHunters breach succeeded because of credential theft and unpatched vulnerabilities, not because storage was centralized."
+    }
+  },
+  {
+    tag:"STORAGE ARCHITECTURE", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Scenario 5 — The Registrar's Tape Drive",
+    visual:`SYSTEM: PHILA-BACKUP-TAPE\nRole: Weekly full backup of all registrar data\nMedia: LTO-8 tape cartridges\nLocation: Tape library in server room rack\nNetwork: CONNECTED to backup server (online)\nOffsite: Last rotation was 8 weeks ago\nEncryption: Disabled`,
+    question:"ShinyHunters scans the network and finds the tape backup system is network-accessible. This is a critical misconfiguration. What is the correct offline backup principle being violated, and what is the best fix?",
+    options:[
+      {l:"A",t:"The tape system is fine — LTO-8 tapes use a proprietary format that no standard network tool can read, so network access poses no real risk."},
+      {l:"B",t:"The violation is the 8-week rotation gap. The fix is to run daily backups instead of weekly."},
+      {l:"C",t:"The violation is the 3-2-1 backup rule: backups should exist on at least 2 media types with 1 copy offsite AND air-gapped (not network accessible). A network-connected tape library can be reached by ransomware, which can encrypt or delete backup catalogs. The fix is to take the tape library offline from the network after backup jobs complete — an 'air gap'."},
+      {l:"D",t:"The violation is using LTO tape instead of cloud backup. Cloud storage is inherently more secure than physical tape because it uses encrypted transmission."}
+    ],
+    correct:2,
+    topic:"3-2-1 Backup Rule & Air Gapping",
+    feedback:{
+      correct:"Critical insight. This is exactly how ransomware groups like ShinyHunters operate: after gaining network access, they scan for backup infrastructure and destroy or encrypt it FIRST, before deploying the ransom payload. If your backup system is network-accessible, it is within the blast radius. The 3-2-1 rule: 3 copies of data, on 2 different media types, with 1 offsite. The air gap addendum: at least 1 copy must be offline and unreachable from the network. A tape library that disconnects from the network after the nightly backup job cannot be reached by a ransomware payload activated the next morning.",
+      wrong:"C is correct. The 3-2-1 rule is the foundational backup principle, and the tape library being permanently network-connected violates the air gap requirement. This is how ransomware destroys backups: it finds the backup server on the network, encrypts the backup catalog, and then the victim has no recovery path. The fix is simple: schedule the tape library to disconnect from the network immediately after the nightly backup job completes."
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// PHASE 2 — DATA EXFILTRATION TRIAGE
+// ══════════════════════════════════════════════════════
+const phase2 = [
+  {
+    tag:"EXFILTRATION ALERT", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Alert 1 — Abnormal Outbound Transfer",
+    visual:`SIEM ALERT #4471 — CRITICAL\nSource IP:    10.5.12.44 (PHILA-FILESVR-01)\nDest IP:      91.215.x.x  [REDACTED — known C2 range]\nProtocol:     HTTPS (port 443)\nData Volume:  47.3 GB outbound over 6 hours\nTime:         02:00 – 08:00 AM (off-hours)\nUser Context: Service account "svc_backup"`,
+    question:"The backup service account is exfiltrating 47GB overnight to a known C2 IP. Which storage-level control would have been the MOST effective prevention?",
+    options:[
+      {l:"A",t:"Antivirus scanning on the file server — malware would have been detected before the exfiltration began."},
+      {l:"B",t:"Principle of least privilege on service accounts — 'svc_backup' should only have read access to backup target folders, not to the entire share. Combined with DLP (Data Loss Prevention) rules flagging large outbound transfers, this would have stopped or alerted on the transfer."},
+      {l:"C",t:"RAID 1 mirroring — if the data was mirrored, the attacker could only copy one mirror, limiting exposure to 50% of files."},
+      {l:"D",t:"Disabling HTTPS on internal servers — forcing HTTP makes outbound transfers visible to proxy inspection tools."}
+    ],
+    correct:1,
+    topic:"Least Privilege & Service Account Security",
+    feedback:{
+      correct:"Correct. Service accounts are one of the most abused attack vectors. 'svc_backup' had read access to the entire share (needed for backup) but should have been restricted to backup staging directories only, not production data. Additionally, a DLP rule saying 'alert if any single account transfers >5GB outbound in <1 hour after midnight' would have caught this at hour one. Storage access controls and behavioral monitoring work together.",
+      wrong:"B is correct. Service account compromise is a classic lateral movement technique. The account had overly broad permissions (entire share instead of just backup targets) and no behavioral monitoring on its access patterns. RAID 1 provides disk redundancy, not access control — both mirrors are equally readable. The fix is least-privilege scoping on service accounts plus DLP alerting on anomalous volume transfers."
+    }
+  },
+  {
+    tag:"CREDENTIAL ATTACK", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Alert 2 — Ransomware Staging Detected",
+    visual:`EDR ALERT — PHILA-DB-01\nProcess:    cmd.exe → vssadmin.exe\nCommand:    vssadmin delete shadows /all /quiet\nTime:       03:44 AM\nContext:    Ran under domain admin account\n            logged in 11 min earlier from new IP\nVSS Status: ALL SHADOW COPIES DELETED`,
+    question:"The attacker ran 'vssadmin delete shadows /all' — deleting all Windows Volume Shadow Copies. What are VSS shadow copies, why are they targeted first by ransomware, and what backup control survives this?",
+    options:[
+      {l:"A",t:"VSS shadow copies are temporary files used by Windows Update. Deleting them prevents Windows from reverting patches, which is not directly related to ransomware recovery."},
+      {l:"B",t:"VSS shadow copies are Windows' built-in point-in-time snapshots stored on the local disk. Ransomware deletes them because they are the fastest recovery path for most users. The ONLY backup that survives this is an air-gapped, offline copy — cloud backup or tape that was not network-accessible at time of attack."},
+      {l:"C",t:"VSS shadow copies are encrypted by default, so deleting them before encrypting the live data is unnecessary — they provide no recovery value to victims."},
+      {l:"D",t:"The solution is to disable vssadmin.exe using AppLocker or WDAC — this prevents the command from running even if an attacker has admin access."}
+    ],
+    correct:1,
+    topic:"VSS Shadow Copies & Air-Gap Backup",
+    feedback:{
+      correct:"This is the single most important thing to understand about modern ransomware. VSS (Volume Shadow Copy Service) creates snapshots of volumes that Windows stores locally — this is what powers 'Previous Versions' in File Explorer. Every ransomware group runs vssadmin delete shadows as step one because it eliminates the fast, free recovery option. The only backup that survives is one that was offline (air-gapped) when the attack ran. Disabling vssadmin.exe is a good hardening step, but a determined attacker with domain admin rights can re-enable it. Offline backups are non-negotiable.",
+      wrong:"B is correct. VSS shadow copies are local, on-disk snapshots. Ransomware deletes them first to eliminate the easy recovery path. If your only 'backup' is VSS snapshots, you have no recovery after a ransomware attack. The defense is a 3-2-1 backup with at least one copy that was not network-accessible during the attack window — tape, cloud with immutable storage, or an offline disk that was physically disconnected."
+    }
+  },
+  {
+    tag:"ACCESS CONTROL", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Alert 3 — Unauthorized NAS Access",
+    visual:`NAS AUDIT LOG — PHILA-NAS-HR\n[03:51] Account: jsmith@phila.edu\n[03:51] Action: Enumerate share contents\n[03:51] Files listed: 14,847 items\n[03:52] Action: Bulk read (recursive)\n[03:52] Data read: 28.4 GB in 4 minutes\n[03:55] Action: Connection terminated\n\nContext: jsmith is a faculty member.\n         HR share — faculty have NO legitimate access.\n         jsmith account logged in from IP in Netherlands.`,
+    question:"A faculty account is reading 28GB from the HR NAS in 4 minutes at 3AM from overseas. What access control failure allowed this, and what TWO controls would have prevented it?",
+    options:[
+      {l:"A",t:"The NAS SMB protocol is inherently insecure — switching to NFS would prevent unauthorized reads because NFS uses Kerberos authentication by default."},
+      {l:"B",t:"The failure is that faculty permissions were not properly scoped to exclude the HR share. Two controls: (1) RBAC — the HR share should only be accessible to the 'HR_STAFF' domain group, not all authenticated users; (2) MFA with geofencing — a login from the Netherlands at 3AM should trigger re-authentication or account lock."},
+      {l:"C",t:"The failure is that RAID was not configured on the NAS. If the data were striped across multiple disks, the attacker could not read all of it in one connection."},
+      {l:"D",t:"The HR NAS should be placed on a separate physical network segment with no routing to the faculty network — air-gapping it completely from the campus LAN."}
+    ],
+    correct:1,
+    topic:"RBAC, NAS Permissions & Geofencing",
+    feedback:{
+      correct:"Exactly. Two failures: (1) permissions — 'jsmith' as an authenticated domain user apparently had read access to the HR share (misconfigured 'Authenticated Users' permission is a common mistake); (2) no anomaly detection on access patterns. Role-Based Access Control means the HR share's ACL should have exactly 'HR_STAFF' and nothing else. The second control — geofencing — uses conditional access policies (Azure AD / on-prem AD with location-aware policies) to flag or block logins from unexpected geographic locations or outside business hours.",
+      wrong:"B is correct. The core failure is a permission misconfiguration — 'jsmith' shouldn't have been able to reach the HR share at all. RBAC (Role-Based Access Control) would have made the share invisible to faculty accounts. The second control, geofencing via conditional access, adds a layer that flags the Netherlands IP and 3AM login time. RAID and NFS switches have nothing to do with access control."
+    }
+  },
+  {
+    tag:"STORAGE FORENSICS", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Alert 4 — Encrypted Files Spreading",
+    visual:`ENDPOINT ALERT — MULTIPLE SYSTEMS\nFile Pattern: *.locked extension appearing\nSystems Affected: PHILA-FILESVR-01, PHILA-NAS-HR\nEncrypted Files: 23,441 files (and counting)\nRansom Note:    RESTORE_FILES.TXT dropped\n                in every directory\nStorage Pool:   Encryption spreading at ~500 files/min\nCurrent Time:   04:12 AM`,
+    question:"Ransomware is actively encrypting files at 500 files/minute across two storage systems. What is the CORRECT immediate storage-level response to limit the blast radius?",
+    options:[
+      {l:"A",t:"Immediately run a full backup of all remaining unencrypted files to a network share before they are encrypted — preserve what you can."},
+      {l:"B",t:"Reformat both storage systems immediately — encrypted files cannot be recovered anyway, so wiping clean is faster than containment."},
+      {l:"C",t:"Isolate infected systems: immediately disconnect PHILA-FILESVR-01 and PHILA-NAS-HR from the network (pull cable or disable NIC at switch). This stops the encryption spread to connected systems. Do NOT shut down — running memory may contain the encryption key. Then restore from the last known-clean offline backup."},
+      {l:"D",t:"Enable RAID 5 rebuild on both systems — the parity data is unencrypted and can be used to recover the encrypted files."}
+    ],
+    correct:2,
+    topic:"Ransomware Containment & Recovery",
+    feedback:{
+      correct:"Critical incident response knowledge. The correct sequence: ISOLATE first (pull network — stops spread), then PRESERVE (don't power off — decryption keys may be in RAM, and forensic tools may need the running state), then RESTORE from the last clean offline backup. Running a new backup to a network share (Option A) connects you to the network and risks spreading to your backup target. RAID parity is not an encryption bypass — the ransomware encrypts the actual data blocks that parity is calculated from.",
+      wrong:"C is correct. The containment priority order is: Isolate → Preserve → Restore. Network isolation (pulling the cable at the switch port) stops the ransomware from spreading to other network shares. You do NOT want to: run new backups to network shares (spreads infection), shut down (loses memory forensics), or reformat without forensic imaging. RAID rebuild from parity cannot recover encrypted files — parity recalculates the missing disk from what's there, but what's there is already encrypted."
+    }
+  },
+  {
+    tag:"STORAGE FORENSICS", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Alert 5 — The Scope Question",
+    visual:`POST-INCIDENT SCOPING\nQuestion from President's Office:\n"How much student data was potentially exposed?\nDo we have to notify affected students?"\n\nKnown accessed systems:\n  - PHILA-FILESVR-01: Student submissions (47.3 GB taken)\n  - PHILA-NAS-HR:     Faculty/staff HR data (28.4 GB taken)\n  - PHILA-DB-01:      Student records DB (access attempted,\n                       blocked by DB firewall rule)\nPHERPA/FERPA Trigger: Any unauthorized access to\n                      student educational records`,
+    question:"The president's office needs to know if FERPA notification is required. Based on the confirmed data access, what is the correct answer?",
+    options:[
+      {l:"A",t:"No notification required — the attackers only downloaded files, they didn't modify or delete records, so no FERPA violation occurred."},
+      {l:"B",t:"Notification is only required if the database server was breached. Since PHILA-DB-01 was blocked, no FERPA-protected data was accessed."},
+      {l:"C",t:"Yes, FERPA notification is likely required. The 47.3GB taken from PHILA-FILESVR-01 (student submissions) constitutes unauthorized access to educational records. FERPA applies to access, not just modification. The institution must notify affected students and the Department of Education within the required timeframe."},
+      {l:"D",t:"FERPA only applies to grades and transcripts. Assignment submissions stored on a file server are not covered educational records."}
+    ],
+    correct:2,
+    topic:"FERPA, Data Classification & Breach Notification",
+    feedback:{
+      correct:"Correct, and this is why data classification matters BEFORE a breach. FERPA (Family Educational Rights and Privacy Act) protects 'education records' — which includes student assignment submissions, not just grades. Unauthorized access (viewing, copying) triggers notification obligations even if data wasn't modified. The institution now has a legal obligation to notify affected students. This is why storage systems should be classified: PII, FERPA-protected, HIPAA, etc. — so that in the event of a breach, you know immediately what laws apply.",
+      wrong:"C is correct. FERPA is triggered by unauthorized ACCESS to education records, not just modification or deletion. Student submissions are education records. The 47.3GB exfiltration from PHILA-FILESVR-01 means you have a FERPA breach and a notification obligation. This is the real-world consequence of the ShinyHunters incident: Instructure had to determine which schools' data was accessed, and those institutions faced notification requirements. Data classification on your storage systems makes this analysis instant instead of taking weeks."
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// PHASE 3 — BACKUP & RECOVERY
+// ══════════════════════════════════════════════════════
+const phase3 = [
+  {
+    tag:"BACKUP STRATEGY", tagColor:"#2E86C1", tagBg:"rgba(46,134,193,0.15)",
+    title:"Recovery 1 — Choosing the Right Backup",
+    visual:`BACKUP INVENTORY — Monday 08:00 AM\nSunday 11 PM:  Full backup      (150 GB) ← last full\nMonday 1 AM:   Incremental      (8 GB)   ← only Mon changes\nTuesday 1 AM:  Incremental      (5 GB)\nWednesday 1AM: Incremental      (6 GB)\nThursday 1AM:  Incremental      (4 GB)   ← last known-clean\nFriday 1AM:    Incremental      (9 GB)   ← INFECTED (malware active)\nSaturday 1AM:  Incremental      (47GB)   ← INFECTED (ransomware)\n\nGoal: Restore to Thursday night state`,
+    question:"To restore to Thursday night's clean state using this backup set, what is the CORRECT restore sequence?",
+    options:[
+      {l:"A",t:"Restore only Thursday's incremental backup (4 GB) — incrementals are self-contained snapshots that include all data."},
+      {l:"B",t:"Restore Sunday's full backup (150 GB), then apply Monday's incremental, then Tuesday's, then Wednesday's, then Thursday's — in sequence. Each incremental only contains changes from that day and depends on the previous backup in the chain."},
+      {l:"C",t:"Restore Saturday's incremental (47 GB) and use the ransomware decryptor — the encrypted files can be decrypted faster than restoring from Sunday's full backup."},
+      {l:"D",t:"Restore Sunday's full backup and Thursday's incremental only — you can skip Monday, Tuesday, and Wednesday incrementals because Thursday supersedes them."}
+    ],
+    correct:1,
+    topic:"Incremental Backup Restore Chain",
+    feedback:{
+      correct:"Perfect. This is the core operational reality of incremental backups: they are NOT standalone. Each incremental backup contains ONLY the files that changed that day, relative to the previous backup in the chain. To restore Thursday's state: you need Sunday's full (all files as of Sunday), then Monday's incremental (adds Monday's changes), Tuesday's (adds Tuesday's changes), Wednesday's, and finally Thursday's. Skipping any step in the chain leaves gaps. This is also why restoration from incrementals takes longer than from a differential backup — you must apply each incremental in sequence.",
+      wrong:"B is correct. Incremental backups only store changes from the previous backup. Thursday's 4 GB incremental contains only Thursday's changed files — it has no idea what files existed on Sunday, Monday, Tuesday, or Wednesday. You must restore the full backup first to establish the baseline, then apply each incremental in chronological order to 'play forward' to Thursday's state. This chain dependency is incrementals' main tradeoff versus the smaller daily backup size."
+    }
+  },
+  {
+    tag:"BACKUP STRATEGY", tagColor:"#2E86C1", tagBg:"rgba(46,134,193,0.15)",
+    title:"Recovery 2 — Differential vs. Incremental",
+    visual:`BACKUP COMPARISON — Same data set\n\nScenario A (Incremental):\n  Mon: 8GB  Tue: 5GB  Wed: 6GB  Thu: 4GB\n  Restore: Full + Mon + Tue + Wed + Thu (4 tapes)\n\nScenario B (Differential):\n  Mon: 8GB  Tue: 13GB  Wed: 19GB  Thu: 23GB\n  Restore: Full + Thu only (2 tapes)\n\nQuestion context: Emergency restore at 3AM.\n                  Every minute offline = $2,400 lost revenue.`,
+    question:"In an emergency restore scenario where time is critical, which backup strategy allows FASTER restoration, and what is the tradeoff?",
+    options:[
+      {l:"A",t:"Incremental is faster to restore because each individual file is smaller (4-8 GB per day vs. 23 GB differential). Less data to transfer means faster restore."},
+      {l:"B",t:"Differential backups restore faster — you only need the full backup plus the most recent differential (2 tapes vs. 5 tapes). The tradeoff is larger daily backup size because differentials capture all changes since the last full, growing larger each day. Incremental backups are smaller daily but require restoring the entire chain."},
+      {l:"C",t:"Both strategies restore at exactly the same speed because the total amount of changed data is identical — it's just packaged differently."},
+      {l:"D",t:"Differential is faster because it compresses all incremental data during backup, resulting in smaller total restore size."}
+    ],
+    correct:1,
+    topic:"Differential vs. Incremental — Restore Speed",
+    feedback:{
+      correct:"This is the fundamental tradeoff every storage admin must understand. Differential: grows daily (stores all changes since last full), but restores with just 2 operations — full + latest differential. Incremental: stays small daily (stores only that day's changes), but requires the full chain to restore — potentially 5, 6, or 7 operations. In an emergency at 3AM: differential wins for speed. In a storage-constrained environment: incremental wins for backup window efficiency. Enterprise backup products like Veeam often use a hybrid approach: synthetic full backups that give you differential-speed restores without the storage growth.",
+      wrong:"B is correct. The tradeoff is backup storage efficiency vs. restore speed. Differential: each day's backup is larger (grows throughout the week), but you only ever need the last full + last differential to restore — fast and simple. Incremental: each day is tiny, but restore requires replaying the full chain — time-consuming under pressure. The total amount of data involved in a restore is actually higher for incrementals (150+8+5+6+4 = 173 GB) versus differentials (150+23 = 173 GB) — they're similar, but the sequential tape operations for incrementals add significant time."
+    }
+  },
+  {
+    tag:"BACKUP STRATEGY", tagColor:"#2E86C1", tagBg:"rgba(46,134,193,0.15)",
+    title:"Recovery 3 — GFS Rotation Schedule",
+    visual:`GFS TAPE ROTATION — Phila Tech College\nGrandfather: 1 tape/month, kept 12 months\nFather:      1 tape/week (Friday full), kept 4 weeks\nSon:         1 tape/day (Mon-Thu incremental), kept 1 week\n\nToday: Wednesday, May 14, 2026\nBreach began: ~Friday May 9 (5 days ago)\n\nAvailable clean tapes:\n  May 9 Friday full:   INFECTED (breach active)\n  May 2 Friday full:   Potentially clean\n  April 30 Month-end:  Clean (confirmed)\n  April 4 Month-end:   Clean (confirmed)`,
+    question:"The breach began on Friday May 9. Using the GFS rotation, what is the MOST RECENT clean restore point, and what data loss (RPO) does that represent?",
+    options:[
+      {l:"A",t:"May 9 Friday full backup — it ran before the breach payload activated and is therefore clean."},
+      {l:"B",t:"May 2 Friday full backup is the most recent clean restore point. This represents approximately 10 days of data loss (May 2 → May 12 ransom activation). This is the RPO — Recovery Point Objective — the maximum age of data that must be recovered."},
+      {l:"C",t:"The April 30 month-end tape is the only safe choice because all weekly tapes from May are suspect — malware may have been dormant since before May 2."},
+      {l:"D",t:"RPO is irrelevant for ransomware recovery because you can reconstruct missing data from email archives and user workstations."}
+    ],
+    correct:1,
+    topic:"GFS Rotation & Recovery Point Objective (RPO)",
+    feedback:{
+      correct:"Correct analysis. May 2 Friday full is the 'Father' tape for the week of April 28–May 2, created before any known attacker activity. May 9's full backup ran after the breach foothold was established — even though ransomware may not have activated yet, malware could have been planted in files that were then backed up. Security teams often go back one extra rotation to be safe, which is why April 30 (month-end 'Grandfather') might be chosen instead. RPO = 10-12 days here. This is why institutions that can't tolerate multi-day RPOs invest in off-site replication with immutable snapshots (WORM storage).",
+      wrong:"B is correct. May 9 is a 'Father' tape created during an active breach — you cannot trust it. May 2 is the previous week's Father tape, created before confirmed attacker activity, making it your safest weekly restore point. RPO here is approximately 10 days — that's how much operational data is lost. For a college during finals, losing 10 days of grade submissions would be catastrophic. This is why RPO analysis drives how frequently you must back up and how far back you maintain clean copies."
+    }
+  },
+  {
+    tag:"WINDOWS SERVER 2025", tagColor:"#2E86C1", tagBg:"rgba(46,134,193,0.15)",
+    title:"Recovery 4 — Storage Spaces Rebuild",
+    visual:`WINDOWS SERVER 2025 — PHILA-FILESVR-01\nStorage Spaces Pool: "CampusDataPool"\nOriginal Config: 3-way mirror virtual disk\n                 (equivalent to RAID 1 on 3 disks)\nStatus after attack: 2 of 3 disks encrypted\n                     1 disk UNAFFECTED (was offline\n                     for maintenance during attack)\n\nPowerShell output:\nGet-StoragePool -FriendlyName CampusDataPool\nHealthStatus: Degraded\nOperationalStatus: Degraded`,
+    question:"Storage Spaces shows 2 of 3 mirror disks were encrypted. One disk was offline during the attack and remains clean. What can be recovered, and what is the PowerShell command to check virtual disk health?",
+    options:[
+      {l:"A",t:"Nothing can be recovered — a 3-way mirror requires all 3 disks to read data. With 2 disks encrypted, the pool is permanently lost."},
+      {l:"B",t:"The clean offline disk contains a full, unencrypted mirror copy of all data as of when it went offline for maintenance. Bring it back online, detach the two encrypted disks from the pool, and read data from the clean disk. Command: Get-VirtualDisk | Select FriendlyName, HealthStatus, OperationalStatus"},
+      {l:"C",t:"Format the two encrypted disks, add them back to the pool, and Storage Spaces will automatically rebuild the mirror from parity data stored on the clean disk."},
+      {l:"D",t:"Use the command: Repair-VirtualDisk -FriendlyName 'CampusDataPool' — this will decrypt the encrypted disks using Windows' built-in decryption engine."}
+    ],
+    correct:1,
+    topic:"Windows Storage Spaces & Mirror Recovery",
+    feedback:{
+      correct:"This is the silver lining of proper Storage Spaces configuration. A 3-way mirror (ResiliencySettingName = Mirror with 3 columns) writes identical data to all 3 disks simultaneously. The disk that was offline during the attack never received the ransomware's encryption I/O — it holds a clean copy of everything written before it went offline. You can bring it online, remove the two compromised disks from the pool, and read the clean data directly. The PowerShell command Get-VirtualDisk is the right diagnostic tool. This is also why 'Storage Spaces Direct (S2D)' in datacenter deployments is so powerful — it enables automatic rebuild from mirror copies.",
+      wrong:"B is correct. In a 3-way mirror, any single disk contains a complete copy of all data. The disk that was offline received no writes during the attack — so it has no encrypted files. You can read it directly. 'Repair-VirtualDisk' does not decrypt anything — it rebuilds missing redundancy after adding a replacement disk. Storage Spaces cannot decrypt ransomware — it has no knowledge of the ransomware key. The clean offline disk is your recovery path."
+    }
+  },
+  {
+    tag:"LESSONS LEARNED", tagColor:"#2E86C1", tagBg:"rgba(46,134,193,0.15)",
+    title:"Recovery 5 — Post-Incident Hardening",
+    visual:`AFTER-ACTION REVIEW — PhilaTech College\nTotal downtime:   72 hours\nData lost:        10 days (RPO exceeded)\nStudents affected: ~2,400\nEstimated cost:    $180,000 (recovery + legal + notification)\n\nShinyHunters entry vector: Credential theft via\n  phishing email → escalated to domain admin\nSystems reached because of:\n  - Flat network (no storage segmentation)\n  - No encryption at rest on sensitive NAS\n  - VSS shadow copies not protected\n  - Tape library network-accessible 24/7\n  - Service accounts over-permissioned`,
+    question:"The after-action review identifies 5 storage security failures. Which single hardening measure would have had the HIGHEST impact on limiting data loss from this specific attack?",
+    options:[
+      {l:"A",t:"Upgrading all HDDs to NVMe SSDs — faster storage means backup jobs complete faster, reducing the window of unprotected data between backups."},
+      {l:"B",t:"Enabling BitLocker encryption at rest on all sensitive NAS shares and file servers — even with valid credentials, exfiltrated data would be encrypted ciphertext, making the 47GB and 28GB exfiltration worthless to the attacker."},
+      {l:"C",t:"Switching from RAID 5 to RAID 6 on all servers — dual parity protection prevents attackers from corrupting data by removing drive redundancy during an attack."},
+      {l:"D",t:"Replacing all tape backups with cloud storage — cloud providers apply encryption automatically, solving the encryption-at-rest problem without configuration."}
+    ],
+    correct:1,
+    topic:"Encryption at Rest — Highest Impact Control",
+    feedback:{
+      correct:"This is the key lesson from the ShinyHunters breach. The attackers successfully exfiltrated 75GB+ of data. That data is now in their possession. But if every sensitive volume had BitLocker encryption at rest enabled: every file they downloaded is ciphertext — unreadable without the volume decryption key, which never leaves the server. This doesn't prevent the breach or the ransom, but it completely neutralizes the data exfiltration threat. Instructure's real exposure was student PII and institutional data that could be sold or published. Encryption at rest makes that data worthless after exfiltration. It's the one control that protects you even after every other control has failed.",
+      wrong:"B is correct, and this is the highest-leverage insight from the ShinyHunters case. Encryption at rest (BitLocker on Windows Server 2025 for volume-level, or EFS for file-level) means that even if an attacker steals your data, they have encrypted blobs. The 47GB taken from PHILA-FILESVR-01 and 28GB from PHILA-NAS-HR would have been worthless. RAID improvements protect against disk failure, not data theft. Cloud storage solves off-site redundancy but doesn't automatically encrypt on-premises NAS shares. Encryption at rest is the single highest-impact control for data exfiltration scenarios."
+    }
+  }
+];
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let state = {
+  phase: 0, idx: 0, scores: [0,0,0],
+  results: []  // {phase, q, correct, topic}
+};
+
+// ══════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateGlobalScore(){
+  const total = state.scores.reduce((a,b)=>a+b,0);
+  const den   = (state.phase-1)*5 + state.idx;
+  document.getElementById('gs-num').textContent = total;
+  document.getElementById('gs-den').textContent = den;
+}
+
+function buildPips(phase, count){
+  const el = document.getElementById(`p${phase}-pips`);
+  el.innerHTML = '';
+  for(let i=0; i<count; i++){
+    const pip = document.createElement('div');
+    pip.className = 'status-pip' + (i===0?' current':'');
+    pip.id = `p${phase}-pip-${i}`;
+    el.appendChild(pip);
+  }
+}
+
+function updatePips(phase, idx, correct){
+  const prev = document.getElementById(`p${phase}-pip-${idx}`);
+  if(prev){ prev.classList.remove('current'); prev.classList.add(correct?'done-correct':'done-wrong'); }
+  const next = document.getElementById(`p${phase}-pip-${idx+1}`);
+  if(next){ next.classList.add('current'); }
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE LAUNCHER
+// ══════════════════════════════════════════════════════
+function startPhase(n){
+  state.phase = n; state.idx = 0;
+  document.getElementById('global-score-display').style.display = 'flex';
+  updateGlobalScore();
+  const data = [null,phase1,phase2,phase3][n];
+  buildPips(n, data.length);
+  show(`screen-p${n}`);
+  renderQuestion(n);
+}
+
+// ══════════════════════════════════════════════════════
+// RENDER QUESTION
+// ══════════════════════════════════════════════════════
+function renderQuestion(phase){
+  const data = [null,phase1,phase2,phase3][phase];
+  const q    = data[state.idx];
+  const total= data.length;
+  const frac = `${state.idx+1} / ${total}`;
+  const pct  = `${((state.idx+1)/total)*100}%`;
+  document.getElementById(`p${phase}-frac`).textContent = frac;
+  document.getElementById(`p${phase}-bar`).style.width  = pct;
+
+  const container = document.getElementById(`p${phase}-question`);
+  const visualLines = q.visual.split('\n').map(l => {
+    const idx = l.indexOf(':');
+    if(idx > -1 && idx < 20){
+      return `<span style="color:var(--gray)">${l.substring(0,idx+1)}</span>${l.substring(idx+1)}`;
+    }
+    return l;
+  }).join('\n');
+
+  container.innerHTML = `
+    <div class="scenario-card">
+      <span class="scenario-tag" style="color:${q.tagColor};background:${q.tagBg}">${q.tag}</span>
+      <div class="scenario-title">${q.title}</div>
+      <div class="scenario-visual">
+        <div class="label">INCIDENT DATA / SYSTEM STATUS</div>
+        <pre style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.9;">${visualLines}</pre>
+      </div>
+      <div class="scenario-question">${q.question}</div>
+      <div class="options" id="p${phase}-options">
+        ${q.options.map((o,i)=>`
+          <button class="option-btn" onclick="selectAnswer(${phase},${i})">
+            <span class="option-letter">${o.l}</span>
+            <span class="option-text">${o.t}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="p${phase}-feedback"></div>
+      <div class="next-btn-wrap" id="p${phase}-next" style="display:none;">
+        <button class="btn btn-primary" onclick="nextQuestion(${phase})">
+          ${state.idx+1 < total ? 'Next Scenario →' : 'View Phase Results →'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════
+// ANSWER HANDLER
+// ══════════════════════════════════════════════════════
+function selectAnswer(phase, chosen){
+  const data    = [null,phase1,phase2,phase3][phase];
+  const q       = data[state.idx];
+  const correct = chosen === q.correct;
+
+  // Disable all buttons
+  document.querySelectorAll(`#p${phase}-options .option-btn`).forEach((btn,i)=>{
+    btn.disabled = true;
+    if(i === q.correct) btn.classList.add(correct&&chosen===i ? 'correct' : 'reveal');
+    if(i === chosen && !correct) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const fb = document.getElementById(`p${phase}-feedback`);
+  fb.className = `feedback show feedback-${correct?'correct':'wrong'}`;
+  fb.innerHTML = `
+    <span class="feedback-icon">${correct?'✅':'❌'}</span>
+    <div>
+      <div class="feedback-title">${correct ? 'Correct — Well Done' : 'Incorrect — Here\'s Why'}</div>
+      <div class="feedback-body">${correct ? q.feedback.correct : q.feedback.wrong}</div>
+    </div>
+  `;
+
+  // Score & results
+  if(correct){ state.scores[phase-1]++; }
+  state.results.push({ phase, q: state.idx, correct, topic: q.topic, title: q.title });
+  updatePips(phase, state.idx, correct);
+  updateGlobalScore();
+
+  // Show next button
+  document.getElementById(`p${phase}-next`).style.display = 'flex';
+}
+
+// ══════════════════════════════════════════════════════
+// NEXT QUESTION
+// ══════════════════════════════════════════════════════
+function nextQuestion(phase){
+  const data = [null,phase1,phase2,phase3][phase];
+  state.idx++;
+  if(state.idx < data.length){
+    renderQuestion(phase);
+  } else {
+    showPhaseScore(phase);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// PHASE SCORE
+// ══════════════════════════════════════════════════════
+function showPhaseScore(phase){
+  const s = state.scores[phase-1];
+  const colors = ['','var(--red2)','var(--amber)','var(--cyan)'];
+  const msgs = ['',
+    [
+      'Excellent architecture analysis. You correctly identified every exposure point in the college\'s storage systems. You understand the difference between DAS, NAS, and SAN — and more importantly, how attackers exploit each one.',
+      'Good work on storage architecture. A few gaps remain — review the scenarios you missed, particularly around NAS access controls and the 3-2-1 backup rule with air gapping.',
+      'Storage architecture is the foundation of this week. Review DAS vs. NAS vs. SAN, RAID configurations, and the 3-2-1 backup rule before proceeding to Quiz 2.'
+    ],
+    [
+      'Outstanding exfiltration triage. You identified every attacker technique and the correct defensive control. You understand how credential theft, VSS deletion, and ransomware lateral movement work in practice.',
+      'Solid triage work. A few techniques tripped you up — review the VSS shadow copy deletion scenario and the FERPA notification requirements. These are both Quiz 2 topics.',
+      'Data exfiltration scenarios are core to Week 6. Review service account least privilege, VSS shadow copies, ransomware containment sequence, and FERPA notification triggers carefully.'
+    ],
+    [
+      'Perfect backup and recovery knowledge. You nailed the incremental restore chain, differential vs. incremental tradeoffs, GFS rotation, and encryption at rest. You are ready to administer real backup systems.',
+      'Good recovery fundamentals. Review the incremental restore chain sequence and the GFS rotation tape selection — these require careful attention to detail that pays off in real incidents.',
+      'Backup and recovery is the Week 6 capstone topic. Review the full/incremental/differential restore procedures, GFS rotation scheduling, RPO concepts, and why encryption at rest is the highest-impact control.'
+    ]
+  ];
+
+  document.getElementById(`p${phase}-score-num`).textContent = s;
+  document.getElementById(`p${phase}-score-num`).style.color = colors[phase];
+  document.getElementById(`p${phase}-correct`).textContent = s;
+  document.getElementById(`p${phase}-wrong`).textContent = 5-s;
+  const tier = s>=4?0:s>=2?1:2;
+  document.getElementById(`p${phase}-msg`).textContent = msgs[phase][tier];
+  show(`screen-p${phase}-score`);
+  if(phase===3){
+    setTimeout(()=>{
+      const btn = document.querySelector('#screen-p3-score .btn-primary');
+      if(btn){ btn.textContent='View Final Incident Report →'; btn.onclick=showFinalReport; }
+    },50);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// FINAL REPORT
+// ══════════════════════════════════════════════════════
+function showFinalReport(){
+  const total = state.scores.reduce((a,b)=>a+b,0);
+
+  // Score display
+  document.getElementById('final-score').textContent = total;
+  document.getElementById('bc1').textContent = state.scores[0];
+  document.getElementById('bc2').textContent = state.scores[1];
+  document.getElementById('bc3').textContent = state.scores[2];
+
+  // Bar widths
+  document.getElementById('bc1-bar').style.width = `${(state.scores[0]/5)*100}%`;
+  document.getElementById('bc2-bar').style.width = `${(state.scores[1]/5)*100}%`;
+  document.getElementById('bc3-bar').style.width = `${(state.scores[2]/5)*100}%`;
+
+  // Grade
+  const grade = total>=13?'Storage Architect 🏆':total>=10?'Ready for Production ✅':total>=7?'Junior Admin 📚':'Review Required 🔄';
+  const gradeColors = {
+    'Storage Architect 🏆':'background:#1E8449;color:#fff',
+    'Ready for Production ✅':'background:#1B4F72;color:#fff',
+    'Junior Admin 📚':'background:#784212;color:#fff',
+    'Review Required 🔄':'background:#641E16;color:#fff'
+  };
+  const gb = document.getElementById('grade-badge');
+  gb.textContent = grade;
+  gb.style.cssText = gradeColors[grade];
+
+  // Review rows
+  const rows = document.getElementById('review-rows');
+  rows.innerHTML = state.results.map(r=>`
+    <div class="review-row">
+      <span class="review-icon">${r.correct?'✅':'❌'}</span>
+      <span class="review-topic">Ph.${r.phase} Q${r.q+1} — ${r.topic}</span>
+      <span class="review-result ${r.correct?'rv-correct':'rv-wrong'}">${r.correct?'CORRECT':'MISSED'}</span>
+    </div>
+  `).join('');
+
+  // Footer message
+  const msgs = {
+    13:'You demonstrated the expertise a real storage administrator needs when responding to a breach like ShinyHunters. You understand that storage security is not just about RAID — it is about access controls, encryption at rest, air-gapped backups, service account privilege, and knowing your legal notification obligations. You are ready for Lab 6.',
+    10:'Strong performance. You have a solid grasp of the core concepts. Review the scenarios you missed before Lab 6 — particularly the incremental backup restore chain and the encryption at rest scenarios. These will appear directly in the hands-on lab.',
+    7:'You are building the right foundation. The breach response simulation covers every topic from this week\'s readings. Go back through the scenarios you missed with the feedback explanations — each one maps to a specific section of the Week 6 reading materials. Then try the simulation again before attempting Lab 6.',
+    0:'The ShinyHunters breach is a real event that affected your school. The concepts in this simulation — RAID, backup types, encryption at rest, access controls — are the actual defenses that limit damage in real incidents. Review the Week 6 reading materials carefully, then retake this simulation. You can do this.'
+  };
+  const msgKey = total>=13?13:total>=10?10:total>=7?7:0;
+  document.getElementById('final-msg').innerHTML = `<strong>Professor's Note:</strong> ${msgs[msgKey]}`;
+
+  show('screen-final');
+}
+
+function restartSim(){
+  state = { phase:0, idx:0, scores:[0,0,0], results:[] };
+  document.getElementById('global-score-display').style.display = 'none';
+  show('screen-landing');
+}
+</script>
+
+
+</body></html>
