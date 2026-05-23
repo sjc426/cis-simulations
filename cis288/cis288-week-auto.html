@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIS 252 Week Animation</title>
-<style>*{margin:0;padding:0;} body{background:#02060f;overflow:hidden;}</style>
+<title>CIS 288 Week Animation</title>
+<style>*{margin:0;padding:0;} body{background:#060412;overflow:hidden;}</style>
 </head>
 <body>
 <iframe id="frame" style="border:0;width:100vw;height:100vh;display:block;" src=""></iframe>
@@ -19,11 +19,19 @@ var TOTAL_WEEKS    = 14;
 
 // Custom animations built so far — add a new line each week
 var CUSTOM = {
-  2: "cis252-week2-virtualization-animation.html",
-  3: "cis252-week3-ad-animation.html"
-  // 4: "cis252-week4-animation.html",
-  // 5: "cis252-week5-animation.html",
-  // ... add each week as we build them
+  2: "week2-iam-animation.html",
+  3: "week3-compute-animation.html"
+  // 4: "week4-storage-animation.html",
+  // 5: "week5-networking-animation.html",
+  // 6: "week6-serverless-animation.html",
+  // 7: "week7-databases-animation.html",
+  // 8: "week8-midterm-animation.html",
+  // 9: "week9-azure-animation.html",
+  // 10: "week10-gcp-animation.html",
+  // 11: "week11-containers-animation.html",
+  // 12: "week12-security-animation.html",
+  // 13: "week13-cost-animation.html",
+  // 14: "week14-final-animation.html"
 };
 
 function getCurrentWeek() {
@@ -36,8 +44,8 @@ function getCurrentWeek() {
 }
 
 var week = getCurrentWeek();
-var base = "https://sjc426.github.io/cis-simulations/cis252/";
-var src  = CUSTOM[week] ? base + CUSTOM[week] : base + "cis252-week-generic.html?week=" + week;
+var base = "https://sjc426.github.io/cis-simulations/cis288/";
+var src  = CUSTOM[week] ? base + CUSTOM[week] : base + "week-generic.html?week=" + week;
 document.getElementById("frame").src = src;
 
 </script>
