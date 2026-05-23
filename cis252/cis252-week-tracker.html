@@ -135,7 +135,17 @@ function render() {
   html += '<div class="btn-row">';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
-  html += '<a class="btn primary" target="_top" href="' + base + '/assignments">🔬 Lab ' + cur + '</a>';
+  var LAB_URLS = {
+    1:  'https://ccp.instructure.com/courses/2103664/assignments/19871789?module_item_id=45328023',
+    2:  'https://ccp.instructure.com/courses/2103664/assignments/19871801?module_item_id=45328033',
+    3:  'https://ccp.instructure.com/courses/2103664/assignments/20024853?module_item_id=45740455',
+    4:  'https://ccp.instructure.com/courses/2103664/assignments/19871969?module_item_id=45737665',
+    5:  'https://ccp.instructure.com/courses/2103664/assignments/20025805?module_item_id=45742571',
+    6:  'https://ccp.instructure.com/courses/2103664/assignments/20027645?module_item_id=45750751',
+    7:  'https://ccp.instructure.com/courses/2103664/assignments/20029093?module_item_id=45755799'
+  };
+  var labURL = LAB_URLS[cur] || (base + '/assignments');
+  html += '<a class="btn primary" target="_top" href="' + labURL + '">🔬 Lab ' + cur + '</a>'
   html += '</div></div>';
 
   if (next > cur) {
