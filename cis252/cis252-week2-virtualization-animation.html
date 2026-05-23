@@ -13,7 +13,7 @@ canvas { display:block; }
 <body>
 <canvas id="c"></canvas>
 <script>
-var c = document.getElementById("c");
+var canvas = document.getElementById("c");
 var ctx = c.getContext("2d");
 var W, H, frame = 0, particles = [], floaters = [], vmBeams = [], beamTimer = 0;
 
@@ -39,11 +39,7 @@ var CLOUDS=[
   {label:"Compute Eng", col:"#4285F4", x:.75, born:176}
 ];
 
-function resize() {
-  // Use document body size — works correctly inside iframes
-  W = c.width  = document.documentElement.clientWidth  || document.body.clientWidth  || 680;
-  H = c.height = document.documentElement.clientHeight || document.body.clientHeight || 280;
-}
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
 resize();
 window.addEventListener("resize", resize);
 
