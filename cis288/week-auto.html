@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 288 Week Animation</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#060412; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; }
+canvas { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+var WEEKS = [
+  { week:1,  start:"2026-05-11", label:"WEEK 1",  title:"Cloud Foundations",       sub:"The Three Landlords: AWS \u00b7 Azure \u00b7 GCP",         theme:"purple", concepts:["AWS","Azure","GCP","IaaS","PaaS","SaaS","Region","Free Tier","Cloud Model","Pay-as-you-go","Shared Responsibility","Elasticity"] },
+  { week:2,  start:"2026-05-18", label:"WEEK 2",  title:"Identity & Access",       sub:"Who Gets In? IAM Across All Three",                         theme:"purple", concepts:["Identity","Authentication","Authorization","Audit","IAM","RBAC","Entra ID","Policy","Role","MFA","Zero Trust","Least Privilege"] },
+  { week:3,  start:"2026-05-25", label:"WEEK 3",  title:"Compute",                 sub:"EC2 \u00b7 Virtual Machine \u00b7 Compute Engine",           theme:"orange", concepts:["EC2","Virtual Machine","Compute Engine","AMI","t2.micro","e2-micro","Security Group","Boot Disk","Availability Zone","Instance Type","Stop vs Terminate","Free Tier"] },
+  { week:4,  start:"2026-06-01", label:"WEEK 4",  title:"Storage",                 sub:"S3 \u00b7 Blob Storage \u00b7 Cloud Storage",               theme:"blue",   concepts:["S3","Blob Storage","Cloud Storage","Bucket","Object","Lifecycle","Glacier","Archive","CDN","Versioning","Static Website","Access Control"] },
+  { week:5,  start:"2026-06-08", label:"WEEK 5",  title:"Networking",              sub:"VPC \u00b7 VNet \u00b7 GCP VPC",                            theme:"teal",   concepts:["VPC","VNet","Subnet","CIDR","Route Table","NAT Gateway","NSG","Firewall","Load Balancer","DNS","Peering","Private Endpoint"] },
+  { week:6,  start:"2026-06-15", label:"WEEK 6",  title:"Serverless",              sub:"Lambda \u00b7 Azure Functions \u00b7 Cloud Functions",       theme:"pink",   concepts:["Lambda","Azure Functions","Cloud Functions","Trigger","Event","FaaS","Cold Start","Timeout","API Gateway","Serverless","Pay-per-invocation","Scale to Zero"] },
+  { week:7,  start:"2026-06-22", label:"WEEK 7",  title:"Databases",               sub:"RDS \u00b7 Azure SQL \u00b7 Cloud SQL",                     theme:"green",  concepts:["RDS","Azure SQL","Cloud SQL","Relational","NoSQL","DynamoDB","Cosmos DB","Firestore","Backup","Replication","Read Replica","Failover"] },
+  { week:8,  start:"2026-06-29", label:"WEEK 8",  title:"Midterm",                 sub:"Cloud Foundations Review",                                  theme:"red",    concepts:["Midterm","Review","IAM","Compute","Storage","Networking","Serverless","Databases","Multi-Cloud","Architecture","Tradeoffs","Well-Architected"] },
+  { week:9,  start:"2026-07-06", label:"WEEK 9",  title:"Azure Deep Dive",         sub:"Azure-Native Services & Architecture",                      theme:"blue",   concepts:["Azure","ARM","Entra ID","App Service","AKS","Monitor","Cost Management","Bicep","Policy","DevOps","Logic Apps","Azure AD"] },
+  { week:10, start:"2026-07-13", label:"WEEK 10", title:"GCP Deep Dive",           sub:"Google Cloud Platform Architecture",                         theme:"green",  concepts:["GCP","BigQuery","GKE","Pub/Sub","Cloud Run","Anthos","Terraform","IAM","Logging","Billing","Cloud Build","Artifact Registry"] },
+  { week:11, start:"2026-07-20", label:"WEEK 11", title:"Containers & Kubernetes", sub:"Docker \u00b7 EKS \u00b7 AKS \u00b7 GKE",                  theme:"teal",   concepts:["Docker","Container","Kubernetes","EKS","AKS","GKE","Pod","Node","Deployment","Service","Helm","Ingress"] },
+  { week:12, start:"2026-07-27", label:"WEEK 12", title:"Security & Compliance",   sub:"Zero Trust \u00b7 Encryption \u00b7 Shared Responsibility",  theme:"purple", concepts:["Zero Trust","Encryption","KMS","Compliance","HIPAA","SOC2","Shared Responsibility","Key Vault","Secrets Manager","WAF","DDoS","Audit Log"] },
+  { week:13, start:"2026-08-03", label:"WEEK 13", title:"Cost & Architecture",     sub:"Pricing Models \u00b7 TCO \u00b7 Well-Architected",          theme:"orange", concepts:["TCO","Pricing","Cost Explorer","Budgets","Reserved","Spot","Savings Plan","Well-Architected","FinOps","Optimization","Tagging","Showback"] },
+  { week:14, start:"2026-08-10", label:"WEEK 14", title:"Final Project",           sub:"Multi-Cloud Design & Presentation",                         theme:"pink",   concepts:["Multi-Cloud","Architecture","Presentation","Portfolio","Design","Tradeoffs","Decision","Final","Capstone","Deploy","Cost","Security"] }
+];
+
+var NODE_LABELS = {
+  purple: [["AWS IAM","Entra ID","GCP IAM"],["AWS IAM","Entra ID","GCP IAM"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"],["AWS","Azure","GCP"]],
+  orange: ["EC2","Azure VM","Compute Eng"],
+  blue:   ["S3","Blob Storage","Cloud Storage"],
+  teal:   ["VPC","VNet","GCP VPC"],
+  pink:   ["Lambda","Az Functions","Cloud Fns"],
+  green:  ["RDS","Azure SQL","Cloud SQL"],
+  red:    ["Compute","Storage","Networking"]
+};
+
+var THEMES = {
+  purple:{ primary:"#c084fc", secondary:"#818cf8", glow:"#9333ea", bg1:"#0d0820", bg2:"#060412" },
+  orange:{ primary:"#fb923c", secondary:"#fbbf24", glow:"#ea6c00", bg1:"#150800", bg2:"#060412" },
+  blue:  { primary:"#60a5fa", secondary:"#38bdf8", glow:"#0078D4", bg1:"#020c1a", bg2:"#060412" },
+  teal:  { primary:"#34d399", secondary:"#2dd4bf", glow:"#0f766e", bg1:"#011a14", bg2:"#060412" },
+  pink:  { primary:"#f472b6", secondary:"#e879f9", glow:"#db2777", bg1:"#150010", bg2:"#060412" },
+  green: { primary:"#86efac", secondary:"#4ade80", glow:"#16a34a", bg1:"#011a08", bg2:"#060412" },
+  red:   { primary:"#fca5a5", secondary:"#f87171", glow:"#dc2626", bg1:"#150404", bg2:"#060412" }
+};
+
+var ICONS = { 1:"☁️", 2:"🔐", 3:"🖥️", 4:"🗄️", 5:"🌐", 6:"⚡", 7:"🗃️", 8:"📝", 9:"☁️", 10:"🔵", 11:"📦", 12:"🔒", 13:"💰", 14:"🏆" };
+
+function getCurrentWeek() {
+  var now = new Date();
+  var cur = WEEKS[0];
+  for (var i=0;i<WEEKS.length;i++){
+    var p=WEEKS[i].start.split("-");
+    var s=new Date(+p[0],+p[1]-1,+p[2]);
+    if(now>=s) cur=WEEKS[i]; else break;
+  }
+  return cur;
+}
+
+var canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
+var W,H,frame=0,particles=[],floaters=[],beams=[];
+var week=getCurrentWeek(), T=THEMES[week.theme];
+
+var rawNodes = NODE_LABELS[week.theme];
+var nodeLabels = Array.isArray(rawNodes[0]) ? rawNodes[week.week-1] || ["AWS","Azure","GCP"] : rawNodes;
+if(!Array.isArray(nodeLabels)) nodeLabels = ["AWS","Azure","GCP"];
+
+var nodes=[
+  {x:.2,  y:.42, label:nodeLabels[0], color:T.primary},
+  {x:.5,  y:.42, label:nodeLabels[1], color:T.secondary},
+  {x:.8,  y:.42, label:nodeLabels[2], color:T.glow}
+];
+
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize(); window.addEventListener("resize",resize);
+
+function init(){
+  particles=[];floaters=[];
+  for(var i=0;i<70;i++) particles.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00018,vy:-Math.random()*.00025-.00004,r:Math.random()*1.4+.3,alpha:Math.random()*.3+.05,color:[T.primary,T.secondary,"#fff"][Math.floor(Math.random()*3)]});
+  var cw=week.concepts||[];
+  for(var j=0;j<Math.min(cw.length,12);j++) floaters.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00028,vy:(Math.random()-.5)*.0002,word:cw[j],alpha:Math.random()*.2+.06,size:Math.floor(Math.random()*5)+9});
+}
+init();
+
+function fadeIn(f,s,d){return Math.max(0,Math.min(1,(f-s)/d));}
+
+function glowRect(x,y,w,h,r,fill,stroke,gc,gb){
+  ctx.save();ctx.shadowColor=gc;ctx.shadowBlur=gb;
+  ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.8;ctx.stroke();}
+  ctx.restore();
+}
+
+function drawBeam(b){
+  var t=Math.min(b.t,1),x1=b.x1*W,y1=b.y1*H,x2=b.x2*W,y2=b.y2*H;
+  var cx=x1+(x2-x1)*t,cy=y1+(y2-y1)*t;
+  var g=ctx.createLinearGradient(x1,y1,cx,cy);
+  g.addColorStop(0,"transparent");g.addColorStop(1,b.color+"bb");
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(cx,cy);
+  ctx.strokeStyle=g;ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+  ctx.save();ctx.shadowColor=b.color;ctx.shadowBlur=16;
+  ctx.beginPath();ctx.arc(cx,cy,4.5,0,Math.PI*2);ctx.fillStyle=b.color;ctx.fill();
+  ctx.restore();
+  if(b.t>.6&&b.t<1.1){
+    var bx=x1+(x2-x1)*.68,by=y1+(y2-y1)*.68;
+    var lbl=b.ok?"OK":"NO",col=b.ok?"#34d399":"#f87171";
+    ctx.save();ctx.shadowColor=col;ctx.shadowBlur=12;
+    ctx.font="bold 10px Segoe UI";ctx.fillStyle=col;ctx.textAlign="center";
+    ctx.fillText(lbl,bx,by-8);ctx.restore();
+  }
+}
+
+function animate(){
+  frame++;
+  ctx.clearRect(0,0,W,H);
+  var bg=ctx.createRadialGradient(W*.5,H*.38,0,W*.5,H*.38,W*.8);
+  bg.addColorStop(0,T.bg1);bg.addColorStop(1,T.bg2);
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  ctx.strokeStyle="rgba(255,255,255,0.04)";ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=52){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+  for(var gy=0;gy<H;gy+=52){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+
+  for(var i=0;i<particles.length;i++){
+    var p=particles[i];p.x+=p.vx;p.y+=p.vy;
+    if(p.y<-.01)p.y=1.01;if(p.x<0)p.x=1;if(p.x>1)p.x=0;
+    ctx.beginPath();ctx.arc(p.x*W,p.y*H,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,"0");ctx.fill();
+  }
+  for(var j=0;j<floaters.length;j++){
+    var f=floaters[j];f.x+=f.vx;f.y+=f.vy;
+    if(f.x<0)f.x=1;if(f.x>1)f.x=0;if(f.y<0)f.y=1;if(f.y>1)f.y=0;
+    ctx.font=f.size+"px Segoe UI";ctx.fillStyle=T.primary+Math.floor(f.alpha*255).toString(16).padStart(2,"0");
+    ctx.textAlign="center";ctx.fillText(f.word,f.x*W,f.y*H);
+  }
+
+  var ta=fadeIn(frame,5,35);
+  if(ta>0){
+    ctx.save();ctx.globalAlpha=ta;ctx.shadowColor=T.primary;ctx.shadowBlur=32;
+    ctx.font="bold "+Math.floor(H*.054)+"px Segoe UI";ctx.fillStyle="#fff";ctx.textAlign="center";
+    ctx.fillText(week.label+" — "+week.title.toUpperCase(),W/2,H*.09);
+    ctx.font=Math.floor(H*.024)+"px Segoe UI";ctx.fillStyle=T.primary;ctx.shadowBlur=12;
+    ctx.fillText(week.sub+" \u00b7 CIS 288",W/2,H*.133);
+    ctx.restore();
+  }
+
+  var ia=fadeIn(frame,18,22);
+  if(ia>0){
+    ctx.save();ctx.globalAlpha=ia;
+    ctx.font=Math.floor(H*.058)+"px Arial";ctx.textAlign="center";
+    ctx.fillText(ICONS[week.week]||"☁️",W/2,H*.215);
+    ctx.restore();
+  }
+
+  var nW=Math.min(W*.22,200),nH=H*.11,nY=H*.31;
+  for(var ni=0;ni<nodes.length;ni++){
+    var na=fadeIn(frame,45+ni*14,28);if(na<=0)continue;
+    var nd=nodes[ni],nx=nd.x*W-nW/2;
+    ctx.save();ctx.globalAlpha=na;
+    glowRect(nx,nY,nW,nH,11,"rgba(10,5,35,.97)",nd.color,nd.color,24*na);
+    ctx.beginPath();ctx.roundRect(nx,nY,nW,5,[11,11,0,0]);ctx.fillStyle=nd.color;ctx.fill();
+    ctx.font="bold "+Math.floor(H*.022)+"px Segoe UI";ctx.fillStyle=nd.color;
+    ctx.textAlign="center";ctx.shadowColor=nd.color;ctx.shadowBlur=14;
+    ctx.fillText(nd.label,nd.x*W,nY+nH*.47);
+    ctx.font=Math.floor(H*.013)+"px Segoe UI";ctx.fillStyle="rgba(255,255,255,.38)";ctx.shadowBlur=0;
+    ctx.fillText(["AWS","Azure","GCP"][ni],nd.x*W,nY+nH*.74);
+    ctx.restore();
+  }
+
+  var uA=fadeIn(frame,88,28),uX=.5,uY=.79;
+  if(uA>0){
+    ctx.save();ctx.globalAlpha=uA;
+    for(var ri=0;ri<3;ri++){
+      var pr=((frame*.8+ri*25)%75)/75;
+      ctx.beginPath();ctx.arc(uX*W,uY*H,28+pr*52,0,Math.PI*2);
+      ctx.strokeStyle="rgba(147,51,234,"+(1-pr)*.25*uA+")";
+      ctx.lineWidth=1.5;ctx.stroke();
+    }
+    glowRect(uX*W-36,uY*H-36,72,72,36,"#100830",T.primary,T.glow,28);
+    ctx.font=Math.floor(H*.05)+"px Arial";ctx.textAlign="center";ctx.fillText("👤",uX*W,uY*H+12);
+    ctx.font="bold "+Math.floor(H*.016)+"px Segoe UI";ctx.fillStyle=T.primary;
+    ctx.shadowColor=T.glow;ctx.shadowBlur=10;ctx.fillText("YOU",uX*W,uY*H+46);
+    ctx.restore();
+  }
+
+  var nYb=nY+nH;
+  if(frame>108&&frame%48===0){
+    var ci=Math.floor(Math.random()*3),ok=Math.random()>.28;
+    beams.push({x1:uX,y1:uY-.065,x2:nodes[ci].x,y2:nYb/H,t:0,dt:.024,color:ok?"#34d399":"#f87171",ok:ok});
+  }
+  for(var bi=beams.length-1;bi>=0;bi--){
+    beams[bi].t+=beams[bi].dt;
+    if(beams[bi].t>1.5){beams.splice(bi,1);continue;}
+    drawBeam(beams[bi]);
+  }
+
+  var la=fadeIn(frame,103,20);
+  if(la>0){
+    ctx.save();ctx.globalAlpha=la*.15;ctx.strokeStyle=T.primary;
+    ctx.lineWidth=1;ctx.setLineDash([3,10]);
+    for(var di=0;di<nodes.length;di++){ctx.beginPath();ctx.moveTo(nodes[di].x*W,nYb);ctx.lineTo(uX*W,uY*H-36);ctx.stroke();}
+    ctx.setLineDash([]);ctx.restore();
+  }
+
+  var ca=fadeIn(frame,123,30);
+  if(ca>0){
+    ctx.save();ctx.globalAlpha=ca;
+    ctx.font=Math.floor(H*.014)+"px Segoe UI";ctx.fillStyle=T.primary+"99";
+    ctx.textAlign="center";
+    ctx.fillText("CIS 288 \u00b7 Prof. Chang \u00b7 Community College of Philadelphia",W/2,H*.958);
+    ctx.restore();
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
