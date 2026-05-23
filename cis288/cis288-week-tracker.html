@@ -151,9 +151,9 @@ function render() {
   html += '<span class="live-label">Live now &middot; Due ' + due + '</span>';
   html += '</div>';
   html += '<div class="btn-row">';
-  html += '<a class="btn" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
-  html += '<a class="btn" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
-  html += '<a class="btn primary" href="' + base + '/assignments">✏️ Quiz ' + cur + ' &amp; Lab ' + cur + '</a>';
+  html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
+  html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
+  html += '<a class="btn primary" target="_top" href="' + base + '/assignments">🔬 Lab ' + cur + '</a>';
   html += '</div></div>';
 
   // Next week locked
