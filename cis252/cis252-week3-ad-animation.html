@@ -4,10 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CIS 252 Week 3 — Active Directory</title>
-<style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#02060f; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; } canvas { display:block; width:100vw; height:100vh; }</style>
+<style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#02060f; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; } canvas { display:block; width:100vw; height:100vh; }  #ada-pause { position:fixed; bottom:12px; right:12px; z-index:999; background:rgba(0,0,0,0.55); border:1.5px solid rgba(255,255,255,0.3); color:#fff; font-size:13px; padding:6px 14px; border-radius:20px; cursor:pointer; font-family:"Segoe UI",Arial,sans-serif; backdrop-filter:blur(4px); transition:background 0.2s; } #ada-pause:hover { background:rgba(255,255,255,0.18); } #ada-pause:focus { outline:2px solid #fff; outline-offset:3px; }
+</style>
 </head>
 <body>
-<canvas id="c"></canvas>
+<canvas id="c" role="img" aria-label="Animated educational illustration for this week. Use Pause button to stop animation."></canvas>
 <script>
 var canvas=document.getElementById("c"),ctx=canvas.getContext("2d");
 var W,H,frame=0,particles=[],floaters=[],authBeams=[],beamTimer=0;
@@ -78,6 +79,22 @@ function animate(){
   if(ca>0){ctx.save();ctx.globalAlpha=ca;ctx.font=Math.floor(H*.016)+"px Segoe UI,Arial";ctx.fillStyle="rgba(0,120,212,.6)";ctx.textAlign="center";ctx.fillText("Domain \u2192 OU \u2192 Users \u00b7 Every login you have ever made passes through this",W/2,H*.927);ctx.font=Math.floor(H*.013)+"px Segoe UI,Arial";ctx.fillStyle="rgba(0,120,212,.28)";ctx.fillText("CIS 252 \u00b7 Prof. Chang \u00b7 Community College of Philadelphia",W/2,H*.957);ctx.restore();}
   requestAnimationFrame(animate);
 }
+
+var _paused=false;
+var _origAnimate=animate;
+animate=function(){ if(!_paused) _origAnimate(); };
+if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches){ _paused=true; }
+var _btn=document.createElement("button");
+_btn.id="ada-pause";
+_btn.setAttribute("aria-label","Pause animation");
+_btn.setAttribute("aria-pressed","false");
+_btn.innerHTML="&#9646;&#9646; Pause";
+document.body.appendChild(_btn);
+_btn.addEventListener("click",function(){
+  _paused=!_paused;
+  if(_paused){ _btn.innerHTML="&#9654; Resume"; _btn.setAttribute("aria-label","Resume animation"); _btn.setAttribute("aria-pressed","true"); }
+  else { _btn.innerHTML="&#9646;&#9646; Pause"; _btn.setAttribute("aria-label","Pause animation"); _btn.setAttribute("aria-pressed","false"); _origAnimate(); }
+});
 animate();
 <\/script>
 </body>
