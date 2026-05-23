@@ -153,7 +153,14 @@ function render() {
   html += '<div class="btn-row">';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
-  html += '<a class="btn primary" target="_top" href="' + base + '/assignments">🔬 Lab ' + cur + '</a>';
+  var LAB_URLS = {
+    1:  'https://ccp.instructure.com/courses/2103716/assignments/19951347?module_item_id=45549771',
+    2:  'https://ccp.instructure.com/courses/2103716/assignments/19951397?module_item_id=45549877',
+    3:  'https://ccp.instructure.com/courses/2103716/assignments/19976331?module_item_id=45623147',
+    4:  'https://ccp.instructure.com/courses/2103716/assignments/20023319?module_item_id=45737649'
+  };
+  var labURL = LAB_URLS[cur] || (base + '/assignments');
+  html += '<a class="btn primary" target="_top" href="' + labURL + '">🔬 Lab ' + cur + '</a>'
   html += '</div></div>';
 
   // Next week locked
