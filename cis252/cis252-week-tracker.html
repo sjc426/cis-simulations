@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 Week Tracker</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:Arial,Helvetica,sans-serif; background:transparent; padding:0; overflow:hidden; }
+.cur-card { border:2px solid #d97706; border-radius:14px; margin-bottom:12px; overflow:hidden; box-shadow:0 0 0 4px rgba(217,119,6,0.08); }
+.cur-header { background:#1c0f00; padding:11px 18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.week-badge { font-size:11px; background:#d97706; color:#fff; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.week-title { font-size:13px; color:#fff; font-weight:600; flex:1; }
+.live-dot { width:7px; height:7px; border-radius:50%; background:#4ade80; display:inline-block; }
+.live-label { font-size:11px; color:#4ade80; white-space:nowrap; }
+.btn-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:12px 14px; background:#fffbeb; }
+.btn { display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 8px; border-radius:10px; text-decoration:none; font-size:12px; border:1.5px solid #d97706; background:#fff; color:#78350f; }
+.btn.primary { background:#d97706; color:#fff; border-color:#d97706; }
+.nxt-card { border:1.5px solid #fcd34d; border-radius:14px; overflow:hidden; opacity:0.88; }
+.nxt-header { background:#2d1a00; padding:11px 18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.nxt-badge { font-size:11px; background:#92400e; color:#fff; padding:3px 10px; border-radius:20px; white-space:nowrap; }
+.nxt-title { font-size:13px; color:#fef3c7; flex:1; }
+.nxt-date { font-size:11px; color:#fbbf24; white-space:nowrap; }
+.nxt-lock { background:#1a0f00; height:60px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.nxt-lock span { font-size:12px; color:#fbbf24; }
+</style>
+</head>
+<body>
+<div id="tracker"></div>
+<script>
+
+// ============================================================
+//  SEMESTER CONFIG — CHANGE ONLY THESE LINES EACH SEMESTER
+// ============================================================
+var SEMESTER_START = "2026-05-11";
+var TOTAL_WEEKS    = 14;
+var COURSE_ID      = "2103664";
+var COURSE_CODE    = "CIS 252";
+// ============================================================
+
+var TOPICS = [
+  "",
+  "Managing Network Servers — Foundations",
+  "Virtualization, Cloud & Your First Server",
+  "Active Directory — Installation & Administration",
+  "DNS & DHCP Configuration",
+  "File & Print Services",
+  "Group Policy Deep Dive",
+  "Remote Access & VPN",
+  "Midterm — Server Administration Review",
+  "Web & Application Servers",
+  "Monitoring & Performance",
+  "Backup & Disaster Recovery",
+  "Security Hardening",
+  "Automation & Scripting",
+  "Final Project — Server Infrastructure Design"
+];
+
+var ICONS = ["","🖧","🖥️","🔐","🌐","🗂️","📋","🔒","📝","🌍","📊","💾","🛡️","⚙️","🏆"];
+
+var SLUGS = [
+  "",
+  "week-1-overview",
+  "week-2-overview-summary",
+  "week-3-overview-active-directory-installation-configuration-and-administration",
+  "week-4-overview",
+  "week-5-overview",
+  "week-6-overview",
+  "week-7-overview",
+  "week-8-overview",
+  "week-9-overview",
+  "week-10-overview",
+  "week-11-overview",
+  "week-12-overview",
+  "week-13-overview",
+  "week-14-overview"
+];
+
+var READ_SLUGS = [
+  "",
+  "week-1-reading-and-resources",
+  "week-2-reading-and-resources",
+  "week-3-reading-and-resources",
+  "week-4-reading-and-resources",
+  "week-5-reading-and-resources",
+  "week-6-reading-and-resources",
+  "week-7-reading-and-resources",
+  "week-8-reading-and-resources",
+  "week-9-reading-and-resources",
+  "week-10-reading-and-resources",
+  "week-11-reading-and-resources",
+  "week-12-reading-and-resources",
+  "week-13-reading-and-resources",
+  "week-14-reading-and-resources"
+];
+
+var DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function weekStart(w) {
+  var p = SEMESTER_START.split("-");
+  var s = new Date(+p[0], +p[1]-1, +p[2]);
+  return new Date(s.getTime() + (w-1)*7*24*60*60*1000);
+}
+function weekEnd(w) { return new Date(weekStart(w).getTime() + 6*24*60*60*1000); }
+function fmt(d) { return DAYS[d.getDay()]+" "+MONTHS[d.getMonth()]+" "+d.getDate(); }
+function fmtShort(d) { return MONTHS[d.getMonth()]+" "+d.getDate(); }
+
+function getCurrentWeek() {
+  var p = SEMESTER_START.split("-");
+  var s = new Date(+p[0], +p[1]-1, +p[2]);
+  var diff = Math.floor((new Date() - s) / (7*24*60*60*1000));
+  return Math.max(1, Math.min(TOTAL_WEEKS, diff + 1));
+}
+
+function render() {
+  var cur  = getCurrentWeek();
+  var next = Math.min(cur + 1, TOTAL_WEEKS);
+  var due  = fmtShort(weekEnd(cur));
+  var unlockFull  = fmt(weekStart(next));
+  var unlockShort = fmtShort(weekStart(next));
+  var base = "https://ccp.instructure.com/courses/" + COURSE_ID;
+  var html = "";
+
+  html += '<p style="font-size:11px;color:#d97706;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;font-family:Arial,sans-serif;">📅 Where We Are Right Now</p>';
+
+  html += '<div class="cur-card" role="region" aria-label="Current week ' + cur + '">';
+  html += '<div class="cur-header">';
+  html += '<span class="week-badge">Week ' + cur + '</span>';
+  html += '<span class="week-title">' + ICONS[cur] + ' ' + TOPICS[cur] + '</span>';
+  html += '<span class="live-dot" aria-hidden="true"></span>';
+  html += '<span class="live-label">Live now &middot; Due ' + due + '</span>';
+  html += '</div>';
+
+  html += '<div class="btn-row">';
+  html += '<a class="btn" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
+  html += '<a class="btn" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
+  html += '<a class="btn primary" href="' + base + '/assignments">✏️ Quiz ' + cur + ' &amp; Lab ' + cur + '</a>';
+  html += '</div></div>';
+
+  if (next > cur) {
+    html += '<div class="nxt-card" role="region" aria-label="Upcoming week ' + next + ' locked">';
+    html += '<div class="nxt-header">';
+    html += '<span class="nxt-badge">Week ' + next + '</span>';
+    html += '<span class="nxt-title">' + ICONS[next] + ' ' + TOPICS[next] + '</span>';
+    html += '<span class="nxt-date">Opens ' + unlockShort + '</span>';
+    html += '</div>';
+    html += '<div class="nxt-lock">';
+    html += '<span aria-hidden="true" style="font-size:20px;">🔒</span>';
+    html += '<span>Unlocks ' + unlockFull + ' &mdash; finish Week ' + cur + ' first</span>';
+    html += '</div></div>';
+  }
+
+  document.getElementById("tracker").innerHTML = html;
+
+  var h = document.getElementById("tracker").scrollHeight + 20;
+  if (window.parent !== window) {
+    window.parent.postMessage({ iframeHeight: h }, "*");
+  }
+}
+
+render();
+</script>
+</body>
+</html>
