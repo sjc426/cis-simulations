@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 Week 2 — Virtualization</title>
+<style>* { margin:0; padding:0; box-sizing:border-box; } body { background:#060412; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; } canvas { display:block; width:100vw; height:100vh; }</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+var c=document.getElementById("c"),ctx=c.getContext("2d");
+var W,H,frame=0,particles=[],floaters=[],vmBeams=[],beamTimer=0;
+var TEAL="#0ea5e9",AMBER="#f59e0b",GREEN="#10b981",PURPLE="#8b5cf6";
+var CONCEPTS=["Hypervisor","Type 1","Type 2","Bare Metal","Host OS","Guest OS","VM","vCPU","vRAM","Snapshot","Clone","Migration","IaaS","PaaS","SaaS","Provisioning","EC2","Azure VM","Compute Engine"];
+
+var LAYERS=[
+  {label:"Hardware / Bare Metal",  sub:"CPU \u00b7 RAM \u00b7 Storage \u00b7 NIC", col:"#475569", y:.74, born:20},
+  {label:"Type 1 Hypervisor",      sub:"Runs directly on hardware",              col:TEAL,      y:.60, born:50},
+  {label:"Type 2 Hypervisor",      sub:"Runs inside a host OS",                 col:AMBER,     y:.60, born:50}
+];
+
+var VMS=[
+  {label:"VM 1",  sub:"Windows Server", col:TEAL,   side:"left",  born:88},
+  {label:"VM 2",  sub:"Ubuntu 24.04",   col:TEAL,   side:"left",  born:104},
+  {label:"VM 3",  sub:"Windows Server", col:AMBER,  side:"right", born:88},
+  {label:"VM 4",  sub:"Ubuntu 24.04",   col:AMBER,  side:"right", born:104}
+];
+
+var CLOUDS=[
+  {label:"AWS EC2",      col:"#FF9900", x:.25, born:148},
+  {label:"Azure VM",     col:"#0078D4", x:.5,  born:162},
+  {label:"Compute Eng",  col:"#4285F4", x:.75, born:176}
+];
+
+function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight;}
+resize(); window.addEventListener("resize",resize);
+for(var i=0;i<60;i++) particles.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00016,vy:-Math.random()*.0002-.00003,r:Math.random()*1.2+.3,alpha:Math.random()*.2+.04,color:[TEAL,AMBER,GREEN,PURPLE][Math.floor(Math.random()*4)]});
+for(var j=0;j<CONCEPTS.length;j++) floaters.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00022,vy:(Math.random()-.5)*.00016,word:CONCEPTS[j],alpha:Math.random()*.14+.04,size:Math.floor(Math.random()*4)+8});
+function fadeIn(f,s,d){return Math.max(0,Math.min(1,(f-s)/d));}
+function rr(x,y,w,h,r){ctx.beginPath();if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);}else{ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}}
+
+function drawLayer(lyr,alpha,isLeft){
+  if(alpha<=0)return;
+  var lW=Math.min(W*.38,310),lH=H*.075;
+  var lx=isLeft?(W*.25-lW/2):(W*.75-lW/2),ly=lyr.y*H-lH/2;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.shadowColor=lyr.col;ctx.shadowBlur=16*alpha;
+  rr(lx,ly,lW,lH,10);ctx.fillStyle="rgba(8,6,22,.97)";ctx.fill();
+  ctx.strokeStyle=lyr.col;ctx.lineWidth=1.8;ctx.stroke();ctx.shadowBlur=0;
+  rr(lx,ly,lW,5,[10,10,0,0]);ctx.fillStyle=lyr.col;ctx.fill();
+  ctx.font="bold "+Math.floor(H*.026)+"px Segoe UI,Arial";
+  ctx.fillStyle="#fff";ctx.textAlign="center";
+  ctx.fillText(lyr.label,lx+lW/2,ly+lH*.45);
+  ctx.font=Math.floor(H*.019)+"px Segoe UI,Arial";
+  ctx.fillStyle="rgba(255,255,255,.4)";
+  ctx.fillText(lyr.sub,lx+lW/2,ly+lH*.76);
+  ctx.restore();
+}
+
+function drawHWLayer(alpha){
+  if(alpha<=0)return;
+  var lW=Math.min(W*.84,680),lH=H*.075,lx=W/2-lW/2,ly=LAYERS[0].y*H-lH/2;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.shadowColor="#475569";ctx.shadowBlur=14*alpha;
+  rr(lx,ly,lW,lH,10);ctx.fillStyle="rgba(8,6,22,.97)";ctx.fill();
+  ctx.strokeStyle="#475569";ctx.lineWidth=1.8;ctx.stroke();ctx.shadowBlur=0;
+  rr(lx,ly,lW,5,[10,10,0,0]);ctx.fillStyle="#475569";ctx.fill();
+  ctx.font="bold "+Math.floor(H*.026)+"px Segoe UI,Arial";
+  ctx.fillStyle="#fff";ctx.textAlign="center";
+  ctx.fillText(LAYERS[0].label,W/2,ly+lH*.45);
+  ctx.font=Math.floor(H*.019)+"px Segoe UI,Arial";
+  ctx.fillStyle="rgba(255,255,255,.4)";
+  ctx.fillText(LAYERS[0].sub,W/2,ly+lH*.76);
+  ctx.restore();
+}
+
+function drawVM(vm,alpha){
+  if(alpha<=0)return;
+  var isLeft=vm.side==="left";
+  var vmW=Math.min(W*.17,130),vmH=H*.1;
+  var baseX=isLeft?W*.25:W*.75;
+  var slot=isLeft?(VMS.filter(function(v){return v.side==="left";}).indexOf(vm)):(VMS.filter(function(v){return v.side==="right";}).indexOf(vm));
+  var vx=baseX+(slot===0?-vmW*.6:vmW*.6)-vmW/2;
+  var vy=LAYERS[1].y*H-vmH-H*.06;
+  vm.screenX=vx+vmW/2; vm.screenY=vy+vmH;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.shadowColor=vm.col;ctx.shadowBlur=14*alpha;
+  rr(vx,vy,vmW,vmH,8);ctx.fillStyle="rgba(8,6,22,.95)";ctx.fill();
+  ctx.strokeStyle=vm.col;ctx.lineWidth=1.5;ctx.stroke();ctx.shadowBlur=0;
+  ctx.font="bold "+Math.floor(H*.022)+"px Segoe UI,Arial";
+  ctx.fillStyle=vm.col;ctx.textAlign="center";ctx.fillText(vm.label,vx+vmW/2,vy+vmH*.42);
+  ctx.font=Math.floor(H*.017)+"px Segoe UI,Arial";
+  ctx.fillStyle="rgba(255,255,255,.38)";ctx.fillText(vm.sub,vx+vmW/2,vy+vmH*.72);
+  ctx.restore();
+}
+
+function drawCloud(cl,alpha){
+  if(alpha<=0)return;
+  var cW=Math.min(W*.2,155),cH=H*.07,cx=cl.x*W-cW/2,cy=H*.13;
+  cl.screenX=cl.x*W; cl.screenY=cy+cH;
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.shadowColor=cl.col;ctx.shadowBlur=18*alpha;
+  rr(cx,cy,cW,cH,10);ctx.fillStyle="rgba(8,6,22,.97)";ctx.fill();
+  ctx.strokeStyle=cl.col;ctx.lineWidth=1.8;ctx.stroke();ctx.shadowBlur=0;
+  rr(cx,cy,cW,5,[10,10,0,0]);ctx.fillStyle=cl.col;ctx.fill();
+  ctx.font="bold "+Math.floor(H*.024)+"px Segoe UI,Arial";
+  ctx.fillStyle=cl.col;ctx.textAlign="center";ctx.fillText(cl.label,cl.x*W,cy+cH*.62);
+  ctx.restore();
+}
+
+function spawnBeam(){
+  if(!CLOUDS[0].screenX) return;
+  var vm=VMS[Math.floor(Math.random()*VMS.length)];
+  var cl=CLOUDS[Math.floor(Math.random()*CLOUDS.length)];
+  if(!vm.screenX||!cl.screenX) return;
+  vmBeams.push({x1:vm.screenX/W,y1:vm.screenY/H,x2:cl.screenX/W,y2:cl.screenY/H,t:0,dt:.02,col:cl.col});
+}
+
+function drawBeam(b){
+  var t=Math.min(b.t,1),x1=b.x1*W,y1=b.y1*H,x2=b.x2*W,y2=b.y2*H;
+  var cx=x1+(x2-x1)*t,cy=y1+(y2-y1)*t;
+  var g=ctx.createLinearGradient(x1,y1,cx,cy);
+  g.addColorStop(0,"transparent");g.addColorStop(1,b.col+"aa");
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(cx,cy);
+  ctx.strokeStyle=g;ctx.lineWidth=1.8;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
+  ctx.save();ctx.shadowColor=b.col;ctx.shadowBlur=14;
+  ctx.beginPath();ctx.arc(cx,cy,4,0,Math.PI*2);ctx.fillStyle=b.col;ctx.fill();
+  ctx.restore();
+  if(b.t>.5&&b.t<1.05){ctx.font="bold 10px Segoe UI,Arial";ctx.fillStyle=b.col;ctx.textAlign="center";ctx.fillText("PROVISION",x1+(x2-x1)*.6,y1+(y2-y1)*.6-9);}
+}
+
+function animate(){
+  frame++;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#060412";ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="rgba(14,165,233,0.05)";ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=50){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+  for(var gy=0;gy<H;gy+=50){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+  for(var i=0;i<particles.length;i++){var p=particles[i];p.x+=p.vx;p.y+=p.vy;if(p.y<-.01)p.y=1.01;if(p.x<0)p.x=1;if(p.x>1)p.x=0;ctx.beginPath();ctx.arc(p.x*W,p.y*H,p.r,0,Math.PI*2);ctx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,"0");ctx.fill();}
+  for(var j=0;j<floaters.length;j++){var f=floaters[j];f.x+=f.vx;f.y+=f.vy;if(f.x<0)f.x=1;if(f.x>1)f.x=0;if(f.y<0)f.y=1;if(f.y>1)f.y=0;ctx.font=f.size+"px Segoe UI,Arial";ctx.fillStyle=TEAL+Math.floor(f.alpha*255).toString(16).padStart(2,"0");ctx.textAlign="center";ctx.fillText(f.word,f.x*W,f.y*H);}
+
+  // Title
+  var ta=fadeIn(frame,5,30);
+  if(ta>0){
+    ctx.save();ctx.globalAlpha=ta;ctx.shadowColor=TEAL;ctx.shadowBlur=28;
+    ctx.font="bold "+Math.floor(H*.054)+"px Segoe UI,Arial";
+    ctx.fillStyle="#fff";ctx.textAlign="center";
+    ctx.fillText("WEEK 2 \u2014 VIRTUALIZATION",W/2,H*.065);
+    ctx.font=Math.floor(H*.024)+"px Segoe UI,Arial";
+    ctx.fillStyle="#67e8f9";ctx.shadowBlur=10;
+    ctx.fillText("Hypervisors \u00b7 Virtual Machines \u00b7 Your First Cloud Server \u00b7 CIS 252",W/2,H*.098);
+    ctx.restore();
+  }
+
+  // Type 1 / Type 2 labels
+  var la=fadeIn(frame,42,20);
+  if(la>0){
+    ctx.save();ctx.globalAlpha=la;
+    ctx.font="bold "+Math.floor(H*.018)+"px Segoe UI,Arial";
+    ctx.fillStyle=TEAL;ctx.textAlign="center";
+    ctx.fillText("TYPE 1 \u2014 BARE METAL",W*.25,LAYERS[1].y*H-H*.075-.01*H);
+    ctx.fillStyle=AMBER;
+    ctx.fillText("TYPE 2 \u2014 HOSTED",W*.75,LAYERS[1].y*H-H*.075-.01*H);
+    ctx.restore();
+  }
+
+  // Divider line
+  var da=fadeIn(frame,35,20);
+  if(da>0){
+    ctx.save();ctx.globalAlpha=da*.3;
+    ctx.strokeStyle="#475569";ctx.lineWidth=1;ctx.setLineDash([4,8]);
+    ctx.beginPath();ctx.moveTo(W*.5,H*.13);ctx.lineTo(W*.5,H*.82);ctx.stroke();
+    ctx.setLineDash([]);ctx.restore();
+  }
+
+  // Cloud boxes (top)
+  CLOUDS.forEach(function(cl){drawCloud(cl,fadeIn(frame,cl.born,25));});
+
+  // VMs
+  VMS.forEach(function(vm){drawVM(vm,fadeIn(frame,vm.born,22));});
+
+  // Hypervisor layers
+  drawLayer(LAYERS[1],fadeIn(frame,LAYERS[1].born,22),true);
+  drawLayer(LAYERS[1],fadeIn(frame,LAYERS[1].born,22),false);
+
+  // Hardware layer (full width)
+  drawHWLayer(fadeIn(frame,LAYERS[0].born,22));
+
+  // Provision beams VM -> Cloud
+  beamTimer++;
+  if(frame>190&&beamTimer%58===0) spawnBeam();
+  for(var bi=vmBeams.length-1;bi>=0;bi--){vmBeams[bi].t+=vmBeams[bi].dt;if(vmBeams[bi].t>1.4){vmBeams.splice(bi,1);continue;}drawBeam(vmBeams[bi]);}
+
+  // Caption
+  var ca=fadeIn(frame,168,30);
+  if(ca>0){ctx.save();ctx.globalAlpha=ca;ctx.font=Math.floor(H*.016)+"px Segoe UI,Arial";ctx.fillStyle="rgba(14,165,233,.6)";ctx.textAlign="center";ctx.fillText("Type 1 runs on the metal \u00b7 Type 2 runs on an OS \u00b7 Both provision VMs to the cloud",W/2,H*.88);ctx.font=Math.floor(H*.013)+"px Segoe UI,Arial";ctx.fillStyle="rgba(14,165,233,.28)";ctx.fillText("CIS 252 \u00b7 Prof. Chang \u00b7 Community College of Philadelphia",W/2,H*.915);ctx.restore();}
+  requestAnimationFrame(animate);
+}
+animate();
+<\/script>
+</body>
+</html>
