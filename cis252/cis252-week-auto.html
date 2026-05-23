@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>CIS 252 Week Animation</title>
+<style>*{margin:0;padding:0;} body{background:#02060f;overflow:hidden;}</style>
+</head>
+<body>
+<iframe id="frame" style="border:0;width:100vw;height:100vh;display:block;" src=""></iframe>
+<script>
+var CUSTOM = {
+  2: "cis252-week2-virtualization-animation.html",
+  3: "cis252-week3-ad-animation.html"
+};
+var SCHEDULE = [
+  {week:1,  start:"2026-05-11"},
+  {week:2,  start:"2026-05-18"},
+  {week:3,  start:"2026-05-25"},
+  {week:4,  start:"2026-06-01"},
+  {week:5,  start:"2026-06-08"},
+  {week:6,  start:"2026-06-15"},
+  {week:7,  start:"2026-06-22"},
+  {week:8,  start:"2026-06-29"},
+  {week:9,  start:"2026-07-06"},
+  {week:10, start:"2026-07-13"},
+  {week:11, start:"2026-07-20"},
+  {week:12, start:"2026-07-27"},
+  {week:13, start:"2026-08-03"},
+  {week:14, start:"2026-08-10"}
+];
+function getCurrentWeek(){
+  var now=new Date(), cur=SCHEDULE[0];
+  for(var i=0;i<SCHEDULE.length;i++){
+    var p=SCHEDULE[i].start.split("-");
+    var s=new Date(+p[0],+p[1]-1,+p[2]);
+    if(now>=s) cur=SCHEDULE[i]; else break;
+  }
+  return cur.week;
+}
+var wk=getCurrentWeek();
+var base="https://sjc426.github.io/cis-simulations/cis252/";
+document.getElementById("frame").src=CUSTOM[wk]?base+CUSTOM[wk]:base+"../cis288/week-auto.html";
+<\/script>
+</body>
+</html>
