@@ -8,23 +8,23 @@
 body{background:#0D1B2A;font-family:Arial,Helvetica,sans-serif;overflow:hidden;}
 .wrap{position:relative;padding:28px 32px 22px;overflow:hidden;}
 canvas#net{position:absolute;top:0;left:0;width:100%;height:100%;opacity:.13;pointer-events:none;}
-.dept{font-size:11px;color:#60a5fa;letter-spacing:.06em;margin-bottom:9px;opacity:0;transition:opacity .6s;}
-h1{font-size:30px;color:#fff;line-height:1.15;margin-bottom:8px;opacity:0;transform:translateY(-12px);transition:opacity .7s .2s,transform .7s .2s;}
+.dept{font-size:11px;color:#60a5fa;letter-spacing:.06em;margin-bottom:9px;opacity:0;}
+h1{font-size:30px;color:#fff;line-height:1.15;margin-bottom:8px;opacity:0;transform:translateY(-12px);}
 h1 em{color:#60a5fa;font-style:normal;}
-.tagline{font-size:12.5px;color:#94a3b8;line-height:1.65;max-width:520px;margin-bottom:16px;opacity:0;transform:translateY(10px);transition:opacity .7s .4s,transform .7s .4s;}
+.tagline{font-size:12.5px;color:#94a3b8;line-height:1.65;max-width:520px;margin-bottom:16px;opacity:0;transform:translateY(10px);}
 .badges{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
-.badge{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.2);color:#e2e8f0;background:rgba(255,255,255,.07);opacity:0;transition:opacity .5s;}
+.badge{font-size:11px;padding:4px 11px;border-radius:20px;border:1px solid rgba(255,255,255,.2);color:#e2e8f0;background:rgba(255,255,255,.07);opacity:0;}
 .badge strong{color:#fff;}
 .badge.free strong{color:#38bdf8;}
 .pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px;}
-.pill{font-size:11px;padding:5px 12px;border-radius:8px;background:rgba(37,99,235,.18);border:1px solid rgba(96,165,250,.3);color:#93c5fd;opacity:0;transition:opacity .5s;}
-.divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:13px;opacity:0;transition:opacity .4s;}
-.slabel{font-size:10px;color:#475569;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;opacity:0;transition:opacity .4s;}
-.outer{overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%);mask-image:linear-gradient(to right,transparent 0%,#000 6%,#000 94%,transparent 100%);}
-.track{display:flex;white-space:nowrap;}
-.chip{display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:12px;color:#cbd5e1;}
+.pill{font-size:11px;padding:5px 12px;border-radius:8px;background:rgba(37,99,235,.18);border:1px solid rgba(96,165,250,.3);color:#93c5fd;opacity:0;}
+.divider{height:1px;background:rgba(255,255,255,.08);margin-bottom:13px;opacity:0;}
+.slabel{font-size:10px;color:#64748b;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;opacity:0;}
+.outer{overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%);mask-image:linear-gradient(to right,transparent 0%,#000 5%,#000 95%,transparent 100%);}
+#track{display:flex;white-space:nowrap;will-change:transform;}
+.chip{display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:12px;color:#cbd5e1;flex-shrink:0;}
 .av{width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;flex-shrink:0;}
-.dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#334155;margin-right:16px;vertical-align:middle;}
+.dot{display:inline-block;width:4px;height:4px;border-radius:50%;background:#334155;margin-right:16px;vertical-align:middle;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -33,22 +33,22 @@ h1 em{color:#60a5fa;font-style:normal;}
 <div class="dept" id="dept">&#9679; Community College of Philadelphia &middot; CIS Department</div>
 <h1 id="title">CIS 150 &mdash; Network <em>Technology</em></h1>
 <p class="tagline" id="tagline">You are not here to watch videos. You are here to configure real networks, diagnose real failures, and think like an IT professional. Welcome to the course that makes Network+ feel achievable.</p>
-<div class="badges" id="badges">
-  <span class="badge">Semester <strong>Summer 2026</strong></span>
-  <span class="badge">Starts <strong>May 11</strong></span>
-  <span class="badge">Format <strong>Hybrid</strong></span>
-  <span class="badge free">Textbook <strong>$0</strong></span>
+<div class="badges">
+  <span class="badge" id="b0">Semester <strong>Summer 2026</strong></span>
+  <span class="badge" id="b1">Starts <strong>May 11</strong></span>
+  <span class="badge" id="b2">Format <strong>Hybrid</strong></span>
+  <span class="badge free" id="b3">Textbook <strong>$0</strong></span>
 </div>
-<div class="pills" id="pills">
-  <span class="pill">Modules</span>
-  <span class="pill">Assignments</span>
-  <span class="pill">Discussions</span>
-  <span class="pill">Quizzes</span>
-  <span class="pill">Resources</span>
+<div class="pills">
+  <span class="pill" id="p0">Modules</span>
+  <span class="pill" id="p1">Assignments</span>
+  <span class="pill" id="p2">Discussions</span>
+  <span class="pill" id="p3">Quizzes</span>
+  <span class="pill" id="p4">Resources</span>
 </div>
 <div class="divider" id="div1"></div>
 <div class="slabel" id="slabel">Enrolled students &mdash; Summer 2026</div>
-<div class="outer"><div class="track" id="track"></div></div>
+<div class="outer"><div id="track"></div></div>
 </div>
 <script>
 var students=[
@@ -70,8 +70,9 @@ var students=[
   {f:"Cierra",i:"CV",bg:"#d1fae5",c:"#059669"}
 ];
 
+// Build track — triple clone so scroll is always seamless
 var track=document.getElementById('track');
-[...students,...students].forEach(function(s){
+[...students,...students,...students].forEach(function(s){
   var chip=document.createElement('span');
   chip.className='chip';
   chip.innerHTML='<span class="av" style="background:'+s.bg+';color:'+s.c+'">'+s.i+'</span>'+s.f;
@@ -81,16 +82,20 @@ var track=document.getElementById('track');
   track.appendChild(dot);
 });
 
-// Scroll animation
-var pos=0,speed=0.45,half=0;
-function scroll(){
-  if(!half) half=track.scrollWidth/2;
-  pos+=speed;
-  if(pos>=half) pos=0;
-  track.style.transform='translateX(-'+pos+'px)';
-  requestAnimationFrame(scroll);
+// Wait for layout then start scroll
+var pos=0, speed=0.5, setWidth=0;
+function startScroll(){
+  setWidth = track.scrollWidth / 3;
+  if(setWidth < 10){ setTimeout(startScroll, 100); return; }
+  requestAnimationFrame(scrollStep);
 }
-requestAnimationFrame(scroll);
+function scrollStep(){
+  pos += speed;
+  if(pos >= setWidth) pos = 0;
+  track.style.transform = 'translateX(-'+pos+'px)';
+  requestAnimationFrame(scrollStep);
+}
+window.addEventListener('load', function(){ setTimeout(startScroll, 200); });
 
 // Network canvas
 var canvas=document.getElementById('net');
@@ -100,51 +105,47 @@ var nodes=[
   {x:.79,y:.32},{x:.95,y:.59},{x:.37,y:.77}
 ];
 var edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[1,6],[6,3],[0,6]];
-
-function resize(){
-  canvas.width=canvas.offsetWidth;
-  canvas.height=canvas.offsetHeight;
-}
+function resize(){ canvas.width=canvas.offsetWidth||860; canvas.height=canvas.offsetHeight||280; }
 resize();
 window.addEventListener('resize',resize);
-
 var t=0;
 function drawNet(){
   if(!canvas.width) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   var w=canvas.width,h=canvas.height;
-  ctx.strokeStyle='#60a5fa';
-  ctx.lineWidth=0.8;
+  ctx.strokeStyle='#60a5fa'; ctx.lineWidth=0.8;
   edges.forEach(function(e){
     var a=nodes[e[0]],b=nodes[e[1]];
-    ctx.beginPath();
-    ctx.moveTo(a.x*w,a.y*h);
-    ctx.lineTo(b.x*w,b.y*h);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(a.x*w,a.y*h); ctx.lineTo(b.x*w,b.y*h); ctx.stroke();
   });
   nodes.forEach(function(n,i){
-    var pulse=1+0.4*Math.sin(t/60+i*0.7);
-    ctx.beginPath();
-    ctx.arc(n.x*w,n.y*h,4*pulse,0,Math.PI*2);
+    var pulse=1+0.35*Math.sin(t/55+i*0.8);
+    ctx.beginPath(); ctx.arc(n.x*w,n.y*h,4*pulse,0,Math.PI*2);
     ctx.fillStyle='rgba(96,165,250,'+(0.5+0.5*Math.abs(Math.sin(t/80+i)))+')';
     ctx.fill();
   });
-  t++;
-  requestAnimationFrame(drawNet);
+  t++; requestAnimationFrame(drawNet);
 }
 requestAnimationFrame(drawNet);
 
-// Fade-in sequence
-function show(el,delay){setTimeout(function(){el.style.opacity='1';el.style.transform='none';},delay);}
-show(document.getElementById('dept'),100);
-show(document.getElementById('title'),250);
-show(document.getElementById('tagline'),450);
-var badges=document.querySelectorAll('.badge');
-badges.forEach(function(b,i){show(b,650+i*120);});
-var pills=document.querySelectorAll('.pill');
-pills.forEach(function(p,i){show(p,1300+i*80);});
-show(document.getElementById('div1'),1750);
-show(document.getElementById('slabel'),1900);
+// Fade-in sequence using CSS transition helper
+function fadeIn(el,delay,extra){
+  setTimeout(function(){
+    el.style.transition='opacity 0.6s, transform 0.6s';
+    el.style.opacity='1';
+    if(extra) el.style.transform='none';
+  }, delay);
+}
+fadeIn(document.getElementById('dept'),100);
+fadeIn(document.getElementById('title'),250,true);
+fadeIn(document.getElementById('tagline'),430,true);
+fadeIn(document.getElementById('b0'),650); fadeIn(document.getElementById('b1'),780);
+fadeIn(document.getElementById('b2'),910); fadeIn(document.getElementById('b3'),1040);
+fadeIn(document.getElementById('p0'),1200); fadeIn(document.getElementById('p1'),1300);
+fadeIn(document.getElementById('p2'),1400); fadeIn(document.getElementById('p3'),1500);
+fadeIn(document.getElementById('p4'),1600);
+fadeIn(document.getElementById('div1'),1750);
+fadeIn(document.getElementById('slabel'),1900);
 </script>
 </body>
 </html>
