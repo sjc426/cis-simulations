@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 2 IAM Animation</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#060412; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; }
+canvas { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+let W,H,frame=0,beams=[],particles=[],floaters=[];
+
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+resize(); window.addEventListener("resize",resize);
+
+const pillars=[
+  {label:"IDENTITY",sub:"Who are you?",color:"#c084fc",glow:"#9333ea"},
+  {label:"AUTHENTICATION",sub:"Prove it.",color:"#818cf8",glow:"#4f46e5"},
+  {label:"AUTHORIZATION",sub:"What can you do?",color:"#34d399",glow:"#059669"},
+  {label:"AUDIT",sub:"We logged it.",color:"#f472b6",glow:"#db2777"}
+];
+
+const clouds=[
+  {label:"AWS IAM",sub:"JSON Policies · Roles",color:"#FF9900",x:0.18},
+  {label:"Azure Entra ID",sub:"RBAC · Conditional Access",color:"#00a2ed",x:0.50},
+  {label:"GCP Cloud IAM",sub:"Resource Hierarchy",color:"#4285F4",x:0.82}
+];
+
+const kwords=["MFA","Zero Trust","Least Privilege","Role","Policy","Token","Deny","Allow","Principal","Scope","Tenant","Directory"];
+for(let i=0;i<12;i++) floaters.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.0003,vy:(Math.random()-.5)*.0002,word:kwords[i],alpha:Math.random()*.22+.06,size:Math.floor(Math.random()*5)+9});
+for(let i=0;i<80;i++) particles.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.0002,vy:-Math.random()*.0003-.00005,r:Math.random()*1.4+.3,alpha:Math.random()*.3+.05,color:["#c084fc","#818cf8","#34d399","#f472b6","#60a5fa"][Math.floor(Math.random()*5)]});
+
+function fadeIn(f,s,d){return Math.max(0,Math.min(1,(f-s)/d));}
+
+function glowRect(x,y,w,h,r,fill,stroke,gc,gb){
+  ctx.save(); ctx.shadowColor=gc; ctx.shadowBlur=gb;
+  ctx.beginPath(); ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.8;ctx.stroke();}
+  ctx.restore();
+}
+
+function drawBeam(b){
+  const t=Math.min(b.t,1);
+  const x1=b.x1*W,y1=b.y1*H,x2=b.x2*W,y2=b.y2*H;
+  const cx=x1+(x2-x1)*t, cy=y1+(y2-y1)*t;
+  const g=ctx.createLinearGradient(x1,y1,cx,cy);
+  g.addColorStop(0,"transparent"); g.addColorStop(1,b.color+"cc");
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(cx,cy);
+  ctx.strokeStyle=g; ctx.lineWidth=2.5; ctx.setLineDash([6,4]); ctx.stroke(); ctx.setLineDash([]);
+  ctx.save(); ctx.shadowColor=b.color; ctx.shadowBlur=20;
+  ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2); ctx.fillStyle=b.color; ctx.fill();
+  ctx.restore();
+  if(b.t>.62&&b.t<1.1){
+    const bx=x1+(x2-x1)*.7, by=y1+(y2-y1)*.7;
+    const lbl=b.approved?"✓ ALLOW":"✗ DENY", col=b.approved?"#34d399":"#f87171";
+    ctx.save(); ctx.shadowColor=col; ctx.shadowBlur=14;
+    ctx.font="bold 11px Segoe UI"; ctx.fillStyle=col; ctx.textAlign="center";
+    ctx.fillText(lbl,bx,by-10); ctx.restore();
+  }
+}
+
+function animate(){
+  frame++;
+  ctx.clearRect(0,0,W,H);
+
+  // BG
+  const bg=ctx.createRadialGradient(W*.5,H*.38,0,W*.5,H*.38,W*.75);
+  bg.addColorStop(0,"#0d0820"); bg.addColorStop(1,"#060412");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle="rgba(147,51,234,0.055)"; ctx.lineWidth=1;
+  for(let x=0;x<W;x+=52){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // Particles
+  for(let p of particles){
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.y<-.01)p.y=1.01; if(p.x<0)p.x=1; if(p.x>1)p.x=0;
+    ctx.beginPath(); ctx.arc(p.x*W,p.y*H,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,"0"); ctx.fill();
+  }
+
+  // Floaters
+  for(let f of floaters){
+    f.x+=f.vx; f.y+=f.vy;
+    if(f.x<0)f.x=1; if(f.x>1)f.x=0; if(f.y<0)f.y=1; if(f.y>1)f.y=0;
+    ctx.font=f.size+"px Segoe UI"; ctx.fillStyle="rgba(192,132,252,"+f.alpha+")";
+    ctx.textAlign="center"; ctx.fillText(f.word,f.x*W,f.y*H);
+  }
+
+  // Title
+  const ta=fadeIn(frame,5,35);
+  if(ta>0){
+    ctx.save(); ctx.globalAlpha=ta;
+    ctx.shadowColor="#c084fc"; ctx.shadowBlur=35;
+    ctx.font="bold "+Math.floor(H*.062)+"px Segoe UI";
+    ctx.fillStyle="#ffffff"; ctx.textAlign="center";
+    ctx.fillText("WEEK 2 — IDENTITY & ACCESS",W/2,H*.09);
+    ctx.font=Math.floor(H*.028)+"px Segoe UI";
+    ctx.fillStyle="#c084fc"; ctx.shadowBlur=14;
+    ctx.fillText("Who Gets In?  ·  CIS 288 Cloud Computing",W/2,H*.138);
+    ctx.restore();
+  }
+
+  // Pillars
+  const pW=Math.min(W*.195,195), pH=H*.1, pY=H*.2;
+  const pGap=(W-pW*4)/5;
+  for(let i=0;i<4;i++){
+    const a=fadeIn(frame,28+i*14,30); if(a<=0)continue;
+    const px=pGap+i*(pW+pGap);
+    ctx.save(); ctx.globalAlpha=a;
+    glowRect(px,pY,pW,pH,10,"rgba(18,8,48,.93)",pillars[i].color,pillars[i].glow,22*a);
+    ctx.font="bold "+Math.floor(H*.022)+"px Segoe UI";
+    ctx.fillStyle=pillars[i].color; ctx.textAlign="center";
+    ctx.shadowColor=pillars[i].glow; ctx.shadowBlur=10;
+    ctx.fillText(pillars[i].label,px+pW/2,pY+pH*.43);
+    ctx.font=Math.floor(H*.016)+"px Segoe UI";
+    ctx.fillStyle="rgba(255,255,255,.48)"; ctx.shadowBlur=0;
+    ctx.fillText(pillars[i].sub,px+pW/2,pY+pH*.74);
+    ctx.restore();
+  }
+
+  // Cloud boxes
+  const cW=Math.min(W*.25,235), cH=H*.14, cY=H*.37;
+  for(let i=0;i<3;i++){
+    const a=fadeIn(frame,70+i*16,32); if(a<=0)continue;
+    const cx=clouds[i].x*W-cW/2;
+    ctx.save(); ctx.globalAlpha=a;
+    glowRect(cx,cY,cW,cH,13,"rgba(10,5,38,.97)",clouds[i].color,clouds[i].color,30*a);
+    ctx.beginPath(); ctx.roundRect(cx,cY,cW,6,[13,13,0,0]);
+    ctx.fillStyle=clouds[i].color; ctx.fill();
+    ctx.font="bold "+Math.floor(H*.026)+"px Segoe UI";
+    ctx.fillStyle=clouds[i].color; ctx.textAlign="center";
+    ctx.shadowColor=clouds[i].color; ctx.shadowBlur=16;
+    ctx.fillText(clouds[i].label,clouds[i].x*W,cY+cH*.47);
+    ctx.font=Math.floor(H*.014)+"px Segoe UI";
+    ctx.fillStyle="rgba(255,255,255,.42)"; ctx.shadowBlur=0;
+    ctx.fillText(clouds[i].sub,clouds[i].x*W,cY+cH*.73);
+    ctx.restore();
+  }
+
+  // User node
+  const uA=fadeIn(frame,105,28), uX=.5, uY=.79;
+  if(uA>0){
+    ctx.save(); ctx.globalAlpha=uA;
+    for(let r=0;r<3;r++){
+      const pr=((frame*.85+r*26)%78)/78;
+      ctx.beginPath(); ctx.arc(uX*W,uY*H,30+pr*55,0,Math.PI*2);
+      ctx.strokeStyle="rgba(147,51,234,"+(1-pr)*.28*uA+")";
+      ctx.lineWidth=1.5; ctx.stroke();
+    }
+    glowRect(uX*W-38,uY*H-38,76,76,38,"#150d35","#9333ea","#7c3aed",32);
+    ctx.font=Math.floor(H*.058)+"px Arial"; ctx.textAlign="center";
+    ctx.fillText("👤",uX*W,uY*H+14);
+    ctx.font="bold "+Math.floor(H*.019)+"px Segoe UI";
+    ctx.fillStyle="#c084fc"; ctx.shadowColor="#9333ea"; ctx.shadowBlur=12;
+    ctx.fillText("YOU",uX*W,uY*H+50);
+    ctx.restore();
+  }
+
+  // Spawn beams
+  if(frame>120&&frame%50===0){
+    const ci=Math.floor(Math.random()*3), ok=Math.random()>.3;
+    beams.push({x1:uX,y1:uY-.065,x2:clouds[ci].x,y2:(cY+cH)/H,t:0,dt:.024,color:ok?"#34d399":"#f87171",approved:ok});
+  }
+  for(let i=beams.length-1;i>=0;i--){
+    beams[i].t+=beams[i].dt;
+    if(beams[i].t>1.5){beams.splice(i,1);continue;}
+    drawBeam(beams[i]);
+  }
+
+  // Dashed guide lines
+  const la=fadeIn(frame,115,22);
+  if(la>0){
+    ctx.save(); ctx.globalAlpha=la*.18;
+    ctx.strokeStyle="#9333ea"; ctx.lineWidth=1; ctx.setLineDash([3,10]);
+    for(let ci=0;ci<3;ci++){ctx.beginPath();ctx.moveTo(clouds[ci].x*W,cY+cH);ctx.lineTo(uX*W,uY*H-38);ctx.stroke();}
+    ctx.setLineDash([]); ctx.restore();
+  }
+
+  // Caption
+  const ca=fadeIn(frame,135,35);
+  if(ca>0){
+    ctx.save(); ctx.globalAlpha=ca;
+    ctx.font=Math.floor(H*.016)+"px Segoe UI"; ctx.fillStyle="rgba(192,132,252,.7)";
+    ctx.textAlign="center";
+    ctx.fillText("Every cloud request passes through IAM — same concept, three dialects",W/2,H*.92);
+    ctx.font=Math.floor(H*.013)+"px Segoe UI"; ctx.fillStyle="rgba(192,132,252,.32)";
+    ctx.fillText("CIS 288 · Prof. Chang · Community College of Philadelphia",W/2,H*.96);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
