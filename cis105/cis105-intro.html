@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif;}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
+#stage{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;align-items:center;justify-content:center;}
+.layer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
+
+/* Phase 1 - CIS105 title */
+#p1 .title{font-size:clamp(36px,8vw,72px);font-weight:700;color:#34d399;text-shadow:0 0 40px rgba(52,211,153,0.8),0 0 80px rgba(52,211,153,0.4);letter-spacing:0.08em;text-align:center;}
+#p1 .sub{font-size:clamp(14px,2.5vw,20px);color:#6ee7b7;letter-spacing:0.2em;text-align:center;margin-top:12px;}
+
+/* Phase 2 - computer parts */
+#p2{flex-direction:column;gap:0;}
+#p2 canvas{position:absolute;top:0;left:0;}
+#p2 .part-label{position:absolute;font-size:clamp(12px,2vw,16px);color:#34d399;letter-spacing:0.1em;text-transform:uppercase;text-shadow:0 0 10px rgba(52,211,153,0.6);opacity:0;}
+
+/* Phase 3 - Star Wars student crawl */
+#p3{overflow:hidden;perspective:300px;}
+#crawl-wrap{position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotateX(25deg);transform-origin:50% 100%;width:70%;text-align:center;}
+.student-name{display:block;font-size:clamp(16px,3vw,28px);font-weight:700;color:#34d399;text-shadow:0 0 20px rgba(52,211,153,0.7);margin:8px 0;opacity:0;transform:scale(0.3);white-space:nowrap;}
+
+/* Phase 4 - static info hold */
+#p4{flex-direction:column;text-align:center;}
+#p4 .info-title{font-size:clamp(18px,3vw,28px);color:#fff;font-weight:500;margin-bottom:8px;}
+#p4 .info-sub{font-size:clamp(12px,1.8vw,16px);color:#6ee7b7;letter-spacing:0.05em;}
+#p4 .info-badges{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+#p4 .badge{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid rgba(52,211,153,0.4);color:#d1fae5;background:rgba(52,211,153,0.1);}
+#p4 .badge strong{color:#34d399;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="stage">
+  <div class="layer" id="p1">
+    <div>
+      <div class="title">CIS 105</div>
+      <div class="sub">Computer Systems Maintenance</div>
+    </div>
+  </div>
+  <div class="layer" id="p2">
+    <canvas id="parts-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;"></canvas>
+    <div class="part-label" id="lbl" style="z-index:2;bottom:18%;left:50%;transform:translateX(-50%);"></div>
+  </div>
+  <div class="layer" id="p3">
+    <div id="crawl-wrap"></div>
+  </div>
+  <div class="layer" id="p4">
+    <div>
+      <div class="info-title">CIS 105 &mdash; Computer Systems <span style="color:#34d399;">Maintenance</span></div>
+      <div class="info-sub">Community College of Philadelphia &nbsp;&bull;&nbsp; CIS Department &nbsp;&bull;&nbsp; Summer 2026</div>
+      <div class="info-badges">
+        <span class="badge">Semester <strong>Summer 2026</strong></span>
+        <span class="badge">Starts <strong>May 12</strong></span>
+        <span class="badge">Format <strong>Hybrid</strong></span>
+        <span class="badge">Textbook <strong style="color:#34d399;">$0</strong></span>
+        <span class="badge">CompTIA <strong>A+ Aligned</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Particle background ──────────────────────────────────────
+var bg = document.getElementById('bg');
+var bctx = bg.getContext('2d');
+var particles = [];
+function resizeBg(){ bg.width=window.innerWidth; bg.height=window.innerHeight; }
+resizeBg(); window.addEventListener('resize', resizeBg);
+for(var i=0;i<80;i++) particles.push({x:Math.random()*2000,y:Math.random()*800,r:Math.random()*1.5+0.3,s:Math.random()*0.3+0.1,o:Math.random()*0.5+0.2});
+function animBg(){
+  bctx.fillStyle='rgba(0,0,0,0.15)';
+  bctx.fillRect(0,0,bg.width,bg.height);
+  particles.forEach(function(p){
+    p.y-=p.s; if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;}
+    bctx.beginPath();bctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    bctx.fillStyle='rgba(52,211,153,'+p.o+')';bctx.fill();
+  });
+  requestAnimationFrame(animBg);
+}
+requestAnimationFrame(animBg);
+
+// ── Parts canvas drawing ──────────────────────────────────────
+var pc = document.getElementById('parts-canvas');
+var pctx = pc.getContext('2d');
+function resizePc(){ pc.width=pc.offsetWidth; pc.height=pc.offsetHeight; }
+
+var PARTS = [
+  { name:'CPU', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=2*s;
+    c.strokeRect(x-30*s,y-30*s,60*s,60*s);
+    c.strokeRect(x-20*s,y-20*s,40*s,40*s);
+    for(var i=-3;i<=3;i++){
+      c.beginPath();c.moveTo(x+i*8*s,y-30*s);c.lineTo(x+i*8*s,y-40*s);c.stroke();
+      c.beginPath();c.moveTo(x+i*8*s,y+30*s);c.lineTo(x+i*8*s,y+40*s);c.stroke();
+      c.beginPath();c.moveTo(x-30*s,y+i*8*s);c.lineTo(x-40*s,y+i*8*s);c.stroke();
+      c.beginPath();c.moveTo(x+30*s,y+i*8*s);c.lineTo(x+40*s,y+i*8*s);c.stroke();
+    }
+    c.fillStyle='rgba(52,211,153,0.15)';c.fillRect(x-20*s,y-20*s,40*s,40*s);
+    c.fillStyle='#34d399';c.font='bold '+(10*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('CPU',x,y);
+  }},
+  { name:'GPU', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=2*s;
+    c.strokeRect(x-60*s,y-25*s,120*s,50*s);
+    for(var i=0;i<4;i++){
+      c.beginPath();c.arc(x-40*s+i*27*s,y,14*s,0,Math.PI*2);
+      c.fillStyle='rgba(52,211,153,0.1)';c.fill();c.stroke();
+    }
+    for(var j=0;j<8;j++){
+      c.beginPath();c.moveTo(x-50*s+j*14*s,y+25*s);c.lineTo(x-50*s+j*14*s,y+38*s);c.stroke();
+    }
+    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('GPU',x,y-14*s);
+  }},
+  { name:'Motherboard', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=1.5*s;
+    c.strokeRect(x-70*s,y-50*s,140*s,100*s);
+    // PCIe slots
+    for(var i=0;i<3;i++){c.strokeRect(x-50*s,y-30*s+i*22*s,80*s,8*s);}
+    // RAM slots
+    for(var r=0;r<4;r++){c.strokeRect(x+40*s,y-45*s+r*23*s,10*s,18*s);}
+    // CPU socket
+    c.strokeRect(x-35*s,y-40*s,40*s,40*s);
+    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-70*s,y-50*s,140*s,100*s);
+    // Traces
+    c.setLineDash([2,3]);
+    [[x-60*s,y-10*s,x+60*s,y-10*s],[x-20*s,y+10*s,x-20*s,y+50*s],[x+20*s,y-50*s,x+20*s,y+50*s]].forEach(function(l){
+      c.beginPath();c.moveTo(l[0],l[1]);c.lineTo(l[2],l[3]);c.stroke();
+    });
+    c.setLineDash([]);
+    c.fillStyle='#34d399';c.font='bold '+(8*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('MOBO',x-15*s,y-20*s);
+  }},
+  { name:'RAM', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=2*s;
+    for(var r=0;r<2;r++){
+      var rx=x+(r-0.5)*30*s;
+      c.strokeRect(rx-10*s,y-50*s,20*s,90*s);
+      c.fillStyle='rgba(52,211,153,0.12)';c.fillRect(rx-10*s,y-50*s,20*s,90*s);
+      for(var i=0;i<6;i++){c.strokeRect(rx-7*s,y-42*s+i*13*s,14*s,8*s);}
+    }
+    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('RAM',x,y+52*s);
+  }},
+  { name:'SSD / Storage', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=2*s;
+    c.strokeRect(x-50*s,y-20*s,100*s,40*s);
+    c.fillStyle='rgba(52,211,153,0.1)';c.fillRect(x-50*s,y-20*s,100*s,40*s);
+    c.beginPath();c.arc(x+30*s,y,12*s,0,Math.PI*2);c.stroke();
+    for(var i=0;i<5;i++){c.strokeRect(x-45*s+i*12*s,y-10*s,8*s,5*s);}
+    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('SSD',x-10*s,y);
+  }},
+  { name:'Power Supply', draw: function(c,x,y,s){
+    c.strokeStyle='#34d399';c.lineWidth=2*s;
+    c.strokeRect(x-40*s,y-35*s,80*s,70*s);
+    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-40*s,y-35*s,80*s,70*s);
+    c.beginPath();c.arc(x,y-5*s,18*s,0,Math.PI*2);c.stroke();
+    c.beginPath();c.arc(x,y-5*s,10*s,0,Math.PI*2);c.stroke();
+    for(var i=0;i<4;i++){c.beginPath();c.moveTo(x-25*s+i*17*s,y+22*s);c.lineTo(x-25*s+i*17*s,y+35*s);c.stroke();}
+    c.fillStyle='#34d399';c.font='bold '+(8*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('PSU',x,y+10*s);
+  }}
+];
+
+var STUDENTS = ['Nia','Peterson','Luis','Kevin','Apollos','Elijah H.','Free','Anele','Emely','Richard','Reginald','Charmyce','Olly'];
+
+// ── Fade helper ───────────────────────────────────────────────
+function fadeEl(el,toOpacity,dur,then){
+  var start=null,from=parseFloat(el.style.opacity)||0;
+  function step(ts){
+    if(!start)start=ts;
+    var p=Math.min((ts-start)/dur,1);
+    el.style.opacity=from+(toOpacity-from)*p;
+    if(p<1)requestAnimationFrame(step);
+    else if(then)then();
+  }
+  requestAnimationFrame(step);
+}
+
+// ── TIMELINE ─────────────────────────────────────────────────
+// 0-2.5s  : Phase 1 CIS105 fade in/hold/out
+// 2.5-7s  : Phase 2 computer parts parade
+// 7-12s   : Phase 3 Star Wars student crawl
+// 12-15s  : Phase 4 static info hold then loop
+
+function phase1(){
+  var p1=document.getElementById('p1');
+  p1.style.opacity=0;
+  fadeEl(p1,1,800,function(){
+    setTimeout(function(){
+      fadeEl(p1,0,600,phase2);
+    },1200);
+  });
+}
+
+var partIdx=0, partTimer=null;
+function phase2(){
+  var p2=document.getElementById('p2');
+  p2.style.opacity=1;
+  resizePc();
+  partIdx=0;
+  showNextPart();
+}
+
+function showNextPart(){
+  if(partIdx>=PARTS.length){ endPhase2(); return; }
+  var part=PARTS[partIdx];
+  var lbl=document.getElementById('lbl');
+  var W=pc.offsetWidth, H=pc.offsetHeight;
+  resizePc();
+  pctx.clearRect(0,0,pc.width,pc.height);
+  var s=Math.min(pc.width,pc.height)/500;
+  var cx=pc.width/2, cy=pc.height/2;
+
+  // Glow effect
+  pctx.shadowColor='rgba(52,211,153,0.5)';
+  pctx.shadowBlur=20;
+  part.draw(pctx,cx,cy,s);
+  pctx.shadowBlur=0;
+
+  lbl.textContent=part.name;
+  lbl.style.opacity=0;
+  fadeEl(lbl,1,300,null);
+
+  partIdx++;
+  partTimer=setTimeout(function(){
+    fadeEl(lbl,0,200,null);
+    pctx.clearRect(0,0,pc.width,pc.height);
+    setTimeout(showNextPart,200);
+  },700);
+}
+
+function endPhase2(){
+  var p2=document.getElementById('p2');
+  fadeEl(p2,0,500,phase3);
+}
+
+function phase3(){
+  var p3=document.getElementById('p3');
+  var wrap=document.getElementById('crawl-wrap');
+  wrap.innerHTML='';
+  p3.style.opacity=1;
+
+  // Build name elements
+  var spans=[];
+  STUDENTS.forEach(function(n){
+    var sp=document.createElement('span');
+    sp.className='student-name';
+    sp.textContent=n;
+    wrap.appendChild(sp);
+    spans.push(sp);
+  });
+
+  // Animate each name: small→big, fade in, hold, fade out — Star Wars style
+  var delay=0;
+  spans.forEach(function(sp,i){
+    setTimeout(function(){
+      sp.style.transition='opacity 0.35s, transform 0.5s';
+      sp.style.opacity=1;
+      sp.style.transform='scale(1)';
+      setTimeout(function(){
+        sp.style.opacity=0;
+        sp.style.transform='scale(1.6)';
+      },550);
+    }, delay);
+    delay += 700;
+  });
+
+  // After all names, transition to phase 4
+  setTimeout(function(){
+    fadeEl(p3,0,500,phase4);
+  }, delay+400);
+}
+
+function phase4(){
+  var p4=document.getElementById('p4');
+  fadeEl(p4,1,800,function(){
+    setTimeout(function(){
+      fadeEl(p4,0,600,function(){
+        // loop back
+        document.querySelectorAll('.layer').forEach(function(l){l.style.opacity=0;});
+        setTimeout(phase1,300);
+      });
+    },3000);
+  });
+}
+
+// Kick off
+setTimeout(phase1, 200);
+</script>
+</body>
+</html>
