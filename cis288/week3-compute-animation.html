@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Week 3 — Compute Animation</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#060412; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; }
+canvas { display:block; width:100vw; height:100vh; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+var canvas=document.getElementById("c"), ctx=canvas.getContext("2d");
+var W,H,frame=0,particles=[],floaters=[],dataStreams=[];
+
+var CONCEPTS=["EC2","Virtual Machine","Compute Engine","AMI","t2.micro","e2-micro","Security Group","Boot Disk","Availability Zone","Instance Type","Stop vs Terminate","Free Tier","Key Pair","Firewall","Region"];
+
+var SERVERS=[
+  { label:"EC2 Instance",    cloud:"AWS",   color:"#FF9900", glow:"#ea6c00", type:"t2.micro",        status:0, x:.2  },
+  { label:"Virtual Machine", cloud:"Azure", color:"#00a2ed", glow:"#0078D4", type:"Standard_B1s",    status:0, x:.5  },
+  { label:"Compute Engine",  cloud:"GCP",   color:"#4285F4", glow:"#1a56db", type:"e2-micro",        status:0, x:.8  }
+];
+
+var STATUSES=["PENDING","BOOTING","RUNNING"];
+var STATUS_COLORS=["#94a3b8","#fbbf24","#34d399"];
+
+function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+resize(); window.addEventListener("resize",resize);
+
+// Particles
+for(var i=0;i<60;i++) particles.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00015,vy:-Math.random()*.0002-.00003,r:Math.random()*1.2+.3,alpha:Math.random()*.25+.05,color:["#fb923c","#fbbf24","#f97316"][Math.floor(Math.random()*3)]});
+
+// Floating concepts
+for(var j=0;j<CONCEPTS.length;j++) floaters.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00025,vy:(Math.random()-.5)*.00018,word:CONCEPTS[j],alpha:Math.random()*.18+.05,size:Math.floor(Math.random()*5)+9});
+
+function fadeIn(f,s,d){return Math.max(0,Math.min(1,(f-s)/d));}
+
+function glowRect(x,y,w,h,r,fill,stroke,gc,gb){
+  ctx.save();ctx.shadowColor=gc;ctx.shadowBlur=gb;
+  ctx.beginPath();ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke();}
+  ctx.restore();
+}
+
+function drawServer(sv, progress, pulse) {
+  var sW=Math.min(W*.22,210), sH=H*.36, sx=sv.x*W-sW/2, sy=H*.28;
+  var a=Math.min(1,progress*2);
+  if(a<=0) return;
+
+  ctx.save(); ctx.globalAlpha=a;
+
+  // Server chassis
+  glowRect(sx,sy,sW,sH,14,"rgba(12,6,32,.97)",sv.color,sv.glow,pulse*30);
+
+  // Top color bar
+  ctx.beginPath(); ctx.roundRect(sx,sy,sW,6,[14,14,0,0]);
+  ctx.fillStyle=sv.color; ctx.fill();
+
+  // Cloud label
+  ctx.font="bold "+Math.floor(H*.014)+"px Segoe UI";
+  ctx.fillStyle=sv.color; ctx.textAlign="center";
+  ctx.shadowColor=sv.glow; ctx.shadowBlur=10;
+  ctx.fillText(sv.cloud, sv.x*W, sy+H*.04);
+  ctx.shadowBlur=0;
+
+  // Server icon — rack unit look
+  var rackX=sx+sW*.12, rackY=sy+H*.07, rackW=sW*.76, unitH=H*.028;
+  for(var u=0;u<4;u++){
+    var uy=rackY+u*(unitH+H*.006);
+    glowRect(rackX,uy,rackW,unitH,4,"rgba(20,10,50,.9)","rgba(255,255,255,.08)","transparent",0);
+    // LED
+    var ledOn = progress>(.15+u*.12);
+    ctx.beginPath(); ctx.arc(rackX+10,uy+unitH/2,4,0,Math.PI*2);
+    ctx.fillStyle=ledOn?(u===0?sv.color:"#34d399"):"#1e293b"; ctx.fill();
+    if(ledOn){
+      ctx.save(); ctx.shadowColor=u===0?sv.color:"#34d399"; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.arc(rackX+10,uy+unitH/2,4,0,Math.PI*2);
+      ctx.fillStyle=u===0?sv.color:"#34d399"; ctx.fill();
+      ctx.restore();
+    }
+    // Bar lines
+    ctx.fillStyle="rgba(255,255,255,.06)";
+    ctx.fillRect(rackX+24,uy+unitH*.25,rackW*.5,unitH*.18);
+    ctx.fillRect(rackX+24,uy+unitH*.58,rackW*.3,unitH*.18);
+  }
+
+  // Instance name
+  ctx.font="bold "+Math.floor(H*.019)+"px Segoe UI";
+  ctx.fillStyle="#ffffff"; ctx.textAlign="center";
+  ctx.fillText(sv.label, sv.x*W, sy+H*.24);
+
+  // Instance type badge
+  var badgeY=sy+H*.27;
+  var badgeW=sW*.7, badgeH=H*.038;
+  glowRect(sv.x*W-badgeW/2,badgeY,badgeW,badgeH,6,"rgba(255,255,255,.07)",sv.color+"55","transparent",0);
+  ctx.font=Math.floor(H*.016)+"px Segoe UI";
+  ctx.fillStyle=sv.color; ctx.textAlign="center";
+  ctx.fillText(sv.type, sv.x*W, badgeY+badgeH*.68);
+
+  // Status badge
+  var st=sv.status, stColor=STATUS_COLORS[st];
+  var stY=sy+H*.335;
+  ctx.save();
+  ctx.shadowColor=stColor; ctx.shadowBlur=st===2?18:6;
+  // Pulsing dot
+  if(st===2){
+    var pulseR=5+pulse*4;
+    ctx.beginPath(); ctx.arc(sv.x*W-42,stY+2,pulseR,0,Math.PI*2);
+    ctx.fillStyle=stColor+"44"; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(sv.x*W-42,stY+2,5,0,Math.PI*2);
+  ctx.fillStyle=stColor; ctx.fill();
+  ctx.font="bold "+Math.floor(H*.018)+"px Segoe UI";
+  ctx.fillStyle=stColor; ctx.textAlign="left";
+  ctx.fillText(STATUSES[st], sv.x*W-32, stY+H*.007);
+  ctx.restore();
+
+  // Progress bar (boot progress)
+  if(st<2){
+    var bY=sy+sH-H*.055, bX=sx+sW*.08, bW=sW*.84, bH=H*.018;
+    glowRect(bX,bY,bW,bH,4,"rgba(255,255,255,.06)","transparent","transparent",0);
+    var fill2=Math.min(1,progress*2.5);
+    if(fill2>0){
+      ctx.save(); ctx.shadowColor=sv.color; ctx.shadowBlur=8;
+      ctx.beginPath(); ctx.roundRect(bX,bY,bW*fill2,bH,4);
+      ctx.fillStyle=sv.color; ctx.fill();
+      ctx.restore();
+    }
+    ctx.font=Math.floor(H*.013)+"px Segoe UI"; ctx.fillStyle="rgba(255,255,255,.4)";
+    ctx.textAlign="center"; ctx.fillText(Math.floor(fill2*100)+"%",sv.x*W,bY+bH+H*.018);
+  }
+
+  ctx.restore();
+}
+
+function spawnDataStream(sv) {
+  dataStreams.push({
+    x:sv.x, startY:.28, endY:.85,
+    color:sv.color, t:0, dt:.018
+  });
+}
+
+function drawDataStream(ds) {
+  var t=Math.min(ds.t,1);
+  var x=ds.x*W, y1=ds.startY*H, y2=ds.endY*H;
+  var cy=y1+(y2-y1)*t;
+  var g=ctx.createLinearGradient(x,y1,x,cy);
+  g.addColorStop(0,"transparent"); g.addColorStop(1,ds.color+"99");
+  ctx.beginPath(); ctx.moveTo(x,y1); ctx.lineTo(x,cy);
+  ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.setLineDash([4,6]);
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.save(); ctx.shadowColor=ds.color; ctx.shadowBlur=14;
+  ctx.beginPath(); ctx.arc(x,cy,4,0,Math.PI*2);
+  ctx.fillStyle=ds.color; ctx.fill();
+  ctx.restore();
+}
+
+// User node at bottom
+function drawUser(a) {
+  if(a<=0) return;
+  var uX=W*.5, uY=H*.855;
+  ctx.save(); ctx.globalAlpha=a;
+  for(var r=0;r<3;r++){
+    var pr=((frame*.7+r*24)%72)/72;
+    ctx.beginPath(); ctx.arc(uX,uY,24+pr*44,0,Math.PI*2);
+    ctx.strokeStyle="rgba(251,146,60,"+(1-pr)*.2*a+")";
+    ctx.lineWidth=1.5; ctx.stroke();
+  }
+  glowRect(uX-30,uY-30,60,60,30,"#100830","#fb923c","#ea6c00",22);
+  ctx.font=Math.floor(H*.043)+"px Arial"; ctx.textAlign="center";
+  ctx.fillText("👤",uX,uY+10);
+  ctx.font="bold "+Math.floor(H*.014)+"px Segoe UI";
+  ctx.fillStyle="#fb923c"; ctx.shadowColor="#ea6c00"; ctx.shadowBlur=8;
+  ctx.fillText("YOU",uX,uY+38);
+  ctx.restore();
+}
+
+var serverSpawned=[false,false,false];
+var streamTimer=0;
+
+function animate(){
+  frame++;
+  ctx.clearRect(0,0,W,H);
+
+  // BG
+  var bg=ctx.createRadialGradient(W*.5,H*.35,0,W*.5,H*.35,W*.8);
+  bg.addColorStop(0,"#150800"); bg.addColorStop(1,"#060412");
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle="rgba(251,146,60,0.045)"; ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=52){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+  for(var gy=0;gy<H;gy+=52){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+
+  // Particles
+  for(var i=0;i<particles.length;i++){
+    var p=particles[i]; p.x+=p.vx; p.y+=p.vy;
+    if(p.y<-.01)p.y=1.01; if(p.x<0)p.x=1; if(p.x>1)p.x=0;
+    ctx.beginPath(); ctx.arc(p.x*W,p.y*H,p.r,0,Math.PI*2);
+    ctx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,"0"); ctx.fill();
+  }
+
+  // Floaters
+  for(var j=0;j<floaters.length;j++){
+    var f=floaters[j]; f.x+=f.vx; f.y+=f.vy;
+    if(f.x<0)f.x=1; if(f.x>1)f.x=0; if(f.y<0)f.y=1; if(f.y>1)f.y=0;
+    ctx.font=f.size+"px Segoe UI";
+    ctx.fillStyle="#fb923c"+Math.floor(f.alpha*255).toString(16).padStart(2,"0");
+    ctx.textAlign="center"; ctx.fillText(f.word,f.x*W,f.y*H);
+  }
+
+  // Title
+  var ta=fadeIn(frame,5,35);
+  if(ta>0){
+    ctx.save(); ctx.globalAlpha=ta;
+    ctx.shadowColor="#fb923c"; ctx.shadowBlur=32;
+    ctx.font="bold "+Math.floor(H*.055)+"px Segoe UI";
+    ctx.fillStyle="#fff"; ctx.textAlign="center";
+    ctx.fillText("WEEK 3 — COMPUTE",W/2,H*.09);
+    ctx.font=Math.floor(H*.025)+"px Segoe UI";
+    ctx.fillStyle="#fb923c"; ctx.shadowBlur=14;
+    ctx.fillText("Rent a computer by the hour \u00b7 CIS 288",W/2,H*.135);
+    ctx.restore();
+  }
+
+  // Server icon
+  var ia=fadeIn(frame,18,22);
+  if(ia>0){
+    ctx.save(); ctx.globalAlpha=ia;
+    ctx.font=Math.floor(H*.055)+"px Arial"; ctx.textAlign="center";
+    ctx.fillText("🖥️",W/2,H*.215);
+    ctx.restore();
+  }
+
+  // Update server statuses based on frame
+  var bootStagger=[55,75,95];
+  var pulse=(Math.sin(frame*.08)+1)*.5;
+  for(var si=0;si<SERVERS.length;si++){
+    var sv=SERVERS[si];
+    var bf=frame-bootStagger[si];
+    if(bf<0) continue;
+    var prog=Math.min(1,bf/80);
+    if(prog>.3&&sv.status===0) sv.status=1;
+    if(prog>=1&&sv.status===1){ sv.status=2; if(!serverSpawned[si]){ spawnDataStream(sv); serverSpawned[si]=true; } }
+    drawServer(sv, prog, sv.status===2?pulse:0);
+  }
+
+  // Data streams
+  streamTimer++;
+  if(streamTimer%90===0&&SERVERS[2].status===2){
+    var ri=Math.floor(Math.random()*3);
+    if(SERVERS[ri].status===2) spawnDataStream(SERVERS[ri]);
+  }
+  for(var di=dataStreams.length-1;di>=0;di--){
+    dataStreams[di].t+=dataStreams[di].dt;
+    if(dataStreams[di].t>1.4){dataStreams.splice(di,1);continue;}
+    drawDataStream(dataStreams[di]);
+  }
+
+  // User
+  drawUser(fadeIn(frame,100,30));
+
+  // Bottom caption
+  var ca=fadeIn(frame,130,30);
+  if(ca>0){
+    ctx.save(); ctx.globalAlpha=ca;
+    ctx.font=Math.floor(H*.014)+"px Segoe UI";
+    ctx.fillStyle="rgba(251,146,60,.65)"; ctx.textAlign="center";
+    ctx.fillText("Same idea \u00b7 Three landlords \u00b7 Different vocabulary",W/2,H*.925);
+    ctx.font=Math.floor(H*.013)+"px Segoe UI";
+    ctx.fillStyle="rgba(251,146,60,.3)";
+    ctx.fillText("CIS 288 \u00b7 Prof. Chang \u00b7 Community College of Philadelphia",W/2,H*.958);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>
