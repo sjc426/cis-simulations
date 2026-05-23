@@ -7,47 +7,46 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif;}
 canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
-#stage{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;display:flex;align-items:center;justify-content:center;}
+#stage{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;}
 .layer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
 
-/* Phase 1 - CIS105 title */
-#p1 .title{font-size:clamp(36px,8vw,72px);font-weight:700;color:#34d399;text-shadow:0 0 40px rgba(52,211,153,0.8),0 0 80px rgba(52,211,153,0.4);letter-spacing:0.08em;text-align:center;}
-#p1 .sub{font-size:clamp(14px,2.5vw,20px);color:#6ee7b7;letter-spacing:0.2em;text-align:center;margin-top:12px;}
+/* Phase 1 */
+#p1 .title{font-size:clamp(52px,12vw,96px);font-weight:900;color:#34d399;text-shadow:0 0 60px rgba(52,211,153,0.9),0 0 120px rgba(52,211,153,0.5);letter-spacing:0.1em;text-align:center;}
+#p1 .sub{font-size:clamp(16px,3vw,26px);color:#6ee7b7;letter-spacing:0.25em;text-align:center;margin-top:14px;text-transform:uppercase;}
 
-/* Phase 2 - computer parts */
-#p2{flex-direction:column;gap:0;}
-#p2 canvas{position:absolute;top:0;left:0;}
-#p2 .part-label{position:absolute;font-size:clamp(12px,2vw,16px);color:#34d399;letter-spacing:0.1em;text-transform:uppercase;text-shadow:0 0 10px rgba(52,211,153,0.6);opacity:0;}
+/* Phase 2 */
+#p2 .part-label{position:absolute;font-size:clamp(18px,3.5vw,28px);color:#34d399;letter-spacing:0.15em;text-transform:uppercase;text-shadow:0 0 14px rgba(52,211,153,0.8);opacity:0;bottom:10%;left:50%;transform:translateX(-50%);white-space:nowrap;font-weight:700;}
 
-/* Phase 3 - Star Wars student crawl */
-#p3{overflow:hidden;perspective:300px;}
-#crawl-wrap{position:absolute;bottom:0;left:50%;transform:translateX(-50%) rotateX(25deg);transform-origin:50% 100%;width:70%;text-align:center;}
-.student-name{display:block;font-size:clamp(16px,3vw,28px);font-weight:700;color:#34d399;text-shadow:0 0 20px rgba(52,211,153,0.7);margin:8px 0;opacity:0;transform:scale(0.3);white-space:nowrap;}
+/* Phase 3 - HUGE names */
+#p3 .name-display{position:absolute;width:100%;text-align:center;opacity:0;transform:scale(0.2);}
+#p3 .name-display .first{font-size:clamp(60px,16vw,140px);font-weight:900;color:#34d399;text-shadow:0 0 40px rgba(52,211,153,1),0 0 80px rgba(52,211,153,0.6),0 0 160px rgba(52,211,153,0.3);letter-spacing:0.05em;line-height:1;display:block;}
+#p3 .name-display .dept{font-size:clamp(12px,2vw,18px);color:#6ee7b7;letter-spacing:0.2em;margin-top:8px;display:block;opacity:0.7;}
 
-/* Phase 4 - static info hold */
-#p4{flex-direction:column;text-align:center;}
-#p4 .info-title{font-size:clamp(18px,3vw,28px);color:#fff;font-weight:500;margin-bottom:8px;}
-#p4 .info-sub{font-size:clamp(12px,1.8vw,16px);color:#6ee7b7;letter-spacing:0.05em;}
-#p4 .info-badges{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
-#p4 .badge{font-size:12px;padding:4px 12px;border-radius:20px;border:1px solid rgba(52,211,153,0.4);color:#d1fae5;background:rgba(52,211,153,0.1);}
+/* Phase 4 static */
+#p4{flex-direction:column;text-align:center;padding:20px;}
+#p4 .info-title{font-size:clamp(20px,4vw,36px);color:#fff;font-weight:600;margin-bottom:8px;}
+#p4 .info-sub{font-size:clamp(12px,1.8vw,16px);color:#6ee7b7;letter-spacing:0.08em;}
+#p4 .info-badges{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center;}
+#p4 .badge{font-size:13px;padding:5px 14px;border-radius:20px;border:1px solid rgba(52,211,153,0.4);color:#d1fae5;background:rgba(52,211,153,0.1);}
 #p4 .badge strong{color:#34d399;}
+#p4 .tagline{font-size:clamp(11px,1.6vw,14px);color:#94a3b8;line-height:1.6;max-width:560px;margin:14px auto 0;}
 </style>
 </head>
 <body>
 <canvas id="bg"></canvas>
 <div id="stage">
   <div class="layer" id="p1">
-    <div>
-      <div class="title">CIS 105</div>
-      <div class="sub">Computer Systems Maintenance</div>
-    </div>
+    <div><div class="title">CIS 105</div><div class="sub">Computer Systems Maintenance</div></div>
   </div>
   <div class="layer" id="p2">
-    <canvas id="parts-canvas" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;"></canvas>
-    <div class="part-label" id="lbl" style="z-index:2;bottom:18%;left:50%;transform:translateX(-50%);"></div>
+    <canvas id="pc" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;"></canvas>
+    <div class="part-label" id="lbl" style="z-index:2;"></div>
   </div>
   <div class="layer" id="p3">
-    <div id="crawl-wrap"></div>
+    <div class="name-display" id="nameDisplay">
+      <span class="first" id="nameText"></span>
+      <span class="dept">CIS 105 &mdash; Summer 2026</span>
+    </div>
   </div>
   <div class="layer" id="p4">
     <div>
@@ -57,242 +56,270 @@ canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
         <span class="badge">Semester <strong>Summer 2026</strong></span>
         <span class="badge">Starts <strong>May 12</strong></span>
         <span class="badge">Format <strong>Hybrid</strong></span>
-        <span class="badge">Textbook <strong style="color:#34d399;">$0</strong></span>
+        <span class="badge">Textbook <strong>$0</strong></span>
         <span class="badge">CompTIA <strong>A+ Aligned</strong></span>
       </div>
+      <div class="tagline">You will not just learn what a computer is — you will see the hardware, identify components, install operating systems, script your way through the command line, and spin up real cloud infrastructure. This is the course that turns curiosity into capability.</div>
     </div>
   </div>
 </div>
 
 <script>
-// ── Particle background ──────────────────────────────────────
-var bg = document.getElementById('bg');
-var bctx = bg.getContext('2d');
-var particles = [];
-function resizeBg(){ bg.width=window.innerWidth; bg.height=window.innerHeight; }
-resizeBg(); window.addEventListener('resize', resizeBg);
-for(var i=0;i<80;i++) particles.push({x:Math.random()*2000,y:Math.random()*800,r:Math.random()*1.5+0.3,s:Math.random()*0.3+0.1,o:Math.random()*0.5+0.2});
-function animBg(){
-  bctx.fillStyle='rgba(0,0,0,0.15)';
-  bctx.fillRect(0,0,bg.width,bg.height);
-  particles.forEach(function(p){
-    p.y-=p.s; if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;}
+// ── Particle BG ───────────────────────────────────────────────
+var bg=document.getElementById('bg'),bctx=bg.getContext('2d'),pts=[];
+function rBg(){bg.width=innerWidth;bg.height=innerHeight;}
+rBg();window.addEventListener('resize',rBg);
+for(var i=0;i<100;i++)pts.push({x:Math.random()*3000,y:Math.random()*1000,r:Math.random()*1.8+0.3,s:Math.random()*0.4+0.1,o:Math.random()*0.5+0.2});
+(function loop(){
+  bctx.fillStyle='rgba(0,0,0,0.18)';bctx.fillRect(0,0,bg.width,bg.height);
+  pts.forEach(function(p){
+    p.y-=p.s;if(p.y<-5){p.y=bg.height+5;p.x=Math.random()*bg.width;}
     bctx.beginPath();bctx.arc(p.x,p.y,p.r,0,Math.PI*2);
     bctx.fillStyle='rgba(52,211,153,'+p.o+')';bctx.fill();
   });
-  requestAnimationFrame(animBg);
-}
-requestAnimationFrame(animBg);
+  requestAnimationFrame(loop);
+})();
 
-// ── Parts canvas drawing ──────────────────────────────────────
-var pc = document.getElementById('parts-canvas');
-var pctx = pc.getContext('2d');
-function resizePc(){ pc.width=pc.offsetWidth; pc.height=pc.offsetHeight; }
+// ── Parts canvas ──────────────────────────────────────────────
+var pc=document.getElementById('pc'),pctx=pc.getContext('2d');
+function rPc(){pc.width=pc.offsetWidth;pc.height=pc.offsetHeight;}
 
-var PARTS = [
-  { name:'CPU', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=2*s;
-    c.strokeRect(x-30*s,y-30*s,60*s,60*s);
-    c.strokeRect(x-20*s,y-20*s,40*s,40*s);
-    for(var i=-3;i<=3;i++){
-      c.beginPath();c.moveTo(x+i*8*s,y-30*s);c.lineTo(x+i*8*s,y-40*s);c.stroke();
-      c.beginPath();c.moveTo(x+i*8*s,y+30*s);c.lineTo(x+i*8*s,y+40*s);c.stroke();
-      c.beginPath();c.moveTo(x-30*s,y+i*8*s);c.lineTo(x-40*s,y+i*8*s);c.stroke();
-      c.beginPath();c.moveTo(x+30*s,y+i*8*s);c.lineTo(x+40*s,y+i*8*s);c.stroke();
+var PARTS=[
+  {name:'CPU — Central Processing Unit',draw:function(c,x,y,s){
+    c.lineWidth=2.5*s;c.strokeStyle='#34d399';
+    c.strokeRect(x-50*s,y-50*s,100*s,100*s);
+    c.strokeRect(x-34*s,y-34*s,68*s,68*s);
+    c.fillStyle='rgba(52,211,153,0.12)';c.fillRect(x-34*s,y-34*s,68*s,68*s);
+    for(var i=-4;i<=4;i++){
+      if(i===0)continue;
+      c.beginPath();c.moveTo(x+i*10*s,y-50*s);c.lineTo(x+i*10*s,y-65*s);c.stroke();
+      c.beginPath();c.moveTo(x+i*10*s,y+50*s);c.lineTo(x+i*10*s,y+65*s);c.stroke();
+      c.beginPath();c.moveTo(x-50*s,y+i*10*s);c.lineTo(x-65*s,y+i*10*s);c.stroke();
+      c.beginPath();c.moveTo(x+50*s,y+i*10*s);c.lineTo(x+65*s,y+i*10*s);c.stroke();
     }
-    c.fillStyle='rgba(52,211,153,0.15)';c.fillRect(x-20*s,y-20*s,40*s,40*s);
-    c.fillStyle='#34d399';c.font='bold '+(10*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    // inner grid
+    for(var r=-2;r<=2;r++)for(var col=-2;col<=2;col++){
+      c.strokeRect(x+r*12*s-5*s,y+col*12*s-5*s,10*s,10*s);
+    }
+    c.fillStyle='#34d399';c.font='bold '+(14*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
     c.fillText('CPU',x,y);
   }},
-  { name:'GPU', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=2*s;
-    c.strokeRect(x-60*s,y-25*s,120*s,50*s);
-    for(var i=0;i<4;i++){
-      c.beginPath();c.arc(x-40*s+i*27*s,y,14*s,0,Math.PI*2);
-      c.fillStyle='rgba(52,211,153,0.1)';c.fill();c.stroke();
+  {name:'GPU — Graphics Card',draw:function(c,x,y,s){
+    c.lineWidth=2.5*s;c.strokeStyle='#34d399';
+    c.strokeRect(x-90*s,y-38*s,180*s,76*s);
+    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-90*s,y-38*s,180*s,76*s);
+    for(var i=0;i<3;i++){
+      var fx=x-50*s+i*50*s;
+      c.beginPath();c.arc(fx,y-5*s,22*s,0,Math.PI*2);
+      c.fillStyle='rgba(52,211,153,0.15)';c.fill();
+      c.strokeStyle='#34d399';c.stroke();
+      c.beginPath();c.arc(fx,y-5*s,12*s,0,Math.PI*2);c.stroke();
+      // fan blades
+      for(var b=0;b<6;b++){
+        var ang=b*Math.PI/3;
+        c.beginPath();c.moveTo(fx+8*s*Math.cos(ang),y-5*s+8*s*Math.sin(ang));
+        c.lineTo(fx+18*s*Math.cos(ang+0.4),y-5*s+18*s*Math.sin(ang+0.4));c.stroke();
+      }
     }
-    for(var j=0;j<8;j++){
-      c.beginPath();c.moveTo(x-50*s+j*14*s,y+25*s);c.lineTo(x-50*s+j*14*s,y+38*s);c.stroke();
-    }
-    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
-    c.fillText('GPU',x,y-14*s);
+    for(var j=0;j<10;j++){c.beginPath();c.moveTo(x-80*s+j*18*s,y+38*s);c.lineTo(x-80*s+j*18*s,y+54*s);c.stroke();}
+    c.fillStyle='#34d399';c.font='bold '+(12*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('GPU',x,y+22*s);
   }},
-  { name:'Motherboard', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=1.5*s;
-    c.strokeRect(x-70*s,y-50*s,140*s,100*s);
-    // PCIe slots
-    for(var i=0;i<3;i++){c.strokeRect(x-50*s,y-30*s+i*22*s,80*s,8*s);}
-    // RAM slots
-    for(var r=0;r<4;r++){c.strokeRect(x+40*s,y-45*s+r*23*s,10*s,18*s);}
+  {name:'Motherboard',draw:function(c,x,y,s){
+    c.lineWidth=2*s;c.strokeStyle='#34d399';
+    c.strokeRect(x-100*s,y-70*s,200*s,140*s);
+    c.fillStyle='rgba(52,211,153,0.06)';c.fillRect(x-100*s,y-70*s,200*s,140*s);
     // CPU socket
-    c.strokeRect(x-35*s,y-40*s,40*s,40*s);
-    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-70*s,y-50*s,140*s,100*s);
-    // Traces
-    c.setLineDash([2,3]);
-    [[x-60*s,y-10*s,x+60*s,y-10*s],[x-20*s,y+10*s,x-20*s,y+50*s],[x+20*s,y-50*s,x+20*s,y+50*s]].forEach(function(l){
+    c.strokeRect(x-55*s,y-55*s,55*s,55*s);
+    c.strokeRect(x-48*s,y-48*s,41*s,41*s);
+    // PCIe slots
+    for(var i=0;i<3;i++){c.strokeRect(x-30*s,y+5*s+i*28*s,90*s,12*s);c.fillStyle='rgba(52,211,153,0.1)';c.fillRect(x-30*s,y+5*s+i*28*s,90*s,12*s);}
+    // RAM slots
+    for(var r=0;r<4;r++){c.strokeRect(x+65*s,y-60*s+r*30*s,14*s,24*s);}
+    // traces
+    c.setLineDash([3,4]);c.lineWidth=1*s;
+    [[x-90*s,y-20*s,x+90*s,y-20*s],[x-30*s,y-70*s,x-30*s,y+70*s],[x+30*s,y-70*s,x+30*s,y+70*s],[x-100*s,y+40*s,x+60*s,y+40*s]].forEach(function(l){
       c.beginPath();c.moveTo(l[0],l[1]);c.lineTo(l[2],l[3]);c.stroke();
     });
-    c.setLineDash([]);
-    c.fillStyle='#34d399';c.font='bold '+(8*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
-    c.fillText('MOBO',x-15*s,y-20*s);
+    c.setLineDash([]);c.lineWidth=2*s;
+    c.fillStyle='#34d399';c.font='bold '+(10*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('MOBO',x-28*s,y-28*s);
   }},
-  { name:'RAM', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=2*s;
+  {name:'RAM — Memory',draw:function(c,x,y,s){
+    c.lineWidth=2.5*s;c.strokeStyle='#34d399';
     for(var r=0;r<2;r++){
-      var rx=x+(r-0.5)*30*s;
-      c.strokeRect(rx-10*s,y-50*s,20*s,90*s);
-      c.fillStyle='rgba(52,211,153,0.12)';c.fillRect(rx-10*s,y-50*s,20*s,90*s);
-      for(var i=0;i<6;i++){c.strokeRect(rx-7*s,y-42*s+i*13*s,14*s,8*s);}
+      var rx=x+(r===0?-22*s:22*s);
+      c.strokeRect(rx-13*s,y-68*s,26*s,120*s);
+      c.fillStyle='rgba(52,211,153,0.12)';c.fillRect(rx-13*s,y-68*s,26*s,120*s);
+      for(var i=0;i<7;i++){c.strokeRect(rx-9*s,y-58*s+i*16*s,18*s,10*s);}
+      // notch
+      c.fillStyle='#000';c.fillRect(rx-4*s,y+48*s,8*s,8*s);
     }
-    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
-    c.fillText('RAM',x,y+52*s);
+    c.fillStyle='#34d399';c.font='bold '+(10*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('RAM',x,y+62*s);
   }},
-  { name:'SSD / Storage', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=2*s;
-    c.strokeRect(x-50*s,y-20*s,100*s,40*s);
-    c.fillStyle='rgba(52,211,153,0.1)';c.fillRect(x-50*s,y-20*s,100*s,40*s);
-    c.beginPath();c.arc(x+30*s,y,12*s,0,Math.PI*2);c.stroke();
-    for(var i=0;i<5;i++){c.strokeRect(x-45*s+i*12*s,y-10*s,8*s,5*s);}
-    c.fillStyle='#34d399';c.font='bold '+(9*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
-    c.fillText('SSD',x-10*s,y);
+  {name:'SSD — Storage Drive',draw:function(c,x,y,s){
+    c.lineWidth=2.5*s;c.strokeStyle='#34d399';
+    c.strokeRect(x-75*s,y-30*s,150*s,60*s);
+    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-75*s,y-30*s,150*s,60*s);
+    // chips
+    for(var i=0;i<4;i++){
+      c.strokeRect(x-60*s+i*32*s,y-18*s,24*s,36*s);
+      c.fillStyle='rgba(52,211,153,0.15)';c.fillRect(x-60*s+i*32*s,y-18*s,24*s,36*s);
+    }
+    // connector
+    c.strokeRect(x+55*s,y-12*s,20*s,24*s);
+    for(var j=0;j<5;j++){c.beginPath();c.moveTo(x+57*s+j*3.5*s,y-12*s);c.lineTo(x+57*s+j*3.5*s,y+12*s);c.stroke();}
+    c.fillStyle='#34d399';c.font='bold '+(11*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('SSD',x-20*s,y);
   }},
-  { name:'Power Supply', draw: function(c,x,y,s){
-    c.strokeStyle='#34d399';c.lineWidth=2*s;
-    c.strokeRect(x-40*s,y-35*s,80*s,70*s);
-    c.fillStyle='rgba(52,211,153,0.08)';c.fillRect(x-40*s,y-35*s,80*s,70*s);
-    c.beginPath();c.arc(x,y-5*s,18*s,0,Math.PI*2);c.stroke();
-    c.beginPath();c.arc(x,y-5*s,10*s,0,Math.PI*2);c.stroke();
-    for(var i=0;i<4;i++){c.beginPath();c.moveTo(x-25*s+i*17*s,y+22*s);c.lineTo(x-25*s+i*17*s,y+35*s);c.stroke();}
-    c.fillStyle='#34d399';c.font='bold '+(8*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
-    c.fillText('PSU',x,y+10*s);
+  {name:'Power Supply Unit',draw:function(c,x,y,s){
+    c.lineWidth=2.5*s;c.strokeStyle='#34d399';
+    c.strokeRect(x-60*s,y-50*s,120*s,100*s);
+    c.fillStyle='rgba(52,211,153,0.07)';c.fillRect(x-60*s,y-50*s,120*s,100*s);
+    // fan
+    c.beginPath();c.arc(x-10*s,y-10*s,28*s,0,Math.PI*2);c.stroke();
+    c.beginPath();c.arc(x-10*s,y-10*s,16*s,0,Math.PI*2);c.stroke();
+    for(var b=0;b<8;b++){
+      var a=b*Math.PI/4;
+      c.beginPath();c.moveTo(x-10*s+12*s*Math.cos(a),y-10*s+12*s*Math.sin(a));
+      c.lineTo(x-10*s+24*s*Math.cos(a+0.3),y-10*s+24*s*Math.sin(a+0.3));c.stroke();
+    }
+    // cables
+    for(var k=0;k<5;k++){c.beginPath();c.moveTo(x+30*s,y-30*s+k*16*s);c.lineTo(x+60*s,y-30*s+k*16*s);c.stroke();}
+    c.fillStyle='#34d399';c.font='bold '+(10*s)+'px Arial';c.textAlign='center';c.textBaseline='middle';
+    c.fillText('PSU',x+42*s,y+46*s);
   }}
 ];
 
-var STUDENTS = ['Nia','Peterson','Luis','Kevin','Apollos','Elijah H.','Free','Anele','Emely','Richard','Reginald','Charmyce','Olly'];
+var STUDENTS=['Nia','Peterson','Luis','Kevin','Apollos','Elijah H.','Free','Anele','Emely','Richard','Reginald','Charmyce','Olly'];
 
-// ── Fade helper ───────────────────────────────────────────────
-function fadeEl(el,toOpacity,dur,then){
-  var start=null,from=parseFloat(el.style.opacity)||0;
-  function step(ts){
-    if(!start)start=ts;
-    var p=Math.min((ts-start)/dur,1);
-    el.style.opacity=from+(toOpacity-from)*p;
-    if(p<1)requestAnimationFrame(step);
-    else if(then)then();
-  }
-  requestAnimationFrame(step);
+// ── Fade utility ──────────────────────────────────────────────
+function fade(el,to,ms,cb){
+  var s=null,fr=parseFloat(el.style.opacity)||0;
+  (function step(ts){
+    if(!s)s=ts;
+    var p=Math.min((ts-s)/ms,1);
+    el.style.opacity=fr+(to-fr)*p;
+    p<1?requestAnimationFrame(step):cb&&cb();
+  })(0);
+  requestAnimationFrame(function(ts){});
 }
 
-// ── TIMELINE ─────────────────────────────────────────────────
-// 0-2.5s  : Phase 1 CIS105 fade in/hold/out
-// 2.5-7s  : Phase 2 computer parts parade
-// 7-12s   : Phase 3 Star Wars student crawl
-// 12-15s  : Phase 4 static info hold then loop
-
-function phase1(){
-  var p1=document.getElementById('p1');
-  p1.style.opacity=0;
-  fadeEl(p1,1,800,function(){
-    setTimeout(function(){
-      fadeEl(p1,0,600,phase2);
-    },1200);
-  });
-}
-
-var partIdx=0, partTimer=null;
-function phase2(){
-  var p2=document.getElementById('p2');
-  p2.style.opacity=1;
-  resizePc();
-  partIdx=0;
-  showNextPart();
-}
-
-function showNextPart(){
-  if(partIdx>=PARTS.length){ endPhase2(); return; }
-  var part=PARTS[partIdx];
-  var lbl=document.getElementById('lbl');
-  var W=pc.offsetWidth, H=pc.offsetHeight;
-  resizePc();
+// ── Drawing helper ─────────────────────────────────────────────
+function drawPart(part){
+  rPc();
   pctx.clearRect(0,0,pc.width,pc.height);
-  var s=Math.min(pc.width,pc.height)/500;
-  var cx=pc.width/2, cy=pc.height/2;
-
-  // Glow effect
-  pctx.shadowColor='rgba(52,211,153,0.5)';
-  pctx.shadowBlur=20;
-  part.draw(pctx,cx,cy,s);
+  var s=Math.min(pc.width,pc.height)/320; // BIGGER: was /500
+  pctx.shadowColor='rgba(52,211,153,0.6)';pctx.shadowBlur=30;
+  part.draw(pctx,pc.width/2,pc.height/2,s);
   pctx.shadowBlur=0;
-
-  lbl.textContent=part.name;
-  lbl.style.opacity=0;
-  fadeEl(lbl,1,300,null);
-
-  partIdx++;
-  partTimer=setTimeout(function(){
-    fadeEl(lbl,0,200,null);
-    pctx.clearRect(0,0,pc.width,pc.height);
-    setTimeout(showNextPart,200);
-  },700);
 }
 
-function endPhase2(){
-  var p2=document.getElementById('p2');
-  fadeEl(p2,0,500,phase3);
-}
+// ── SEQUENCE ENGINE ───────────────────────────────────────────
+var loopCount=0;
 
-function phase3(){
-  var p3=document.getElementById('p3');
-  var wrap=document.getElementById('crawl-wrap');
-  wrap.innerHTML='';
-  p3.style.opacity=1;
-
-  // Build name elements
-  var spans=[];
-  STUDENTS.forEach(function(n){
-    var sp=document.createElement('span');
-    sp.className='student-name';
-    sp.textContent=n;
-    wrap.appendChild(sp);
-    spans.push(sp);
+function runLoop(onDone){
+  phase1(function(){
+    phase2(function(){
+      phase3(onDone);
+    });
   });
-
-  // Animate each name: small→big, fade in, hold, fade out — Star Wars style
-  var delay=0;
-  spans.forEach(function(sp,i){
-    setTimeout(function(){
-      sp.style.transition='opacity 0.35s, transform 0.5s';
-      sp.style.opacity=1;
-      sp.style.transform='scale(1)';
-      setTimeout(function(){
-        sp.style.opacity=0;
-        sp.style.transform='scale(1.6)';
-      },550);
-    }, delay);
-    delay += 700;
-  });
-
-  // After all names, transition to phase 4
-  setTimeout(function(){
-    fadeEl(p3,0,500,phase4);
-  }, delay+400);
 }
 
-function phase4(){
-  var p4=document.getElementById('p4');
-  fadeEl(p4,1,800,function(){
-    setTimeout(function(){
-      fadeEl(p4,0,600,function(){
-        // loop back
-        document.querySelectorAll('.layer').forEach(function(l){l.style.opacity=0;});
-        setTimeout(phase1,300);
+function startAll(){
+  loopCount=0;
+  runLoop(function(){
+    loopCount++;
+    // Reset all layers
+    ['p1','p2','p3'].forEach(function(id){document.getElementById(id).style.opacity=0;});
+    runLoop(function(){
+      // After 2 loops → show static page
+      document.getElementById('p3').style.opacity=0;
+      phase4();
+    });
+  });
+}
+
+// ── Phase 1: CIS105 title (2.5s) ─────────────────────────────
+function phase1(done){
+  var el=document.getElementById('p1');
+  el.style.opacity=0;
+  fade(el,1,700,function(){
+    setTimeout(function(){fade(el,0,600,done);},1400);
+  });
+}
+
+// ── Phase 2: Parts parade ─────────────────────────────────────
+function phase2(done){
+  var el=document.getElementById('p2');
+  el.style.opacity=1;
+  var lbl=document.getElementById('lbl');
+  var idx=0;
+  function next(){
+    if(idx>=PARTS.length){
+      fade(el,0,400,function(){
+        pctx.clearRect(0,0,pc.width,pc.height);
+        done();
       });
-    },3000);
-  });
+      return;
+    }
+    var p=PARTS[idx++];
+    drawPart(p);
+    lbl.textContent=p.name;
+    lbl.style.opacity=0;
+    fade(lbl,1,250,null);
+    setTimeout(function(){
+      fade(lbl,0,200,null);
+      setTimeout(function(){
+        pctx.clearRect(0,0,pc.width,pc.height);
+        setTimeout(next,150);
+      },200);
+    },800);
+  }
+  next();
 }
 
-// Kick off
-setTimeout(phase1, 200);
+// ── Phase 3: HUGE student names ───────────────────────────────
+function phase3(done){
+  var el=document.getElementById('p3');
+  var nd=document.getElementById('nameDisplay');
+  var nt=document.getElementById('nameText');
+  el.style.opacity=1;
+  var idx=0;
+  function showName(){
+    if(idx>=STUDENTS.length){
+      fade(el,0,400,done);
+      return;
+    }
+    nt.textContent=STUDENTS[idx++];
+    nd.style.opacity=0;
+    nd.style.transform='scale(0.15)';
+    nd.style.transition='opacity 0.35s ease, transform 0.5s ease';
+    // force reflow
+    nd.offsetHeight;
+    nd.style.opacity=1;
+    nd.style.transform='scale(1)';
+    setTimeout(function(){
+      nd.style.transition='opacity 0.3s ease, transform 0.45s ease';
+      nd.style.opacity=0;
+      nd.style.transform='scale(1.8)';
+      setTimeout(showName,350);
+    },700);
+  }
+  showName();
+}
+
+// ── Phase 4: Static info — holds then stays ───────────────────
+function phase4(){
+  var el=document.getElementById('p4');
+  el.style.opacity=0;
+  fade(el,1,900,null);
+  // stays visible — no loop back, students read the info
+}
+
+// ── Kick off ──────────────────────────────────────────────────
+setTimeout(startAll,300);
 </script>
 </body>
 </html>
