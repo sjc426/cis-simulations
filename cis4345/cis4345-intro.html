@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#1a1a1a;padding:20px;font-family:Arial,sans-serif;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+#heroWrap{width:100%;max-width:900px;height:380px;position:relative;background:#000;border-radius:12px;margin:0 auto;overflow:hidden;}
+#bgC{position:absolute;top:0;left:0;width:100%;height:100%;}
+#sceneC{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;opacity:0;}
+#cmdLine{position:absolute;top:9%;left:50%;transform:translateX(-50%);font-family:monospace;font-size:clamp(11px,1.5vw,13px);color:#22d3ee;opacity:0;z-index:20;text-align:center;white-space:nowrap;}
+#sceneLabel{position:absolute;bottom:9%;left:50%;transform:translateX(-50%);font-size:clamp(13px,2vw,18px);color:#FFCCD5;letter-spacing:0.12em;text-transform:uppercase;opacity:0;white-space:nowrap;font-weight:700;z-index:20;}
+#stage{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;}
+.layer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
+#p1 .big{font-size:clamp(38px,8vw,72px);font-weight:900;color:#fff;letter-spacing:0.08em;text-align:center;line-height:1;}
+#p1 .sub{font-size:clamp(13px,2.2vw,20px);color:#FFCCD5;letter-spacing:0.22em;text-align:center;margin-top:10px;text-transform:uppercase;}
+#pSlogan{flex-direction:column;text-align:center;padding:20px;}
+#sLine1{font-size:clamp(13px,2.4vw,20px);color:#FFCCD5;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px;opacity:0;}
+#sLine2{font-size:clamp(28px,7vw,60px);font-weight:900;color:#fff;line-height:1.15;text-align:center;opacity:0;}
+#sLine2 span{color:#FFCCD5;}
+#sLine3{font-size:clamp(12px,1.8vw,16px);color:rgba(255,204,213,0.7);letter-spacing:0.14em;margin-top:14px;text-transform:uppercase;opacity:0;}
+#p4{flex-direction:column;text-align:center;padding:20px;}
+#p4 .ititle{font-size:clamp(16px,3vw,26px);color:#fff;font-weight:700;margin-bottom:6px;}
+#p4 .isub{font-size:clamp(12px,1.6vw,14px);color:#FFCCD5;letter-spacing:0.07em;}
+#p4 .ibadges{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
+#p4 .ibadge{font-size:13px;padding:4px 12px;border-radius:20px;border:1px solid rgba(255,204,213,0.35);color:#fde8ec;background:rgba(157,34,53,0.25);}
+#p4 .ibadge strong{color:#FFCCD5;}
+#p4 .tagline{font-size:clamp(11px,1.3vw,13px);color:#c9b0b5;line-height:1.7;max-width:540px;margin:12px auto 0;font-style:italic;}
+/* PAUSE BUTTON — z-index king, pointer-events forced on */
+#pauseBtn{
+  position:absolute;
+  top:12px;
+  right:14px;
+  z-index:999;
+  background:rgba(157,34,53,0.9);
+  border:2px solid #FFCCD5;
+  border-radius:7px;
+  color:#FFCCD5;
+  font-size:14px;
+  font-weight:700;
+  padding:7px 16px;
+  cursor:pointer;
+  font-family:Arial,sans-serif;
+  line-height:1.3;
+  pointer-events:auto !important;
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+#pauseBtn:focus{outline:3px solid #fff;outline-offset:2px;}
+#pauseBtn:hover{background:#9D2235;}
+</style>
+</head>
+<body>
+<h2 class="sr-only">CIS 4345 Introduction to Cloud Computing — Temple University animated course intro.</h2>
+<div id="heroWrap" role="img" aria-label="Animated intro for CIS 4345 Introduction to Cloud Computing, Temple University Fall 2026">
+  <canvas id="bgC" aria-hidden="true"></canvas>
+  <canvas id="sceneC" aria-hidden="true"></canvas>
+  <div id="cmdLine" aria-hidden="true"></div>
+  <div id="sceneLabel" aria-hidden="true"></div>
+  <div id="stage" aria-hidden="true">
+    <div class="layer" id="p1">
+      <div><div class="big">CIS 4345</div><div class="sub">Introduction to Cloud Computing</div></div>
+    </div>
+    <div class="layer" id="pSlogan">
+      <div style="text-align:center;">
+        <div id="sLine1">Temple University &nbsp;&middot;&nbsp; CIS Department</div>
+        <div id="sLine2">One Course.<br><span>Three Clouds.</span><br>Zero Limits.</div>
+        <div id="sLine3">Fall 2026 &nbsp;&middot;&nbsp; Online &nbsp;&middot;&nbsp; Prof. Chang</div>
+      </div>
+    </div>
+    <div class="layer" id="p4">
+      <div>
+        <div class="ititle">CIS 4345 &mdash; Introduction to <span style="color:#FFCCD5;">Cloud Computing</span></div>
+        <div class="isub">Temple University &nbsp;&bull;&nbsp; College of Science &amp; Technology &nbsp;&bull;&nbsp; Fall 2026</div>
+        <div class="ibadges">
+          <span class="ibadge">Semester <strong>Fall 2026</strong></span>
+          <span class="ibadge">Format <strong>Online &middot; Zoom</strong></span>
+          <span class="ibadge">Providers <strong>AWS &middot; Azure &middot; GCP</strong></span>
+        </div>
+        <div class="tagline">An introduction to cloud computing concepts, architectures, and services across Amazon Web Services, Microsoft Azure, and Google Cloud. Topics include virtualization, IaaS/PaaS/SaaS models, cloud storage, networking, identity &amp; access management, serverless computing, and cloud security.</div>
+      </div>
+    </div>
+  </div>
+  <!-- PAUSE BUTTON — last child = highest paint order, nothing above it -->
+  <button id="pauseBtn" aria-label="Pause animation" aria-pressed="false">⏸ Pause</button>
+  <div class="sr-only" aria-live="polite" aria-atomic="true" id="ariaLive"></div>
+</div>
+
+<script>
+var wrap=document.getElementById('heroWrap');
+var bgC=document.getElementById('bgC'),bgX=bgC.getContext('2d');
+var scC=document.getElementById('sceneC'),scX=scC.getContext('2d');
+var ariaLive=document.getElementById('ariaLive');
+var pauseBtn=document.getElementById('pauseBtn');
+var bgNodes=[],bgPackets=[],bgFrame=0,paused=false,cmdInt=null;
+
+function announce(msg){ariaLive.textContent='';setTimeout(function(){ariaLive.textContent=msg;},60);}
+
+pauseBtn.addEventListener('click',function(){
+  paused=!paused;
+  pauseBtn.setAttribute('aria-pressed',paused?'true':'false');
+  pauseBtn.textContent=paused?'▶ Resume':'⏸ Pause';
+  pauseBtn.setAttribute('aria-label',paused?'Resume animation':'Pause animation');
+  announce(paused?'Animation paused':'Animation resumed');
+});
+
+function resize(){bgC.width=wrap.offsetWidth;bgC.height=wrap.offsetHeight;scC.width=wrap.offsetWidth;scC.height=wrap.offsetHeight;}
+resize();window.addEventListener('resize',resize);
+
+function initNodes(){
+  bgNodes=[];bgPackets=[];
+  var cols=9,rows=5;
+  for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
+    bgNodes.push({
+      x:bgC.width*(0.04+c*(0.92/(cols-1)))+(Math.random()-0.5)*70,
+      y:bgC.height*(0.08+r*(0.84/(rows-1)))+(Math.random()-0.5)*50,
+      vx:(Math.random()-0.5)*0.09,vy:(Math.random()-0.5)*0.08,
+      pulse:Math.random()*Math.PI*2,
+      size:Math.random()<0.12?5:Math.random()<0.3?3.5:2.2,
+      col:Math.random()<0.33?'#FF9900':Math.random()<0.5?'#0078D4':'#34A853'
+    });
+  }
+}
+initNodes();
+
+function spawnPkt(){
+  if(bgPackets.length>28)return;
+  var a=Math.floor(Math.random()*bgNodes.length),b=Math.floor(Math.random()*bgNodes.length);
+  if(a===b)return;
+  var dx=bgNodes[a].x-bgNodes[b].x,dy=bgNodes[a].y-bgNodes[b].y;
+  if(Math.sqrt(dx*dx+dy*dy)>bgC.width*0.3)return;
+  bgPackets.push({a:a,b:b,t:0,speed:0.004+Math.random()*0.006,col:bgNodes[a].col});
+}
+function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b2=parseInt(hex.slice(5,7),16);return'rgba('+r+','+g+','+b2+','+a+')';}
+
+function drawBg(){
+  if(!paused){
+    bgX.fillStyle='rgba(5,0,10,0.18)';bgX.fillRect(0,0,bgC.width,bgC.height);
+    var maxD=bgC.width*0.21;
+    for(var i=0;i<bgNodes.length;i++)for(var j=i+1;j<bgNodes.length;j++){
+      var dx=bgNodes[i].x-bgNodes[j].x,dy=bgNodes[i].y-bgNodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<maxD){bgX.strokeStyle='rgba(157,34,53,'+(1-d/maxD)*0.14+')';bgX.lineWidth=0.5;bgX.beginPath();bgX.moveTo(bgNodes[i].x,bgNodes[i].y);bgX.lineTo(bgNodes[j].x,bgNodes[j].y);bgX.stroke();}
+    }
+    bgNodes.forEach(function(n){
+      n.pulse+=0.03;n.x+=n.vx;n.y+=n.vy;
+      if(n.x<8||n.x>bgC.width-8)n.vx*=-1;
+      if(n.y<8||n.y>bgC.height-8)n.vy*=-1;
+      var g=0.32+0.28*Math.sin(n.pulse);
+      bgX.beginPath();bgX.arc(n.x,n.y,n.size*2.6,0,Math.PI*2);bgX.fillStyle=hexA(n.col,g*0.13);bgX.fill();
+      bgX.beginPath();bgX.arc(n.x,n.y,n.size,0,Math.PI*2);bgX.fillStyle=n.col;bgX.fill();
+    });
+    for(var pi=bgPackets.length-1;pi>=0;pi--){
+      var p=bgPackets[pi];p.t+=p.speed;
+      if(p.t>=1){bgPackets.splice(pi,1);continue;}
+      var na=bgNodes[p.a],nb=bgNodes[p.b];if(!na||!nb)continue;
+      for(var tr=4;tr>=0;tr--){
+        var tt=Math.max(0,p.t-tr*0.02),tx=na.x+(nb.x-na.x)*tt,ty=na.y+(nb.y-na.y)*tt;
+        bgX.beginPath();bgX.arc(tx,ty,Math.max(0.5,2.4-tr*0.38),0,Math.PI*2);
+        bgX.fillStyle=hexA(p.col,tr===0?1:(5-tr)*0.13);bgX.fill();
+      }
+    }
+    if(bgFrame%14===0)spawnPkt();
+    bgFrame++;
+  }
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+function fade(el,to,ms,cb){
+  var st=null,fr=parseFloat(el.style.opacity)||0;
+  function step(ts){if(paused){requestAnimationFrame(step);return;}if(!st)st=ts;var pct=Math.min((ts-st)/ms,1);el.style.opacity=fr+(to-fr)*pct;pct<1?requestAnimationFrame(step):cb&&cb();}
+  requestAnimationFrame(step);
+}
+function pTimeout(ms,cb){
+  var elapsed=0,last=performance.now();
+  function check(){var now=performance.now();if(!paused)elapsed+=now-last;last=now;elapsed>=ms?cb():requestAnimationFrame(check);}
+  requestAnimationFrame(check);
+}
+
+var AWS_CMDS=['$ aws ec2 run-instances --instance-type t2.micro','$ aws s3 mb s3://cis4345-lab-bucket','$ aws iam create-user --user-name student-lab','$ aws lambda create-function --function-name hello-cloud','$ aws rds create-db-instance --db-instance-class db.t3.micro'];
+var AZ_CMDS=['> az vm create --name labVM --image UbuntuLTS','> az storage account create --name cis4345lab','> az ad user create --display-name "Lab Student"','> az network vnet create --name labVNet','> az functionapp create --name cis4345fn --runtime python'];
+var GCP_CMDS=['$ gcloud compute instances create lab-vm --zone us-east1-b','$ gcloud storage buckets create gs://cis4345-lab','$ gcloud iam service-accounts create lab-sa','$ gcloud compute networks create lab-vpc','$ gcloud functions deploy helloCloud --runtime python310'];
+
+var cmdEl=document.getElementById('cmdLine'),lblEl=document.getElementById('sceneLabel');
+function startCmd(arr){if(cmdInt)clearInterval(cmdInt);cmdEl.style.opacity=0;fade(cmdEl,1,250,null);var i=0;cmdEl.textContent=arr[0];cmdInt=setInterval(function(){if(!paused){i++;cmdEl.textContent=arr[i%arr.length];}},1400);}
+function stopCmd(cb){clearInterval(cmdInt);cmdInt=null;fade(cmdEl,0,200,cb);}
+
+function drawProvider(prov,prog){
+  scX.clearRect(0,0,scC.width,scC.height);
+  var cx=scC.width/2,cy=scC.height/2,s=Math.min(scC.width,scC.height)/480;
+  var col=prov==='aws'?'#FF9900':prov==='azure'?'#0078D4':'#34A853';
+  var col2=prov==='aws'?'#ffb84d':prov==='azure'?'#50a8ff':'#7ddc94';
+  scX.shadowColor=hexA(col,0.6);scX.shadowBlur=22;
+  if(prov==='aws'){
+    var numR=5,rW=34*s,rH=22*s,rGap=5*s,totalH=numR*(rH+rGap),startY=cy-totalH/2;
+    var vis=Math.min(numR,Math.ceil(prog*numR*1.5));
+    for(var i=0;i<vis;i++){
+      var ry2=startY+i*(rH+rGap),rx=cx-80*s;
+      scX.fillStyle='rgba(15,12,0,0.85)';scX.fillRect(rx,ry2,rW,rH);
+      scX.strokeStyle=col;scX.lineWidth=1.2*s;scX.strokeRect(rx,ry2,rW,rH);
+      for(var d=0;d<3;d++){scX.fillStyle='rgba(255,153,0,0.18)';scX.fillRect(rx+3*s+d*10*s,ry2+3*s,7*s,rH-6*s);}
+      scX.beginPath();scX.arc(rx+rW-6*s,ry2+rH/2,2.5*s,0,Math.PI*2);scX.fillStyle=prog>0.4?'#22c55e':col;scX.fill();
+    }
+    if(prog>0.5){
+      var bkt=[{n:'S3',d:'Object Storage'},{n:'EC2',d:'Compute'},{n:'IAM',d:'Identity'},{n:'Lambda',d:'Serverless'}];
+      bkt.forEach(function(b,idx){
+        if(prog<0.55+idx*0.1)return;
+        var bx=cx+28*s+(idx%2)*72*s,by=cy-42*s+Math.floor(idx/2)*56*s;
+        scX.fillStyle='rgba(255,153,0,0.13)';scX.fillRect(bx,by,62*s,30*s);
+        scX.strokeStyle=col2;scX.lineWidth=0.8*s;scX.strokeRect(bx,by,62*s,30*s);
+        scX.fillStyle=col2;scX.font='bold '+(8.5*s)+'px Arial';scX.textAlign='center';scX.textBaseline='middle';scX.fillText(b.n,bx+31*s,by+10*s);
+        scX.fillStyle='rgba(255,184,77,0.65)';scX.font=(7*s)+'px Arial';scX.fillText(b.d,bx+31*s,by+22*s);
+        scX.strokeStyle=hexA(col,0.4);scX.lineWidth=0.6*s;scX.beginPath();scX.moveTo(cx-80*s+rW,cy);scX.lineTo(bx,by+15*s);scX.stroke();
+      });
+    }
+  } else if(prov==='azure'){
+    var chevW=90*s,chevH=70*s,cx2=cx-22*s,cy2=cy;
+    var pts=[[cx2-chevW/2,cy2-chevH/2],[cx2+10*s,cy2-chevH/2],[cx2+chevW/2,cy2],[cx2+10*s,cy2+chevH/2],[cx2-chevW/2,cy2+chevH/2],[cx2-20*s,cy2]];
+    if(prog>0.1){
+      scX.beginPath();scX.moveTo(pts[0][0],pts[0][1]);pts.forEach(function(pt){scX.lineTo(pt[0],pt[1]);});
+      scX.closePath();scX.fillStyle=hexA(col,0.12);scX.fill();scX.strokeStyle=col;scX.lineWidth=2*s;scX.stroke();
+      scX.fillStyle=col2;scX.font='bold '+(8*s)+'px Arial';scX.textAlign='center';scX.textBaseline='middle';scX.fillText('AZURE',cx2,cy2);
+    }
+    if(prog>0.45){
+      var svcs=[{n:'VMs',d:'Compute'},{n:'Blob',d:'Storage'},{n:'Entra ID',d:'Identity'},{n:'Functions',d:'Serverless'}];
+      svcs.forEach(function(sv,idx){
+        if(prog<0.5+idx*0.1)return;
+        var sx=cx+36*s,sy=cy-52*s+idx*30*s;
+        scX.fillStyle=hexA(col,0.14);scX.fillRect(sx,sy,68*s,24*s);scX.strokeStyle=col2;scX.lineWidth=0.8*s;scX.strokeRect(sx,sy,68*s,24*s);
+        scX.fillStyle=col2;scX.font='bold '+(8.5*s)+'px Arial';scX.textAlign='center';scX.textBaseline='middle';scX.fillText(sv.n,sx+34*s,sy+9*s);
+        scX.fillStyle='rgba(80,168,255,0.65)';scX.font=(7*s)+'px Arial';scX.fillText(sv.d,sx+34*s,sy+19*s);
+        scX.strokeStyle=hexA(col,0.4);scX.lineWidth=0.6*s;scX.beginPath();scX.moveTo(cx2+chevW/2,cy2);scX.lineTo(sx,sy+12*s);scX.stroke();
+      });
+    }
+  } else {
+    var gcols=['#4285F4','#EA4335','#FBBC05','#34A853'],r0=20*s;
+    for(var a=0;a<4;a++){if(prog<a*0.2)continue;scX.beginPath();scX.arc(cx-22*s,cy,r0+a*18*s,0,Math.PI*2*Math.min(1,prog*2-a*0.3));scX.strokeStyle=gcols[a];scX.lineWidth=2.5*s;scX.stroke();}
+    if(prog>0.3){scX.fillStyle='rgba(255,255,255,0.75)';scX.font='bold '+(7.5*s)+'px Arial';scX.textAlign='center';scX.textBaseline='middle';scX.fillText('GCP',cx-22*s,cy);}
+    if(prog>0.5){
+      var gsvc=[{n:'Compute Engine',c:'#4285F4'},{n:'Cloud Storage',c:'#EA4335'},{n:'Cloud IAM',c:'#FBBC05'},{n:'Cloud SQL',c:'#34A853'}];
+      gsvc.forEach(function(gs,idx){
+        if(prog<0.55+idx*0.1)return;
+        var gx=cx+28*s,gy=cy-46*s+idx*30*s;
+        scX.fillStyle=hexA(gs.c,0.13);scX.fillRect(gx,gy,74*s,22*s);scX.strokeStyle=gs.c;scX.lineWidth=0.8*s;scX.strokeRect(gx,gy,74*s,22*s);
+        scX.fillStyle=gs.c;scX.font='bold '+(7.5*s)+'px Arial';scX.textAlign='center';scX.textBaseline='middle';scX.fillText(gs.n,gx+37*s,gy+11*s);
+      });
+    }
+  }
+  scX.shadowBlur=0;
+}
+
+function runProvider(prov,cmds,label,ariaMsg,done){
+  scC.style.opacity=1;lblEl.style.opacity=0;lblEl.textContent=label;fade(lblEl,1,350,null);startCmd(cmds);announce(ariaMsg);
+  var prog=0,running=true;
+  function tick(){if(!running)return;if(!paused)prog+=0.0018;drawProvider(prov,Math.min(prog,1));if(prog<1.06)requestAnimationFrame(tick);else{running=false;pTimeout(1800,function(){stopCmd(function(){fade(lblEl,0,250,function(){scX.clearRect(0,0,scC.width,scC.height);scC.style.opacity=0;done();});});});}}
+  requestAnimationFrame(tick);
+}
+
+function phaseSlogan(done){
+  var el=document.getElementById('pSlogan');
+  var l1=document.getElementById('sLine1'),l2=document.getElementById('sLine2'),l3=document.getElementById('sLine3');
+  announce('One Course. Three Clouds. Zero Limits. Temple University CIS Department, Fall 2026.');
+  fade(el,1,400,function(){
+    pTimeout(200,function(){fade(l1,1,500,function(){pTimeout(300,function(){fade(l2,1,600,function(){pTimeout(400,function(){fade(l3,1,500,function(){pTimeout(2400,function(){fade(l1,0,400,null);fade(l2,0,400,null);fade(l3,0,400,null);pTimeout(450,function(){fade(el,0,400,done);});});});});});});});});
+  });
+}
+
+function phase1(done){announce('CIS 4345 Introduction to Cloud Computing, Temple University');var el=document.getElementById('p1');fade(el,1,700,function(){pTimeout(1800,function(){fade(el,0,500,done);});});}
+function phase2(done){
+  runProvider('aws',AWS_CMDS,'AWS — Amazon Web Services','Now showing Amazon Web Services',function(){
+    pTimeout(300,function(){runProvider('azure',AZ_CMDS,'Azure — Microsoft Azure','Now showing Microsoft Azure',function(){pTimeout(300,function(){runProvider('gcp',GCP_CMDS,'GCP — Google Cloud Platform','Now showing Google Cloud Platform',done);});});});
+  });
+}
+function phase4(){announce('Course info: CIS 4345, Temple University, Fall 2026');fade(document.getElementById('p4'),1,900,null);}
+
+setTimeout(function(){phase1(function(){phase2(function(){phaseSlogan(function(){phase4();});});});},500);
+</script>
+</body>
+</html>
