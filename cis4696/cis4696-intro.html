@@ -16,11 +16,11 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
   position:absolute;
   top:50%;left:50%;
   transform:translate(-50%,-50%);
-  width:min(680px,90%);
-  background:#0a0a0a;
-  border:1.5px solid #9D2235;
-  border-radius:8px;
-  box-shadow:0 0 40px rgba(157,34,53,0.35),0 0 80px rgba(157,34,53,0.12);
+  width:min(860px,94%);
+  background:#080808;
+  border:2px solid #9D2235;
+  border-radius:10px;
+  box-shadow:0 0 60px rgba(157,34,53,0.5),0 0 120px rgba(157,34,53,0.18),inset 0 0 40px rgba(0,0,0,0.8);
   z-index:20;
   opacity:0;
 }
@@ -37,9 +37,9 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
 .tdot.r{background:#9D2235;}
 .tdot.y{background:#333;}
 .tdot.g{background:#333;}
-#termTitleText{font-size:12px;color:#666;margin-left:8px;letter-spacing:0.08em;}
-#termBody{padding:20px 22px 22px;min-height:260px;}
-#termOutput{font-size:clamp(11px,1.4vw,13px);line-height:1.9;color:#c0c0c0;}
+#termTitleText{font-size:14px;color:#888;margin-left:8px;letter-spacing:0.1em;}
+#termBody{padding:26px 30px 28px;min-height:340px;}
+#termOutput{font-size:clamp(14px,1.9vw,18px);line-height:2;color:#d4d4d4;letter-spacing:0.02em;}
 .t-red{color:#ff4d6d;}
 .t-green{color:#22c55e;}
 .t-yellow{color:#fbbf24;}
@@ -48,7 +48,7 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
 .t-dim{color:#555;}
 .t-white{color:#f0f0f0;}
 .t-cherry{color:#ff6b84;}
-#cursor{display:inline-block;width:8px;height:14px;background:#9D2235;animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px;}
+#cursor{display:inline-block;width:11px;height:20px;background:#9D2235;animation:blink 1s step-end infinite;vertical-align:middle;margin-left:3px;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
 /* Slogan overlay */
 #sloganWrap{
@@ -60,9 +60,9 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
   text-align:center;padding:20px;
 }
 #slogLine1{font-size:clamp(12px,2vw,18px);color:#9D2235;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:12px;opacity:0;}
-#slogLine2{font-size:clamp(26px,5.5vw,56px);font-weight:900;color:#fff;line-height:1.1;opacity:0;letter-spacing:0.02em;}
+#slogLine2{font-size:clamp(32px,7vw,72px);font-weight:900;color:#fff;line-height:1.1;opacity:0;letter-spacing:0.02em;}
 #slogLine2 .hl{color:#ff4d6d;}
-#slogLine3{font-size:clamp(12px,1.8vw,16px);color:#555;letter-spacing:0.16em;text-transform:uppercase;margin-top:16px;opacity:0;}
+#slogLine3{font-size:clamp(13px,2vw,18px);color:#94a3b8;letter-spacing:0.16em;text-transform:uppercase;margin-top:16px;opacity:0;}
 /* Info card */
 #infoCard{
   position:absolute;
@@ -72,13 +72,13 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
   z-index:25;opacity:0;pointer-events:none;
   text-align:center;padding:24px 30px;
 }
-#infoCard .ititle{font-size:clamp(22px,4vw,42px);font-weight:900;color:#fff;margin-bottom:10px;line-height:1.1;font-family:'Courier New',Courier,monospace;}
+#infoCard .ititle{font-size:clamp(26px,5vw,52px);font-weight:900;color:#fff;margin-bottom:12px;line-height:1.1;font-family:'Courier New',Courier,monospace;}
 #infoCard .ititle .hl{color:#ff4d6d;}
-#infoCard .isub{font-size:clamp(13px,1.8vw,17px);color:#94a3b8;letter-spacing:0.06em;font-family:'Courier New',Courier,monospace;}
-#infoCard .ibadges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
+#infoCard .isub{font-size:clamp(14px,2vw,19px);color:#e2e8f0;letter-spacing:0.06em;font-family:'Courier New',Courier,monospace;}
+#infoCard .ibadges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;max-width:600px;margin-left:auto;margin-right:auto;}
 #infoCard .ibadge{font-size:13px;padding:5px 13px;border-radius:4px;border:1px solid rgba(157,34,53,0.5);color:#fda4af;background:rgba(157,34,53,0.12);font-family:'Courier New',Courier,monospace;}
 #infoCard .ibadge strong{color:#ff4d6d;}
-#infoCard .tagline{font-size:clamp(12px,1.5vw,14px);color:#64748b;line-height:1.8;max-width:580px;margin:16px auto 0;font-family:'Courier New',Courier,monospace;}
+#infoCard .tagline{font-size:clamp(13px,1.6vw,15px);color:#cbd5e1;line-height:1.8;max-width:600px;margin:14px auto 0;font-family:'Courier New',Courier,monospace;}
 /* Pause button */
 #pauseBtn{
   position:absolute;bottom:14px;right:14px;z-index:9999;
@@ -157,32 +157,25 @@ function resize(){
 }
 resize();setTimeout(resize,200);window.addEventListener('resize',resize);
 
-// Background — falling matrix chars + red pulse nodes
-var particles=[];
+// Background — Matrix digital rain (proper cascade with bright lead + fading trail)
 var matrixCols=[];
 var bgFrame=0;
+var MATRIX_CHARS='アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF!@#$><|/\\';
 
 function initParticles(){
-  particles=[];matrixCols=[];
-  var cols=Math.floor(bgC.width/18);
-  for(var c=0;c<cols;c++){
+  matrixCols=[];
+  var colW=18;
+  var numCols=Math.ceil(bgC.width/colW);
+  for(var c=0;c<numCols;c++){
+    var trailLen=Math.floor(8+Math.random()*18);
     matrixCols.push({
-      x:c*18+9,
+      x:c*colW+colW/2,
       y:Math.random()*bgC.height*-1,
-      speed:0.4+Math.random()*0.8,
-      opacity:0.04+Math.random()*0.08,
-      chars:'ABCDEF0123456789!@#$%^&*<>?/\\|nmap-sV-Pn-T4sqlixssreconexploit'
-    });
-  }
-  // Red pulse nodes
-  for(var i=0;i<12;i++){
-    particles.push({
-      x:Math.random()*bgC.width,
-      y:Math.random()*bgC.height,
-      r:1+Math.random()*2,
-      pulse:Math.random()*Math.PI*2,
-      vx:(Math.random()-0.5)*0.15,
-      vy:(Math.random()-0.5)*0.12
+      speed:1.2+Math.random()*2.8,
+      trailLen:trailLen,
+      trail:[],
+      colW:colW,
+      bright:Math.random()<0.15   // some columns get extra brightness
     });
   }
 }
@@ -191,29 +184,54 @@ function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5)
 
 function drawBg(){
   if(!paused){
-    bgX.fillStyle='rgba(5,5,5,0.15)';bgX.fillRect(0,0,bgC.width,bgC.height);
-    bgX.font='12px "Courier New",monospace';
+    // Soft black fade — creates the trail smear effect
+    bgX.fillStyle='rgba(0,0,0,0.06)';
+    bgX.fillRect(0,0,bgC.width,bgC.height);
 
-    // Matrix rain
+    bgX.font='bold 15px "Courier New",monospace';
+    bgX.textAlign='center';
+
     matrixCols.forEach(function(col){
+      // Advance position
       col.y+=col.speed;
-      if(col.y>bgC.height)col.y=Math.random()*-200;
-      var ch=col.chars[Math.floor(Math.random()*col.chars.length)];
-      bgX.fillStyle='rgba(157,34,53,'+col.opacity+')';
-      bgX.fillText(ch,col.x,col.y);
-    });
 
-    // Pulse nodes
-    particles.forEach(function(p){
-      p.pulse+=0.025;
-      p.x+=p.vx;p.y+=p.vy;
-      if(p.x<0||p.x>bgC.width)p.vx*=-1;
-      if(p.y<0||p.y>bgC.height)p.vy*=-1;
-      var g=0.4+0.3*Math.sin(p.pulse);
-      bgX.beginPath();bgX.arc(p.x,p.y,p.r*3,0,Math.PI*2);
-      bgX.fillStyle=hexA('#9D2235',g*0.08);bgX.fill();
-      bgX.beginPath();bgX.arc(p.x,p.y,p.r,0,Math.PI*2);
-      bgX.fillStyle='#9D2235';bgX.fill();
+      // Add new char to trail head
+      col.trail.unshift(MATRIX_CHARS[Math.floor(Math.random()*MATRIX_CHARS.length)]);
+
+      // Trim trail to max length
+      if(col.trail.length>col.trailLen)col.trail.length=col.trailLen;
+
+      // Reset when column has fallen off screen
+      if(col.y-col.trail.length*16>bgC.height){
+        col.y=Math.random()*bgC.height*-0.5;
+        col.trail=[];
+        col.speed=1.2+Math.random()*2.8;
+        col.trailLen=Math.floor(8+Math.random()*18);
+      }
+
+      // Draw each char in the trail
+      for(var i=0;i<col.trail.length;i++){
+        var cy=col.y-i*16;
+        if(cy<0||cy>bgC.height)continue;
+        var ratio=1-(i/col.trailLen);
+
+        if(i===0){
+          // Leading char — bright white or bright green
+          bgX.fillStyle=col.bright?'rgba(255,255,255,0.95)':'rgba(180,255,180,0.98)';
+          // Glow behind lead char
+          bgX.shadowColor='#00ff41';
+          bgX.shadowBlur=12;
+        } else {
+          // Trail chars — green fading to dark
+          var green=Math.floor(180*ratio+20);
+          var alpha=Math.max(0.03,ratio*0.85);
+          bgX.fillStyle='rgba(0,'+green+',0,'+alpha+')';
+          bgX.shadowBlur=ratio>0.6?6:0;
+          bgX.shadowColor='#00ff41';
+        }
+        bgX.fillText(col.trail[i],col.x,cy);
+      }
+      bgX.shadowBlur=0;
     });
     bgFrame++;
   }
@@ -263,7 +281,7 @@ function typeChar(str,cls,idx,cb){
   span.className=cls||'';
   span.textContent=str[idx];
   termOut.appendChild(span);
-  setTimeout(function(){typeChar(str,cls,idx+1,cb);},35+Math.random()*20);
+  setTimeout(function(){typeChar(str,cls,idx+1,cb);},42+Math.random()*22);
 }
 
 function addLine(text,cls,cb){
