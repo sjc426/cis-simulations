@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 Week Animation</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { width:100%; height:100%; background:#060412; overflow:hidden; font-family:"Segoe UI",Arial,sans-serif; }
+canvas { display:block; }
+#ada-pause { position:absolute; bottom:12px; right:12px; z-index:999; background:rgba(0,0,0,0.55); border:1.5px solid rgba(255,255,255,0.3); color:#fff; font-size:13px; padding:6px 14px; border-radius:20px; cursor:pointer; font-family:"Segoe UI",Arial,sans-serif; backdrop-filter:blur(4px); transition:background 0.2s; }
+#ada-pause:hover { background:rgba(255,255,255,0.18); }
+#ada-pause:focus { outline:2px solid #fff; outline-offset:3px; }
+</style>
+</head>
+<body>
+<canvas id="c" role="img" aria-label="Animated educational illustration for this week. Use Pause button to stop animation."></canvas>
+<script>
+var TOPICS=["","Managing Network Servers — Foundations","Virtualization, Cloud & Your First Server","Active Directory — Installation & Administration","DNS & DHCP Configuration","File & Print Services","Group Policy Deep Dive","Remote Access & VPN","Midterm — Server Administration Review","Web & Application Servers","Monitoring & Performance","Backup & Disaster Recovery","Security Hardening","Automation & Scripting","Final Project — Server Infrastructure Design"];
+var SUBTITLES=["","Server roles \u00b7 Architecture \u00b7 Admin fundamentals","Hypervisors \u00b7 VMs \u00b7 Your first cloud server","AD DS \u00b7 Domain controllers \u00b7 LDAP \u00b7 Users & groups","Name resolution \u00b7 IP leasing \u00b7 Network services","NTFS permissions \u00b7 Shares \u00b7 Print queues","GPO \u00b7 OUs \u00b7 Policy inheritance \u00b7 Enforcement","VPN \u00b7 RDP \u00b7 DirectAccess \u00b7 Secure tunnels","Cumulative review \u00b7 Lab practical \u00b7 Exam prep","IIS \u00b7 Apache \u00b7 Nginx \u00b7 App hosting","Task Manager \u00b7 PerfMon \u00b7 Alerts \u00b7 Baselines","VSS \u00b7 Windows Backup \u00b7 3-2-1 strategy \u00b7 RTO/RPO","Hardening \u00b7 Firewall rules \u00b7 Patch mgmt \u00b7 Audit logs","PowerShell \u00b7 Bash \u00b7 Task Scheduler \u00b7 Automation","Design \u00b7 Build \u00b7 Secure \u00b7 Document \u00b7 Decommission"];
+var ICONS=["","\ud83d\udea7","\ud83d\udda5\ufe0f","\ud83d\udd10","\ud83c\udf10","\ud83d\uddc2\ufe0f","\ud83d\udccb","\ud83d\udd12","\ud83d\udcdd","\ud83c\udf0d","\ud83d\udcca","\ud83d\udcbe","\ud83d\udee1\ufe0f","\u2699\ufe0f","\ud83c\udfc6"];
+var KEYWORDS=[[],["Server","Roles","NIC","RAID","BIOS","UEFI","RAM","CPU","iDRAC","IPMI","BMC","Rack","Domain","Admin","DNS","DHCP"],["Hypervisor","Type 1","Type 2","vCPU","vRAM","Snapshot","Clone","EC2","Azure VM","GCE","IaaS","PaaS","SaaS"],["Active Directory","AD DS","LDAP","Kerberos","DC","OU","GPO","Schema","Forest","Domain","Trust","SPN","UPN"],["DNS","A Record","CNAME","MX","PTR","TTL","DHCP","Lease","Scope","Relay","IPv4","IPv6","Forwarder","Zone"],["NTFS","Share","ACL","Permissions","DFS","SMB","NFS","Print","Queue","Driver","Spool","GPP","Home Folder"],["GPO","OU","Policy","Loopback","WMI Filter","Precedence","RSOP","gpresult","Block","Enforce","Link"],["VPN","RDP","TLS","IPsec","L2TP","SSTP","DirectAccess","NLA","MFA","Bastion","Jumpbox","RDS","Gateway"],["Review","Midterm","Lab","Practical","Exam","Server","AD","DNS","DHCP","GPO","VPN","Storage","Security"],["IIS","Apache","Nginx","HTTP","HTTPS","SSL","TLS","vHost","App Pool","PHP","ASP.NET","Reverse Proxy","WAF"],["PerfMon","Baseline","Counter","Alert","Task Mgr","WMI","SNMP","Syslog","Threshold","CPU","Memory","Disk"],["Backup","VSS","RTO","RPO","3-2-1","Incremental","Differential","Full","DR","Offsite","Cloud","Restore"],["Hardening","Firewall","ACL","Patch","Audit","Event Log","Antivirus","BitLocker","AppLocker","CIS","STIG"],["PowerShell","Bash","Script","Cmdlet","Cron","Task Scheduler","Module","Pipeline","Runbook","Automation"],["Design","Capstone","Documentation","Decommission","DR Plan","Runbook","Portfolio","Network Diagram","Final"]];
+
+var params=new URLSearchParams(window.location.search);
+var WEEK=Math.max(1,Math.min(14,parseInt(params.get("week"))||1));
+var TOPIC=TOPICS[WEEK]||"CIS 252";
+var SUBTITLE=SUBTITLES[WEEK]||"Managing Network Servers";
+var ICON=ICONS[WEEK]||"\ud83d\udea7";
+var WORDS=KEYWORDS[WEEK]||KEYWORDS[1];
+
+var canvas=document.getElementById("c");
+var ctx=canvas.getContext("2d");
+var W,H,frame=0;
+var AMBER="#d97706",AMBER2="#fbbf24",TEAL="#0ea5e9",GREEN="#10b981",SLATE="#475569";
+
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize();window.addEventListener("resize",resize);
+
+var particles=[];
+for(var i=0;i<55;i++) particles.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00014,vy:-Math.random()*.00018-.00002,r:Math.random()*1.3+.3,alpha:Math.random()*.18+.04,color:[AMBER,AMBER2,TEAL,GREEN,SLATE][Math.floor(Math.random()*5)]});
+
+var floaters=[];
+for(var j=0;j<WORDS.length;j++) floaters.push({x:Math.random(),y:Math.random(),vx:(Math.random()-.5)*.00020,vy:(Math.random()-.5)*.00014,word:WORDS[j],alpha:Math.random()*.13+.04,size:Math.floor(Math.random()*4)+8});
+
+var NODES=[],NODE_COLS=5,NODE_ROWS=3;
+for(var nr=0;nr<NODE_ROWS;nr++) for(var nc=0;nc<NODE_COLS;nc++) NODES.push({gx:nc,gy:nr,pulse:Math.random()*Math.PI*2,pulseSpeed:.018+Math.random()*.012,active:Math.random()>.3,born:80+nc*14+nr*20});
+
+var packets=[],packetTimer=0;
+function spawnPacket(){var f=Math.floor(Math.random()*NODES.length),t=Math.floor(Math.random()*NODES.length);if(f===t)return;packets.push({from:f,to:t,t:0,dt:.016,col:[AMBER2,TEAL,GREEN][Math.floor(Math.random()*3)]});}
+
+function fadeIn(f,s,d){return Math.max(0,Math.min(1,(f-s)/d));}
+function nodePos(n){var px=W*.12,py=H*.44,sx=(W*.76)/(NODE_COLS-1),sy=(H*.32)/(NODE_ROWS-1);return{x:px+n.gx*sx,y:py+n.gy*sy};}
+function rr(x,y,w,h,r){ctx.beginPath();if(ctx.roundRect){ctx.roundRect(x,y,w,h,r);}else{ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}}
+
+function drawBG(){
+  ctx.fillStyle="#060412";ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle="rgba(217,119,6,0.04)";ctx.lineWidth=1;
+  for(var gx=0;gx<W;gx+=48){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+  for(var gy=0;gy<H;gy+=48){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+  var g=ctx.createLinearGradient(0,H*.7,0,H);g.addColorStop(0,"rgba(217,119,6,0)");g.addColorStop(1,"rgba(217,119,6,0.07)");
+  ctx.fillStyle=g;ctx.fillRect(0,H*.7,W,H*.3);
+}
+function drawParticles(){for(var i=0;i<particles.length;i++){var p=particles[i];p.x+=p.vx;p.y+=p.vy;if(p.y<-.01)p.y=1.01;if(p.x<0)p.x=1;if(p.x>1)p.x=0;ctx.beginPath();ctx.arc(p.x*W,p.y*H,p.r,0,Math.PI*2);ctx.fillStyle=p.color+Math.floor(p.alpha*255).toString(16).padStart(2,"0");ctx.fill();}}
+function drawFloaters(){for(var j=0;j<floaters.length;j++){var f=floaters[j];f.x+=f.vx;f.y+=f.vy;if(f.x<0)f.x=1;if(f.x>1)f.x=0;if(f.y<0)f.y=1;if(f.y>1)f.y=0;ctx.font=f.size+"px Segoe UI,Arial";ctx.fillStyle=AMBER+Math.floor(f.alpha*255).toString(16).padStart(2,"0");ctx.textAlign="center";ctx.fillText(f.word,f.x*W,f.y*H);}}
+function drawTitle(a){
+  if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+  var bw=Math.min(W*.18,140),bh=Math.min(H*.055,34),bx=W/2-bw/2,by=H*.09;
+  ctx.shadowColor=AMBER;ctx.shadowBlur=18*a;rr(bx,by,bw,bh,bh/2);ctx.fillStyle=AMBER;ctx.fill();
+  ctx.font="bold "+Math.floor(bh*.55)+"px Segoe UI,Arial";ctx.fillStyle="#fff";ctx.textAlign="center";ctx.shadowBlur=0;
+  ctx.fillText("WEEK "+WEEK,W/2,by+bh*.72);
+  ctx.font=Math.floor(H*.075)+"px Arial";ctx.shadowColor=AMBER2;ctx.shadowBlur=22*a;ctx.fillText(ICON,W/2,H*.22);
+  var ts=Math.min(Math.floor(H*.072),Math.floor(W/(TOPIC.length*.55)));ts=Math.max(ts,16);
+  ctx.font="bold "+ts+"px Segoe UI,Arial";ctx.fillStyle="#fff";ctx.shadowBlur=24*a;ctx.fillText(TOPIC,W/2,H*.33);
+  ctx.font=Math.floor(H*.038)+"px Segoe UI,Arial";ctx.fillStyle=AMBER2;ctx.shadowBlur=10*a;ctx.fillText(SUBTITLE,W/2,H*.395);
+  ctx.font=Math.floor(H*.026)+"px Segoe UI,Arial";ctx.fillStyle="rgba(251,191,36,0.45)";ctx.shadowBlur=0;
+  ctx.fillText("CIS 252  \u00b7  Prof. Chang  \u00b7  Community College of Philadelphia",W/2,H*.445);
+  ctx.restore();
+}
+function drawNodes(a){
+  if(a<=0)return;ctx.save();ctx.globalAlpha=a;
+  for(var i=0;i<NODES.length;i++){var na=NODES[i];if(!na.active||fadeIn(frame,na.born,18)<=0)continue;var pa=nodePos(na);for(var j=i+1;j<NODES.length;j++){var nb=NODES[j];if(!nb.active||fadeIn(frame,nb.born,18)<=0)continue;if(Math.abs(na.gx-nb.gx)+Math.abs(na.gy-nb.gy)!==1)continue;var pb=nodePos(nb);ctx.beginPath();ctx.moveTo(pa.x,pa.y);ctx.lineTo(pb.x,pb.y);ctx.strokeStyle="rgba(217,119,6,0.18)";ctx.lineWidth=1;ctx.stroke();}}
+  for(var k=0;k<NODES.length;k++){var n=NODES[k];var nfa=fadeIn(frame,n.born,18);if(nfa<=0)continue;n.pulse+=n.pulseSpeed;var pf=.5+.5*Math.sin(n.pulse);var pos=nodePos(n);var rad=(n.active?6:4)+pf*2;var col=n.active?AMBER:SLATE;ctx.shadowColor=col;ctx.shadowBlur=n.active?14*pf:4;ctx.beginPath();ctx.arc(pos.x,pos.y,rad,0,Math.PI*2);ctx.fillStyle=n.active?col:"rgba(71,85,105,0.6)";ctx.fill();ctx.shadowBlur=0;ctx.beginPath();ctx.arc(pos.x,pos.y,rad*.35,0,Math.PI*2);ctx.fillStyle=n.active?"#fff":SLATE;ctx.fill();}
+  ctx.restore();
+}
+function drawPackets(a){
+  if(a<=0)return;
+  for(var i=packets.length-1;i>=0;i--){var pk=packets[i];pk.t+=pk.dt;if(pk.t>1.2){packets.splice(i,1);continue;}var t=Math.min(pk.t,1);var pf=nodePos(NODES[pk.from]);var pt=nodePos(NODES[pk.to]);var px=pf.x+(pt.x-pf.x)*t;var py=pf.y+(pt.y-pf.y)*t;ctx.save();ctx.globalAlpha=a*(1-pk.t*.5);ctx.shadowColor=pk.col;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=pk.col;ctx.fill();var tl=.12;var tx=px-(pt.x-pf.x)*tl;var ty=py-(pt.y-pf.y)*tl;var gr=ctx.createLinearGradient(tx,ty,px,py);gr.addColorStop(0,"transparent");gr.addColorStop(1,pk.col+"99");ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(px,py);ctx.strokeStyle=gr;ctx.lineWidth=2;ctx.stroke();ctx.restore();}
+}
+function drawFooter(a){if(a<=0)return;ctx.save();ctx.globalAlpha=a;ctx.font=Math.floor(H*.03)+"px Segoe UI,Arial";ctx.fillStyle="rgba(217,119,6,0.55)";ctx.textAlign="center";ctx.fillText("Network is live \u00b7 nodes are talking \u00b7 packets are moving \u00b7 CIS 252",W/2,H*.96);ctx.restore();}
+
+function animate(){
+  frame++;ctx.clearRect(0,0,W,H);
+  drawBG();drawParticles();drawFloaters();
+  drawTitle(fadeIn(frame,5,35));drawNodes(fadeIn(frame,75,30));
+  drawPackets(fadeIn(frame,140,20));drawFooter(fadeIn(frame,160,30));
+  packetTimer++;if(frame>140&&packetTimer%42===0)spawnPacket();
+  requestAnimationFrame(animate);
+}
+
+var _paused=false,_orig=animate;
+animate=function(){if(!_paused)_orig();};
+if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)_paused=true;
+var _btn=document.createElement("button");_btn.id="ada-pause";_btn.setAttribute("aria-label","Pause animation");_btn.setAttribute("aria-pressed","false");_btn.innerHTML="&#9646;&#9646; Pause";document.body.appendChild(_btn);
+_btn.addEventListener("click",function(){_paused=!_paused;if(_paused){_btn.innerHTML="&#9654; Resume";_btn.setAttribute("aria-label","Resume animation");_btn.setAttribute("aria-pressed","true");}else{_btn.innerHTML="&#9646;&#9646; Pause";_btn.setAttribute("aria-label","Pause animation");_btn.setAttribute("aria-pressed","false");_orig();}});
+animate();
+</script>
+</body>
+</html>
