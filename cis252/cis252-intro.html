@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:Arial,Helvetica,sans-serif;}
+canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;}
+#stage{position:fixed;top:0;left:0;width:100%;height:100%;z-index:10;}
+.layer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
+
+#p1 .title{font-size:clamp(52px,12vw,96px);font-weight:900;color:#38bdf8;text-shadow:0 0 60px rgba(56,189,248,0.9),0 0 120px rgba(56,189,248,0.4);letter-spacing:0.1em;text-align:center;}
+#p1 .sub{font-size:clamp(16px,3vw,26px);color:#7dd3fc;letter-spacing:0.25em;text-align:center;margin-top:14px;text-transform:uppercase;}
+
+#p2{flex-direction:column;}
+#p2 canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;}
+#p2 .scene-label{position:absolute;bottom:10%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3vw,26px);color:#38bdf8;letter-spacing:0.15em;text-transform:uppercase;text-shadow:0 0 14px rgba(56,189,248,0.8);opacity:0;white-space:nowrap;font-weight:700;z-index:2;}
+#p2 .cmd-stream{position:absolute;top:8%;left:50%;transform:translateX(-50%);font-family:monospace;font-size:clamp(11px,1.8vw,15px);color:#22d3ee;opacity:0;z-index:2;text-align:center;white-space:nowrap;text-shadow:0 0 8px rgba(34,211,238,0.7);}
+
+#p3 .name-display{position:absolute;width:100%;text-align:center;opacity:0;transform:scale(0.15);}
+#p3 .name-display .first{font-size:clamp(48px,13vw,120px);font-weight:900;color:#38bdf8;text-shadow:0 0 40px rgba(56,189,248,1),0 0 80px rgba(56,189,248,0.6),0 0 160px rgba(56,189,248,0.3);letter-spacing:0.05em;line-height:1;display:block;}
+#p3 .name-display .dept{font-size:clamp(12px,2vw,18px);color:#7dd3fc;letter-spacing:0.2em;margin-top:8px;display:block;opacity:0.7;}
+
+#p4{flex-direction:column;text-align:center;padding:20px;}
+#p4 .info-title{font-size:clamp(20px,4vw,36px);color:#fff;font-weight:600;margin-bottom:8px;}
+#p4 .info-sub{font-size:clamp(12px,1.8vw,16px);color:#7dd3fc;letter-spacing:0.08em;}
+#p4 .info-badges{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;justify-content:center;}
+#p4 .badge{font-size:13px;padding:5px 14px;border-radius:20px;border:1px solid rgba(56,189,248,0.4);color:#e0f2fe;background:rgba(56,189,248,0.1);}
+#p4 .badge strong{color:#38bdf8;}
+#p4 .tagline{font-size:clamp(11px,1.6vw,14px);color:#94a3b8;line-height:1.6;max-width:580px;margin:14px auto 0;}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div id="stage">
+  <div class="layer" id="p1">
+    <div><div class="title">CIS 252</div><div class="sub">Managing Network Servers</div></div>
+  </div>
+  <div class="layer" id="p2">
+    <canvas id="sceneCanvas"></canvas>
+    <div class="cmd-stream" id="cmdStream"></div>
+    <div class="scene-label" id="sceneLabel"></div>
+  </div>
+  <div class="layer" id="p3">
+    <div class="name-display" id="nameDisplay">
+      <span class="first" id="nameText"></span>
+      <span class="dept">CIS 252 &mdash; Summer 2026</span>
+    </div>
+  </div>
+  <div class="layer" id="p4">
+    <div>
+      <div class="info-title">CIS 252 &mdash; Managing <span style="color:#38bdf8;">Network Servers</span></div>
+      <div class="info-sub">Community College of Philadelphia &nbsp;&bull;&nbsp; CIS Department &nbsp;&bull;&nbsp; Summer 2026</div>
+      <div class="info-badges">
+        <span class="badge">Semester <strong>Summer 2026</strong></span>
+        <span class="badge">Format <strong>Hybrid</strong></span>
+        <span class="badge">Linux <strong>Ubuntu Server</strong></span>
+        <span class="badge">Windows <strong>Active Directory</strong></span>
+        <span class="badge">Textbook <strong>$0</strong></span>
+      </div>
+      <div class="tagline">You will build, configure, and manage real servers. From spinning up Linux user accounts and hardening permissions to joining machines to a Windows domain and managing Active Directory — this course is hands-on from day one. You leave with the skills that IT administrators use every single day.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── NETWORK MESH BACKGROUND ───────────────────────────────────
+var bgCanvas=document.getElementById('bgCanvas'),bgCtx=bgCanvas.getContext('2d');
+var bgNodes=[],bgPackets=[],bgFrame=0,bgAccent='linux';
+
+function resizeBg(){bgCanvas.width=innerWidth;bgCanvas.height=innerHeight;}
+resizeBg();window.addEventListener('resize',resizeBg);
+
+function initBgNodes(){
+  bgNodes=[];
+  var cols=8,rows=6;
+  for(var r=0;r<rows;r++){
+    for(var c=0;c<cols;c++){
+      var jx=(Math.random()-0.5)*80,jy=(Math.random()-0.5)*60;
+      bgNodes.push({
+        x:bgCanvas.width*(0.05+c*(0.9/(cols-1)))+jx,
+        y:bgCanvas.height*(0.08+r*(0.84/(rows-1)))+jy,
+        vx:(Math.random()-0.5)*0.12,vy:(Math.random()-0.5)*0.10,
+        pulse:Math.random()*Math.PI*2,
+        size:Math.random()<0.12?5:Math.random()<0.3?3.5:2.5
+      });
+    }
+  }
+  bgPackets=[];
+}
+initBgNodes();
+
+function spawnBgPacket(){
+  if(bgPackets.length>30)return;
+  var a=Math.floor(Math.random()*bgNodes.length);
+  var b=Math.floor(Math.random()*bgNodes.length);
+  if(a===b)return;
+  var dx=bgNodes[a].x-bgNodes[b].x,dy=bgNodes[a].y-bgNodes[b].y;
+  if(Math.sqrt(dx*dx+dy*dy)>bgCanvas.width*0.28)return;
+  var col=bgAccent==='ad'
+    ?( Math.random()<0.5?'#818cf8':Math.random()<0.5?'#a78bfa':'#38bdf8')
+    :(Math.random()<0.5?'#22d3ee':Math.random()<0.5?'#38bdf8':'#6366f1');
+  bgPackets.push({a:a,b:b,t:0,speed:0.005+Math.random()*0.007,color:col});
+}
+
+function hexAlpha(hex,a){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+
+function drawBg(){
+  bgCtx.fillStyle='rgba(0,4,18,0.16)';bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+  var maxDist=bgCanvas.width*0.22;
+  for(var i=0;i<bgNodes.length;i++){
+    for(var j=i+1;j<bgNodes.length;j++){
+      var dx=bgNodes[i].x-bgNodes[j].x,dy=bgNodes[i].y-bgNodes[j].y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<maxDist){
+        var alpha=(1-d/maxDist)*0.18;
+        bgCtx.strokeStyle='rgba(56,189,248,'+alpha+')';
+        bgCtx.lineWidth=0.6;
+        bgCtx.beginPath();bgCtx.moveTo(bgNodes[i].x,bgNodes[i].y);bgCtx.lineTo(bgNodes[j].x,bgNodes[j].y);bgCtx.stroke();
+      }
+    }
+  }
+  bgNodes.forEach(function(n){
+    n.pulse+=0.035;
+    n.x+=n.vx;n.y+=n.vy;
+    if(n.x<10||n.x>bgCanvas.width-10)n.vx*=-1;
+    if(n.y<10||n.y>bgCanvas.height-10)n.vy*=-1;
+    var glow=0.35+0.3*Math.sin(n.pulse);
+    var col=bgAccent==='ad'?'#818cf8':'#38bdf8';
+    bgCtx.beginPath();bgCtx.arc(n.x,n.y,n.size*2.8,0,Math.PI*2);
+    bgCtx.fillStyle=hexAlpha(col,glow*0.12);bgCtx.fill();
+    bgCtx.beginPath();bgCtx.arc(n.x,n.y,n.size,0,Math.PI*2);
+    bgCtx.fillStyle=col;bgCtx.fill();
+  });
+  for(var pi=bgPackets.length-1;pi>=0;pi--){
+    var p=bgPackets[pi];p.t+=p.speed;
+    if(p.t>=1){bgPackets.splice(pi,1);continue;}
+    var na=bgNodes[p.a],nb=bgNodes[p.b];
+    if(!na||!nb)continue;
+    var px=na.x+(nb.x-na.x)*p.t,py=na.y+(nb.y-na.y)*p.t;
+    for(var tr=4;tr>=0;tr--){
+      var tt=Math.max(0,p.t-tr*0.022);
+      var tx=na.x+(nb.x-na.x)*tt,ty=na.y+(nb.y-na.y)*tt;
+      bgCtx.beginPath();bgCtx.arc(tx,ty,Math.max(0.5,2.5-tr*0.4),0,Math.PI*2);
+      bgCtx.fillStyle=hexAlpha(p.color,tr===0?1:(5-tr)*0.14);bgCtx.fill();
+    }
+  }
+  if(bgFrame%16===0)spawnBgPacket();
+  bgFrame++;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+// ── SCENE CANVAS (Phase 2) ────────────────────────────────────
+var sc=document.getElementById('sceneCanvas'),sctx=sc.getContext('2d');
+function resizeSc(){sc.width=sc.offsetWidth;sc.height=sc.offsetHeight;}
+
+// ── FADE UTILITY ──────────────────────────────────────────────
+function fade(el,to,ms,cb){
+  var start=null,from=parseFloat(el.style.opacity)||0;
+  function step(ts){
+    if(!start)start=ts;
+    var p=Math.min((ts-start)/ms,1);
+    el.style.opacity=from+(to-from)*p;
+    p<1?requestAnimationFrame(step):cb&&cb();
+  }
+  requestAnimationFrame(step);
+}
+
+// ── SCENE A: LINUX SERVER RACK ────────────────────────────────
+var LINUX_CMDS=[
+  '$ useradd -m -s /bin/bash jsmith',
+  '$ passwd jsmith  →  Password set.',
+  '$ usermod -aG sudo jsmith',
+  '$ chmod 750 /home/jsmith',
+  '$ groupadd sysadmins',
+  '$ id jsmith  →  uid=1001 gid=1001 groups=sudo,sysadmins',
+  '$ systemctl enable ssh && systemctl start ssh',
+  '$ ufw allow OpenSSH && ufw enable'
+];
+
+function drawRack(progress){
+  resizeSc();sctx.clearRect(0,0,sc.width,sc.height);
+  var cx=sc.width/2,cy=sc.height/2;
+  var s=Math.min(sc.width,sc.height)/520;
+  sctx.shadowColor='rgba(56,189,248,0.5)';sctx.shadowBlur=20;
+
+  // rack chassis
+  var rw=160*s,rh=220*s,rx=cx-rw/2,ry=cy-rh/2;
+  sctx.strokeStyle='#38bdf8';sctx.lineWidth=2*s;
+  sctx.strokeRect(rx,ry,rw,rh);
+  sctx.fillStyle='rgba(56,189,248,0.04)';sctx.fillRect(rx,ry,rw,rh);
+
+  // rack ears
+  sctx.strokeRect(rx-10*s,ry+8*s,10*s,rh-16*s);
+  sctx.strokeRect(rx+rw,ry+8*s,10*s,rh-16*s);
+
+  // 1U server units
+  var numServers=6;
+  var serverH=28*s,gap=4*s,startY=ry+10*s;
+  var serversVisible=Math.min(numServers,Math.ceil(progress*numServers*1.4));
+
+  for(var i=0;i<serversVisible;i++){
+    var sy=startY+i*(serverH+gap);
+    var sw=rw-16*s,ssx=rx+8*s;
+    // server body
+    sctx.fillStyle='rgba(15,23,42,0.9)';sctx.fillRect(ssx,sy,sw,serverH);
+    sctx.strokeStyle='#1e40af';sctx.lineWidth=1*s;sctx.strokeRect(ssx,sy,sw,serverH);
+    // drive bays
+    for(var d=0;d<4;d++){
+      sctx.fillStyle='rgba(56,189,248,0.15)';
+      sctx.fillRect(ssx+4*s+d*14*s,sy+4*s,10*s,serverH-8*s);
+      sctx.strokeStyle='#1e3a8a';sctx.lineWidth=0.5*s;
+      sctx.strokeRect(ssx+4*s+d*14*s,sy+4*s,10*s,serverH-8*s);
+    }
+    // LED indicator — amber first, then green as progress advances
+    var ledFrac=(i+1)/numServers;
+    var powered=progress>ledFrac*0.7;
+    sctx.beginPath();sctx.arc(ssx+sw-10*s,sy+serverH/2,3*s,0,Math.PI*2);
+    sctx.fillStyle=powered?'#22c55e':'#f59e0b';sctx.fill();
+    // power button
+    sctx.beginPath();sctx.arc(ssx+sw-20*s,sy+serverH/2,4*s,0,Math.PI*2);
+    sctx.strokeStyle='#64748b';sctx.lineWidth=1*s;sctx.stroke();
+    sctx.beginPath();sctx.moveTo(ssx+sw-20*s,sy+serverH/2-4*s);sctx.lineTo(ssx+sw-20*s,sy+serverH/2-1*s);
+    sctx.strokeStyle='#94a3b8';sctx.stroke();
+    // network port glow
+    var portActive=powered&&progress>0.5;
+    sctx.fillStyle=portActive?'rgba(34,211,238,0.9)':'rgba(30,58,138,0.6)';
+    sctx.fillRect(ssx+sw-34*s,sy+serverH/2-3*s,6*s,6*s);
+  }
+
+  // patch panel label
+  sctx.shadowBlur=0;
+  sctx.fillStyle='#38bdf8';sctx.font='bold '+(9*s)+'px Arial';
+  sctx.textAlign='center';sctx.textBaseline='middle';
+  sctx.fillText('PATCH',rx+rw+28*s,cy-30*s);
+  sctx.fillText('PANEL',rx+rw+28*s,cy-18*s);
+
+  // cables on right side
+  for(var c2=0;c2<4;c2++){
+    var cabY=ry+30*s+c2*40*s;
+    sctx.beginPath();
+    sctx.moveTo(rx+rw+8*s,cabY);
+    sctx.bezierCurveTo(rx+rw+35*s,cabY,rx+rw+35*s,cabY+20*s,rx+rw+8*s,cabY+20*s);
+    sctx.strokeStyle='rgba(56,189,248,'+(0.3+c2*0.1)+')';sctx.lineWidth=2*s;
+    sctx.fill();sctx.stroke();
+  }
+  sctx.shadowBlur=0;
+}
+
+// ── SCENE B: ACTIVE DIRECTORY ─────────────────────────────────
+var AD_CMDS=[
+  'PS> New-ADUser -Name "J.Smith" -SamAccountName jsmith',
+  'PS> Set-ADAccountPassword jsmith -Reset',
+  'PS> Enable-ADAccount -Identity jsmith',
+  'PS> Add-ADGroupMember "Domain Admins" -Members jsmith',
+  'PS> Get-ADUser jsmith | Select Name,Enabled',
+  'PS> New-ADOrganizationalUnit -Name "Faculty"',
+  'PS> Move-ADObject jsmith -TargetPath "OU=Faculty,DC=ccp,DC=edu"',
+  'PS> gpupdate /force  →  Policy update complete.'
+];
+
+function drawAD(progress){
+  resizeSc();sctx.clearRect(0,0,sc.width,sc.height);
+  var cx=sc.width/2,cy=sc.height/2;
+  var s=Math.min(sc.width,sc.height)/520;
+  sctx.shadowColor='rgba(129,140,248,0.5)';sctx.shadowBlur=16;
+
+  // Domain root
+  var rootW=120*s,rootH=32*s,rootX=cx-rootW/2,rootY=cy-110*s;
+  sctx.fillStyle='rgba(129,140,248,0.18)';sctx.fillRect(rootX,rootY,rootW,rootH);
+  sctx.strokeStyle='#818cf8';sctx.lineWidth=1.5*s;sctx.strokeRect(rootX,rootY,rootW,rootH);
+  sctx.fillStyle='#a5b4fc';sctx.font='bold '+(10*s)+'px Arial';
+  sctx.textAlign='center';sctx.textBaseline='middle';
+  sctx.fillText('ccp.edu Domain',cx,rootY+rootH/2);
+
+  if(progress<0.12)return;
+
+  // OU boxes
+  var ous=[{name:'Faculty OU',col:'#38bdf8'},{name:'Students OU',col:'#38bdf8'},{name:'IT Staff OU',col:'#38bdf8'}];
+  var ouW=90*s,ouH=28*s,ouY=rootY+70*s;
+  var ouSpacing=110*s;
+  var ouStartX=cx-ouSpacing;
+  ous.forEach(function(ou,i){
+    if(progress<0.15+i*0.1)return;
+    var ox=ouStartX+i*ouSpacing,oy=ouY;
+    // connector
+    sctx.strokeStyle='rgba(56,189,248,0.5)';sctx.lineWidth=1*s;
+    sctx.setLineDash([4,4]);
+    sctx.beginPath();sctx.moveTo(cx,rootY+rootH);sctx.lineTo(ox+ouW/2,oy);sctx.stroke();
+    sctx.setLineDash([]);
+    sctx.fillStyle='rgba(56,189,248,0.12)';sctx.fillRect(ox,oy,ouW,ouH);
+    sctx.strokeStyle=ou.col;sctx.lineWidth=1.5*s;sctx.strokeRect(ox,oy,ouW,ouH);
+    sctx.fillStyle=ou.col;sctx.font='bold '+(9*s)+'px Arial';
+    sctx.textAlign='center';sctx.textBaseline='middle';
+    sctx.fillText(ou.name,ox+ouW/2,oy+ouH/2);
+    // user objects below each OU
+    if(progress>0.4+i*0.12){
+      for(var u=0;u<2;u++){
+        var ux=ox+(u===0?10*s:ouW/2+5*s),uy=oy+ouH+18*s;
+        // user icon circle
+        sctx.beginPath();sctx.arc(ux+12*s,uy+10*s,10*s,0,Math.PI*2);
+        sctx.fillStyle='rgba(99,102,241,0.2)';sctx.fill();
+        sctx.strokeStyle='#6366f1';sctx.lineWidth=1*s;sctx.stroke();
+        // head
+        sctx.beginPath();sctx.arc(ux+12*s,uy+7*s,4*s,0,Math.PI*2);
+        sctx.fillStyle='#818cf8';sctx.fill();
+        // body arc
+        sctx.beginPath();sctx.arc(ux+12*s,uy+18*s,6*s,Math.PI,0);
+        sctx.strokeStyle='#818cf8';sctx.stroke();
+        // connector to OU
+        sctx.strokeStyle='rgba(99,102,241,0.4)';sctx.lineWidth=0.8*s;
+        sctx.setLineDash([3,3]);
+        sctx.beginPath();sctx.moveTo(ox+ouW/2,oy+ouH);sctx.lineTo(ux+12*s,uy);sctx.stroke();
+        sctx.setLineDash([]);
+      }
+    }
+  });
+
+  // DC server box bottom
+  if(progress>0.7){
+    var dcW=100*s,dcH=30*s,dcX=cx-dcW/2,dcY=cy+70*s;
+    sctx.fillStyle='rgba(239,68,68,0.1)';sctx.fillRect(dcX,dcY,dcW,dcH);
+    sctx.strokeStyle='#ef4444';sctx.lineWidth=1.5*s;sctx.strokeRect(dcX,dcY,dcW,dcH);
+    sctx.fillStyle='#fca5a5';sctx.font='bold '+(9*s)+'px Arial';
+    sctx.textAlign='center';sctx.textBaseline='middle';
+    sctx.fillText('Domain Controller',cx,dcY+dcH/2);
+    sctx.strokeStyle='rgba(239,68,68,0.4)';sctx.lineWidth=1*s;
+    sctx.setLineDash([4,4]);
+    sctx.beginPath();sctx.moveTo(cx,rootY+rootH);sctx.lineTo(cx,dcY);sctx.stroke();
+    sctx.setLineDash([]);
+  }
+  sctx.shadowBlur=0;
+}
+
+// ── CMD STREAM TICKER ─────────────────────────────────────────
+var cmdInterval=null;
+function startCmdStream(cmds){
+  var el=document.getElementById('cmdStream');
+  el.style.opacity=0;
+  var idx=0;
+  fade(el,1,300,null);
+  cmdInterval=setInterval(function(){
+    el.textContent=cmds[idx%cmds.length];idx++;
+  },900);
+}
+function stopCmdStream(){
+  if(cmdInterval)clearInterval(cmdInterval);
+  var el=document.getElementById('cmdStream');
+  fade(el,0,200,null);
+}
+
+// ── STUDENTS ─────────────────────────────────────────────────
+var STUDENTS=[
+  'Darryl','Terrence','Sirron','Ibraheem','Inga','Andrew',
+  'Gianna','Nasia','Shantonu','Kimlieng','Justin',
+  'Aneudy','Robert','Aidan','Tran Anh','Jazzmere'
+];
+
+// ── PHASE ENGINE ─────────────────────────────────────────────
+function phase1(done){
+  var el=document.getElementById('p1');
+  el.style.opacity=0;
+  fade(el,1,700,function(){
+    setTimeout(function(){fade(el,0,600,done);},1600);
+  });
+}
+
+function phase2(done){
+  var el=document.getElementById('p2');
+  el.style.opacity=1;
+  var lbl=document.getElementById('sceneLabel');
+  resizeSc();
+
+  // Scene A: Linux server rack
+  bgAccent='linux';
+  lbl.textContent='Linux — User & Server Management';
+  lbl.style.opacity=0;
+  startCmdStream(LINUX_CMDS);
+  fade(lbl,1,400,null);
+
+  var prog=0,animA=null;
+  function tickA(){
+    prog+=0.012;
+    drawRack(Math.min(prog,1));
+    if(prog<1.08)animA=requestAnimationFrame(tickA);
+    else{
+      cancelAnimationFrame(animA);
+      // hold then transition to AD
+      setTimeout(function(){
+        stopCmdStream();
+        fade(lbl,0,300,function(){
+          // Scene B: AD
+          bgAccent='ad';
+          sctx.clearRect(0,0,sc.width,sc.height);
+          lbl.textContent='Windows — Active Directory';
+          fade(lbl,1,400,null);
+          startCmdStream(AD_CMDS);
+          var prog2=0,animB=null;
+          function tickB(){
+            prog2+=0.010;
+            drawAD(Math.min(prog2,1));
+            if(prog2<1.05)animB=requestAnimationFrame(tickB);
+            else{
+              cancelAnimationFrame(animB);
+              setTimeout(function(){
+                stopCmdStream();
+                fade(lbl,0,300,null);
+                fade(el,0,400,function(){
+                  sctx.clearRect(0,0,sc.width,sc.height);
+                  done();
+                });
+              },1200);
+            }
+          }
+          requestAnimationFrame(tickB);
+        });
+      },1000);
+    }
+  }
+  requestAnimationFrame(tickA);
+}
+
+function phase3(done){
+  var el=document.getElementById('p3');
+  var nd=document.getElementById('nameDisplay');
+  var nt=document.getElementById('nameText');
+  bgAccent='linux';
+  el.style.opacity=1;
+  var idx=0;
+  function showName(){
+    if(idx>=STUDENTS.length){fade(el,0,400,done);return;}
+    nt.textContent=STUDENTS[idx++];
+    nd.style.opacity=0;nd.style.transform='scale(0.15)';
+    nd.style.transition='opacity 0.35s ease,transform 0.5s ease';
+    nd.offsetHeight;
+    nd.style.opacity=1;nd.style.transform='scale(1)';
+    setTimeout(function(){
+      nd.style.transition='opacity 0.28s ease,transform 0.42s ease';
+      nd.style.opacity=0;nd.style.transform='scale(1.8)';
+      setTimeout(showName,320);
+    },680);
+  }
+  showName();
+}
+
+function phase4(){
+  var el=document.getElementById('p4');
+  el.style.opacity=0;
+  fade(el,1,900,null);
+}
+
+// ── KICK OFF ─────────────────────────────────────────────────
+setTimeout(function(){
+  phase1(function(){
+    phase2(function(){
+      phase3(function(){
+        phase4();
+      });
+    });
+  });
+},400);
+</script>
+</body>
+</html>
