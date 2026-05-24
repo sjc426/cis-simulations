@@ -346,7 +346,7 @@ function startCmdStream(cmds){
   fade(el,1,300,null);
   cmdInterval=setInterval(function(){
     el.textContent=cmds[idx%cmds.length];idx++;
-  },3000);
+  },5500);
 }
 function stopCmdStream(){
   if(cmdInterval)clearInterval(cmdInterval);
@@ -385,7 +385,7 @@ function phase2(done){
 
   var prog=0,animA=null;
   function tickA(){
-    prog+=0.004;
+    prog+=0.0015;
     drawRack(Math.min(prog,1));
     if(prog<1.08)animA=requestAnimationFrame(tickA);
     else{
@@ -402,7 +402,7 @@ function phase2(done){
           startCmdStream(AD_CMDS);
           var prog2=0,animB=null;
           function tickB(){
-            prog2+=0.004;
+            prog2+=0.0015;
             drawAD(Math.min(prog2,1));
             if(prog2<1.05)animB=requestAnimationFrame(tickB);
             else{
@@ -414,12 +414,12 @@ function phase2(done){
                   sctx.clearRect(0,0,sc.width,sc.height);
                   done();
                 });
-              },3500);
+              },7000);
             }
           }
           requestAnimationFrame(tickB);
         });
-      },2000);
+      },3000);
     }
   }
   requestAnimationFrame(tickA);
