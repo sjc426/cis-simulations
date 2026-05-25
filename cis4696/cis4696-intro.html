@@ -5,129 +5,102 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Courier New',Courier,monospace;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-#heroWrap{width:100%;height:100%;position:relative;background:#050505;}
-/* Scanline overlay */
-#heroWrap::after{content:'';position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:50;}
+#heroWrap{width:100%;height:100%;position:relative;background:#000;}
 #bgC{position:absolute;top:0;left:0;width:100%;height:100%;}
-/* Terminal window */
-#terminal{
+
+/* Full screen terminal — CRT monitor with bezel */
+#monitorWrap{
   position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:min(860px,94%);
-  background:#080808;
-  border:2px solid #9D2235;
+  top:14px;left:14px;right:14px;bottom:14px;
+  border:2px solid rgba(0,255,65,0.55);
   border-radius:10px;
-  box-shadow:0 0 60px rgba(157,34,53,0.5),0 0 120px rgba(157,34,53,0.18),inset 0 0 40px rgba(0,0,0,0.8);
-  z-index:20;
-  opacity:0;
+  box-shadow:0 0 0 1px rgba(0,255,65,0.15),0 0 30px rgba(0,255,65,0.2),0 0 60px rgba(0,255,65,0.08),inset 0 0 30px rgba(0,0,0,0.6);
+  z-index:10;
+  display:flex;flex-direction:column;
+  overflow:hidden;
 }
-#termTitle{
-  background:#111;
-  border-bottom:1px solid #2d0010;
-  padding:10px 16px;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  border-radius:7px 7px 0 0;
+#monitor{
+  flex:1;
+  background:rgba(0,0,0,0.72);
+  display:flex;flex-direction:column;
+  border:none;
 }
-.tdot{width:12px;height:12px;border-radius:50%;}
-.tdot.r{background:#9D2235;}
-.tdot.y{background:#333;}
-.tdot.g{background:#333;}
-#termTitleText{font-size:14px;color:#888;margin-left:8px;letter-spacing:0.1em;}
-#termBody{padding:26px 30px 28px;min-height:340px;}
-#termOutput{font-size:clamp(14px,1.9vw,18px);line-height:2;color:#d4d4d4;letter-spacing:0.02em;}
-.t-red{color:#ff4d6d;}
-.t-green{color:#22c55e;}
-.t-yellow{color:#fbbf24;}
-.t-blue{color:#60a5fa;}
-.t-purple{color:#a78bfa;}
-.t-dim{color:#555;}
-.t-white{color:#f0f0f0;}
-.t-cherry{color:#ff6b84;}
-#cursor{display:inline-block;width:11px;height:20px;background:#9D2235;animation:blink 1s step-end infinite;vertical-align:middle;margin-left:3px;}
+/* Monitor title bar */
+#monBar{
+  background:rgba(0,20,0,0.9);
+  border-bottom:1px solid rgba(0,255,65,0.25);
+  padding:10px 18px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+.mdot{width:11px;height:11px;border-radius:50%;}
+.mdot.r{background:#ff5f57;opacity:0.7;}
+.mdot.y{background:#febc2e;opacity:0.7;}
+.mdot.g{background:#28c840;opacity:0.7;}
+#monTitle{font-family:'Courier New',monospace;font-size:13px;color:rgba(0,255,65,0.5);margin-left:10px;letter-spacing:0.1em;}
+/* Monitor body — scrollable output */
+#monBody{
+  flex:1;
+  padding:22px 28px 80px;
+  overflow:hidden;
+  position:relative;
+}
+#termOut{
+  font-family:'Courier New',Courier,monospace;
+  font-size:clamp(15px,2vw,19px);
+  line-height:2.1;
+  color:#00ff41;
+}
+/* Text colors */
+.c-prompt{color:rgba(0,255,65,0.5);}
+.c-cmd{color:#00ff41;}
+.c-output{color:rgba(0,220,50,0.75);}
+.c-dim{color:rgba(0,180,40,0.45);}
+.c-white{color:rgba(255,255,255,0.9);}
+.c-bright{color:#ffffff;text-shadow:0 0 8px #00ff41;}
+.c-red{color:#ff4d6d;}
+.c-cyan{color:#22d3ee;}
+.c-mantra{color:#ffffff;font-weight:900;font-size:clamp(15px,2vw,19px);text-shadow:0 0 14px #00ff41,0 0 28px rgba(0,255,65,0.4);}
+.c-access{color:#00ff41;font-weight:900;font-size:clamp(16px,2.2vw,22px);text-shadow:0 0 20px #00ff41,0 0 40px rgba(0,255,65,0.6);}
+
+/* Blinking cursor */
+#cur{display:inline-block;width:10px;height:clamp(13px,1.7vw,16px);background:#00ff41;animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px;box-shadow:0 0 6px #00ff41;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
-/* Slogan overlay */
-#sloganWrap{
-  position:absolute;
-  top:0;left:0;width:100%;height:100%;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  z-index:25;opacity:0;pointer-events:none;
-  text-align:center;padding:20px;
-}
-#slogLine1{font-size:clamp(12px,2vw,18px);color:#9D2235;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:12px;opacity:0;}
-#slogLine2{font-size:clamp(32px,7vw,72px);font-weight:900;color:#fff;line-height:1.1;opacity:0;letter-spacing:0.02em;}
-#slogLine2 .hl{color:#ff4d6d;}
-#slogLine3{font-size:clamp(13px,2vw,18px);color:#94a3b8;letter-spacing:0.16em;text-transform:uppercase;margin-top:16px;opacity:0;}
-/* Info card */
-#infoCard{
-  position:absolute;
-  top:0;left:0;width:100%;height:100%;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  z-index:25;opacity:0;pointer-events:none;
-  text-align:center;padding:24px 30px;
-}
-#infoCard .ititle{font-size:clamp(26px,5vw,52px);font-weight:900;color:#fff;margin-bottom:12px;line-height:1.1;font-family:'Courier New',Courier,monospace;}
-#infoCard .ititle .hl{color:#ff4d6d;}
-#infoCard .isub{font-size:clamp(14px,2vw,19px);color:#e2e8f0;letter-spacing:0.06em;font-family:'Courier New',Courier,monospace;}
-#infoCard .ibadges{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center;max-width:600px;margin-left:auto;margin-right:auto;}
-#infoCard .ibadge{font-size:13px;padding:5px 13px;border-radius:4px;border:1px solid rgba(157,34,53,0.5);color:#fda4af;background:rgba(157,34,53,0.12);font-family:'Courier New',Courier,monospace;}
-#infoCard .ibadge strong{color:#ff4d6d;}
-#infoCard .tagline{font-size:clamp(13px,1.6vw,15px);color:#cbd5e1;line-height:1.8;max-width:600px;margin:14px auto 0;font-family:'Courier New',Courier,monospace;}
+
+/* Scanline overlay */
+#scan{position:absolute;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:30;}
+
 /* Pause button */
-#pauseBtn{
-  position:absolute;bottom:14px;right:14px;z-index:9999;
-  background:rgba(157,34,53,0.85);border:1.5px solid #ff4d6d;
-  border-radius:4px;color:#fda4af;font-size:13px;font-weight:700;
-  padding:6px 14px;cursor:pointer;font-family:'Courier New',Courier,monospace;line-height:1.3;
-}
-#pauseBtn:focus{outline:3px solid #ff4d6d;outline-offset:2px;}
-#pauseBtn:hover{background:#9D2235;}
+#pauseBtn{position:absolute;bottom:14px;right:14px;z-index:9999;background:rgba(0,40,0,0.9);border:1.5px solid rgba(0,255,65,0.5);border-radius:4px;color:#00ff41;font-size:13px;font-weight:700;padding:6px 14px;cursor:pointer;font-family:'Courier New',monospace;line-height:1.3;}
+#pauseBtn:focus{outline:3px solid #00ff41;outline-offset:2px;}
+#pauseBtn:hover{background:rgba(0,80,0,0.9);}
+
+/* CRT vignette */
+#vignette{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at center,transparent 60%,rgba(0,0,0,0.55) 100%);pointer-events:none;z-index:20;}
 </style>
 </head>
 <body>
-<h2 class="sr-only">CIS 4696 Ethical Hacking and Intrusion Forensics — Temple University animated course intro. Shows a simulated terminal attack sequence against the authorized target altoro.testfire.net.</h2>
-<div id="heroWrap" role="img" aria-label="CIS 4696 Ethical Hacking and Intrusion Forensics course intro animation, Temple University Fall 2026">
+<h2 class="sr-only">CIS 4696 Ethical Hacking and Intrusion Forensics — Temple University. Full screen terminal animation. Course info and mantra typed as if Neo watching the Matrix.</h2>
+<div id="heroWrap">
   <canvas id="bgC" aria-hidden="true"></canvas>
-
-  <!-- Terminal window -->
-  <div id="terminal" aria-hidden="true">
-    <div id="termTitle">
-      <div class="tdot r"></div>
-      <div class="tdot y"></div>
-      <div class="tdot g"></div>
-      <span id="termTitleText">kali@temple:~$ — CIS 4696 Lab Terminal</span>
+  <div id="monitorWrap" aria-hidden="true">
+  <div id="monitor">
+    <div id="monBar">
+      <div class="mdot r"></div>
+      <div class="mdot y"></div>
+      <div class="mdot g"></div>
+      <span id="monTitle">kali@temple-university: ~/cis4696 — root</span>
     </div>
-    <div id="termBody">
-      <div id="termOutput"></div>
-      <span id="cursor"></span>
+    <div id="monBody">
+      <div id="termOut"></div>
+      <span id="cur"></span>
     </div>
   </div>
-
-  <!-- Slogan -->
-  <div id="sloganWrap" aria-hidden="true">
-    <div id="slogLine1">CIS 4696 &nbsp;&middot;&nbsp; Temple University &nbsp;&middot;&nbsp; Fall 2026</div>
-    <div id="slogLine2">You <span class="hl">Break</span> It.<br>You <span class="hl">Fix</span> It.<br>You <span class="hl">Own</span> It.</div>
-    <div id="slogLine3">Ethical Hacking &nbsp;&middot;&nbsp; Intrusion Forensics &nbsp;&middot;&nbsp; AI Kill Chain</div>
   </div>
-
-  <!-- Info card -->
-  <div id="infoCard" aria-hidden="true">
-    <div class="ititle">CIS 4696 &mdash; <span class="hl">Ethical Hacking</span><br>&amp; Intrusion Forensics</div>
-    <div class="isub">Temple University &nbsp;&bull;&nbsp; College of Science &amp; Technology &nbsp;&bull;&nbsp; Fall 2026</div>
-    <div class="ibadges">
-      <span class="ibadge">Semester <strong>Fall 2026</strong></span>
-      <span class="ibadge">Meetings <strong>Tuttleman 00402 &middot; T 5:30&ndash;8:00 PM</strong></span>
-      <span class="ibadge">Target <strong>altoro.testfire.net</strong></span>
-    </div>
-    <div class="tagline">Learn to break into systems the way real attackers do — manually first, then with AI. By Week 12 you will simulate the kind of autonomous APT campaign that nation-state actors run. No prior hacking experience required. Just curiosity and a willingness to think like the adversary.</div>
-  </div>
-
+  <div id="vignette"></div>
+  <div id="scan"></div>
   <button id="pauseBtn" aria-label="Pause animation" aria-pressed="false">&#9208; Pause</button>
   <div class="sr-only" aria-live="polite" aria-atomic="true" id="ariaLive"></div>
 </div>
@@ -135,9 +108,13 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
 <script>
 var wrap=document.getElementById('heroWrap');
 var bgC=document.getElementById('bgC'),bgX=bgC.getContext('2d');
+var termOut=document.getElementById('termOut');
+var cur=document.getElementById('cur');
 var ariaLive=document.getElementById('ariaLive');
 var pauseBtn=document.getElementById('pauseBtn');
-var paused=false;
+var paused=false,bgFrame=0;
+var matrixCols=[];
+var CHARS='アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF!@#$><|/\\';
 
 function announce(msg){ariaLive.textContent='';setTimeout(function(){ariaLive.textContent=msg;},60);}
 pauseBtn.addEventListener('click',function(){
@@ -149,82 +126,54 @@ pauseBtn.addEventListener('click',function(){
 });
 
 function resize(){
-  var w=wrap.offsetWidth||window.innerWidth;
-  var h=wrap.offsetHeight||window.innerHeight;
-  bgC.width=w;bgC.height=h;
-  initParticles();
+  bgC.width=wrap.offsetWidth||window.innerWidth;
+  bgC.height=wrap.offsetHeight||window.innerHeight;
+  initMatrix();
 }
 resize();setTimeout(resize,200);window.addEventListener('resize',resize);
 
-// Background — Matrix digital rain (proper cascade with bright lead + fading trail)
-var matrixCols=[];
-var bgFrame=0;
-var MATRIX_CHARS='アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF!@#$><|/\\';
-
-function initParticles(){
+function initMatrix(){
   matrixCols=[];
-  var colW=18;
-  var numCols=Math.ceil(bgC.width/colW);
+  var colW=18,numCols=Math.ceil(bgC.width/colW);
   for(var c=0;c<numCols;c++){
-    var trailLen=Math.floor(8+Math.random()*18);
     matrixCols.push({
       x:c*colW+colW/2,
       y:Math.random()*bgC.height*-1,
-      speed:1.2+Math.random()*2.8,
-      trailLen:trailLen,
+      speed:1.4+Math.random()*2.6,
+      trailLen:Math.floor(10+Math.random()*20),
       trail:[],
-      colW:colW,
-      bright:Math.random()<0.15   // some columns get extra brightness
+      bright:Math.random()<0.12
     });
   }
 }
 
-function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b2=parseInt(hex.slice(5,7),16);return'rgba('+r+','+g+','+b2+','+a+')';}
-
-function drawBg(){
+function drawMatrix(){
   if(!paused){
-    // Soft black fade — creates the trail smear effect
-    bgX.fillStyle='rgba(0,0,0,0.12)';
+    bgX.fillStyle='rgba(0,0,0,0.08)';
     bgX.fillRect(0,0,bgC.width,bgC.height);
-
-    bgX.font='bold 15px "Courier New",monospace';
+    bgX.font='bold 14px "Courier New",monospace';
     bgX.textAlign='center';
-
     matrixCols.forEach(function(col){
-      // Advance position
       col.y+=col.speed;
-
-      // Add new char to trail head
-      col.trail.unshift(MATRIX_CHARS[Math.floor(Math.random()*MATRIX_CHARS.length)]);
-
-      // Trim trail to max length
+      col.trail.unshift(CHARS[Math.floor(Math.random()*CHARS.length)]);
       if(col.trail.length>col.trailLen)col.trail.length=col.trailLen;
-
-      // Reset when column has fallen off screen
       if(col.y-col.trail.length*16>bgC.height){
         col.y=Math.random()*bgC.height*-0.5;
         col.trail=[];
-        col.speed=1.2+Math.random()*2.8;
-        col.trailLen=Math.floor(8+Math.random()*18);
+        col.speed=1.4+Math.random()*2.6;
+        col.trailLen=Math.floor(10+Math.random()*20);
       }
-
-      // Draw each char in the trail
       for(var i=0;i<col.trail.length;i++){
         var cy=col.y-i*16;
         if(cy<0||cy>bgC.height)continue;
         var ratio=1-(i/col.trailLen);
-
         if(i===0){
-          // Leading char — softer, blended white/green
-          bgX.fillStyle=col.bright?'rgba(255,255,255,0.55)':'rgba(180,255,180,0.60)';
-          bgX.shadowColor='#00ff41';
-          bgX.shadowBlur=10;
+          bgX.fillStyle=col.bright?'rgba(255,255,255,0.9)':'rgba(180,255,180,0.92)';
+          bgX.shadowColor='#00ff41';bgX.shadowBlur=14;
         } else {
-          // Trail chars — very subtle green fade
-          var green=Math.floor(160*ratio+10);
-          var alpha=Math.max(0.02,ratio*0.38);
-          bgX.fillStyle='rgba(0,'+green+',0,'+alpha+')';
-          bgX.shadowBlur=ratio>0.7?3:0;
+          var g=Math.floor(200*ratio+20);
+          bgX.fillStyle='rgba(0,'+g+',0,'+(ratio*0.65)+')';
+          bgX.shadowBlur=ratio>0.6?5:0;
           bgX.shadowColor='#00ff41';
         }
         bgX.fillText(col.trail[i],col.x,cy);
@@ -233,128 +182,198 @@ function drawBg(){
     });
     bgFrame++;
   }
-  requestAnimationFrame(drawBg);
+  requestAnimationFrame(drawMatrix);
 }
-drawBg();
+drawMatrix();
 
-function fade(el,to,ms,cb){
-  var st=null,fr=parseFloat(el.style.opacity)||0;
-  function step(ts){if(paused){requestAnimationFrame(step);return;}if(!st)st=ts;var pct=Math.min((ts-st)/ms,1);el.style.opacity=fr+(to-fr)*pct;pct<1?requestAnimationFrame(step):cb&&cb();}
-  requestAnimationFrame(step);
-}
+// ── Typewriter engine ──
 function pTimeout(ms,cb){
   var elapsed=0,last=performance.now();
   function check(){var now=performance.now();if(!paused)elapsed+=now-last;last=now;elapsed>=ms?cb():requestAnimationFrame(check);}
   requestAnimationFrame(check);
 }
 
-// Terminal typewriter
-var termOut=document.getElementById('termOutput');
-var cursor=document.getElementById('cursor');
-var termLines=[
-  {text:'kali@temple:~$ ', cls:'t-green', delay:0},
-  {text:'nmap -sV -Pn -T4 altoro.testfire.net', cls:'t-white', type:true, speed:38},
-  {text:'\n', delay:400},
-  {text:'Starting Nmap 7.94 ( https://nmap.org )', cls:'t-dim', delay:200},
-  {text:'\nScanning altoro.testfire.net [1 host]', cls:'t-dim', delay:300},
-  {text:'\n\nPORT      STATE  SERVICE     VERSION', cls:'t-yellow', delay:500},
-  {text:'\n22/tcp    open   ssh         OpenSSH 7.9', cls:'t-green', delay:180},
-  {text:'\n80/tcp    open   http        Apache 2.4.41', cls:'t-green', delay:160},
-  {text:'\n443/tcp   open   https       Apache 2.4.41', cls:'t-green', delay:160},
-  {text:'\n8080/tcp  open   http-proxy  IBM WebSphere', cls:'t-green', delay:200},
-  {text:'\n\n[!] 14 vulnerabilities detected', cls:'t-red', delay:600},
-  {text:'\n[!] SQLi endpoint found: /bank/login.aspx', cls:'t-red', delay:300},
-  {text:'\n[!] XSS vector found: /search.aspx?query=', cls:'t-red', delay:300},
-  {text:'\n\n[*] Running exploit: SQL injection bypass...', cls:'t-cherry', delay:700},
-  {text:'\n[*] Payload: \' OR 1=1 --', cls:'t-cherry', delay:300},
-  {text:'\n\nACCESS GRANTED', cls:'t-green blink-text', delay:500},
-  {text:'\nWelcome, admin. Session token: 4a7f2c9e...', cls:'t-green', delay:200},
+function addEl(cls,text){
+  var span=document.createElement('span');
+  span.className=cls;
+  span.textContent=text;
+  termOut.insertBefore(span,null);
+  return span;
+}
+
+function addBr(){termOut.appendChild(document.createElement('br'));}
+
+function typeText(cls,text,speed,cb){
+  if(paused){setTimeout(function(){typeText(cls,text,speed,cb);},80);return;}
+  var span=document.createElement('span');
+  span.className=cls;
+  termOut.insertBefore(span,null);
+  var i=0;
+  function next(){
+    if(paused){setTimeout(next,80);return;}
+    if(i>=text.length){cb&&cb();return;}
+    span.textContent+=text[i++];
+    // Auto scroll
+    var mb=document.getElementById('monBody');
+    mb.scrollTop=mb.scrollHeight;
+    setTimeout(next,speed+(Math.random()*speed*0.4));
+  }
+  next();
+}
+
+function prompt(cb){
+  addBr();
+  addEl('c-dim','[root@kali cis4696]');
+  addEl('c-prompt',' ~$ ');
+  pTimeout(280,cb);
+}
+
+function typeCmd(cmd,cb){
+  typeText('c-cmd',cmd,38,function(){
+    pTimeout(320,cb);
+  });
+}
+
+function out(cls,text,delay,cb){
+  addBr();
+  addEl(cls,'  '+text);
+  pTimeout(delay,cb);
+}
+
+// ── Script ──
+var script=[
+  // Boot
+  function(next){
+    addEl('c-dim','Kali GNU/Linux — Temple University Security Lab');addBr();
+    addEl('c-dim','CIS 4696 | Ethical Hacking & Intrusion Forensics');addBr();
+    addEl('c-dim','Fall 2026 | Prof. Chang | Tuttleman 00402');addBr();
+    addBr();
+    pTimeout(900,next);
+  },
+  // whoami
+  function(next){
+    prompt(function(){typeCmd('whoami',function(){
+      out('c-output','root',120,function(){
+        out('c-output','Prof. Sonny J. Chang — Temple University CIS Dept.',80,function(){
+          out('c-output','Course: CIS 4696 — Ethical Hacking & Intrusion Forensics',80,next);
+        });
+      });
+    });});
+  },
+  // cat mission
+  function(next){
+    prompt(function(){typeCmd('cat mission.txt',function(){
+      addBr();
+      out('c-white','You will learn to break into systems the way real attackers do.',90,function(){
+        out('c-white','Manually first. Then with AI. No prior hacking experience required.',80,function(){
+          out('c-white','Just curiosity. And a willingness to think like the adversary.',80,next);
+        });
+      });
+    });});
+  },
+  // cat target
+  function(next){
+    prompt(function(){typeCmd('nmap -sV altoro.testfire.net',function(){
+      addBr();
+      out('c-dim','Starting Nmap 7.94 ...',200,function(){
+        out('c-cyan','TARGET  : altoro.testfire.net',120,function(){
+          out('c-cyan','STATUS  : AUTHORIZED — IBM Security Training Bank',100,function(){
+            out('c-red','VULNS   : 14 detected | SQLi | XSS | Auth Bypass',100,function(){
+              out('c-output','MISSION : One target. All semester. Know it cold.',80,next);
+            });
+          });
+        });
+      });
+    });});
+  },
+  // Two acts
+  function(next){
+    prompt(function(){typeCmd('cat syllabus.txt | grep ACT',function(){
+      addBr();
+      out('c-output','ACT I  [Wk 01-08] — The Human Hacker',100,function(){
+        out('c-dim','  Recon · Scanning · SQLi · XSS · Credential Theft · BurpSuite',80,function(){
+          out('c-output','ACT II [Wk 09-16] — The Machine Hacker',100,function(){
+            out('c-dim','  AutoRecon · OWASP ZAP · Nuclei · Claude AI · APT Kill Chain',80,function(){
+              out('c-dim','  Week 12: Full autonomous APT simulation. Nation-state tactics.',80,next);
+            });
+          });
+        });
+      });
+    });});
+  },
+  // Meetings
+  function(next){
+    prompt(function(){typeCmd('cat schedule.conf',function(){
+      addBr();
+      out('c-output','LOCATION : Tuttleman Learning Center 00402',90,function(){
+        out('c-output','MEETS    : Tuesdays 5:30 PM — 8:00 PM (EDT)',80,function(){
+          out('c-output','DATES    : Aug 24, 2026 — Dec 15, 2026',80,next);
+        });
+      });
+    });});
+  },
+  // course info
+  function(next){
+    prompt(function(){typeCmd('cat course_info.txt',function(){
+      addBr();
+      out('c-cyan','┌─────────────────────────────────────────────────────┐',60,function(){
+      out('c-cyan','│  COURSE  : CIS 4696                                 │',60,function(){
+      out('c-cyan','│  TITLE   : Ethical Hacking & Intrusion Forensics    │',60,function(){
+      out('c-cyan','│  SCHOOL  : Temple University — CST                  │',60,function(){
+      out('c-cyan','│  PROF    : Sonny J. Chang                           │',60,function(){
+      out('c-cyan','│  MEETS   : Tuttleman 00402 · Tue 5:30–8:00 PM       │',60,function(){
+      out('c-cyan','│  TERM    : Fall 2026 · Aug 24 – Dec 15              │',60,function(){
+      out('c-cyan','│  TARGET  : altoro.testfire.net (authorized)         │',60,function(){
+      out('c-cyan','│  FORMAT  : Hybrid · No textbook · $0 cost           │',60,function(){
+      out('c-cyan','└─────────────────────────────────────────────────────┘',60,next);
+      });});});});});});});});});
+    });});
+  },
+  // echo mantra
+  function(next){
+    prompt(function(){typeCmd('echo $MANTRA',function(){
+      addBr();
+      out('c-mantra','You Break It.',180,function(){
+        out('c-mantra','You Fix It.',180,function(){
+          out('c-mantra','You Own It.',180,next);
+        });
+      });
+    });});
+  },
+  // begin
+  function(next){
+    prompt(function(){typeCmd('./begin_week1.sh',function(){
+      addBr();
+      out('c-dim','Loading environment...',400,function(){
+        out('c-dim','Mounting Kali tools...',350,function(){
+          out('c-dim','Connecting to altoro.testfire.net...',400,function(){
+            addBr();
+            out('c-access','██ ACCESS GRANTED ██',300,function(){
+              out('c-bright','Welcome to CIS 4696. The simulation begins now.',200,function(){
+                addBr();
+                pTimeout(800,next);
+              });
+            });
+          });
+        });
+      });
+    });});
+  },
+  // idle — keep cursor blinking
+  function(next){
+    prompt(function(){
+      announce('CIS 4696 terminal sequence complete. Course: Ethical Hacking and Intrusion Forensics, Temple University Fall 2026.');
+    });
+  }
 ];
 
-var lineIdx=0;
-function typeChar(str,cls,idx,cb){
-  if(paused){setTimeout(function(){typeChar(str,cls,idx,cb);},50);return;}
-  if(idx>=str.length){cb&&cb();return;}
-  var span=document.createElement('span');
-  span.className=cls||'';
-  span.textContent=str[idx];
-  termOut.appendChild(span);
-  setTimeout(function(){typeChar(str,cls,idx+1,cb);},42+Math.random()*22);
+var stepIdx=0;
+function runNext(){
+  if(stepIdx>=script.length)return;
+  script[stepIdx++](runNext);
 }
 
-function addLine(text,cls,cb){
-  if(text==='\n'){
-    termOut.appendChild(document.createElement('br'));
-    cb&&cb();return;
-  }
-  var span=document.createElement('span');
-  span.className=cls||'';
-  span.textContent=text;
-  termOut.appendChild(span);
-  cb&&cb();
-}
-
-function runTerminal(cb){
-  if(lineIdx>=termLines.length){cb&&cb();return;}
-  var line=termLines[lineIdx++];
-  var go=function(){
-    if(line.type){
-      typeChar(line.text,line.cls,0,function(){
-        pTimeout(200,function(){runTerminal(cb);});
-      });
-    } else {
-      addLine(line.text,line.cls,function(){
-        pTimeout(line.delay||80,function(){runTerminal(cb);});
-      });
-    }
-  };
-  pTimeout(line.delay||0,go);
-}
-
-function phaseTerminal(done){
-  announce('Simulated terminal scan: scanning altoro.testfire.net, finding vulnerabilities, demonstrating SQL injection');
-  var term=document.getElementById('terminal');
-  fade(term,1,600,function(){
-    runTerminal(function(){
-      pTimeout(1800,function(){
-        fade(term,0,600,done);
-      });
-    });
-  });
-}
-
-function phaseSlogan(done){
-  var wrap2=document.getElementById('sloganWrap');
-  var l1=document.getElementById('slogLine1');
-  var l2=document.getElementById('slogLine2');
-  var l3=document.getElementById('slogLine3');
-  announce('You Break It. You Fix It. You Own It. CIS 4696 Ethical Hacking and Intrusion Forensics.');
-  fade(wrap2,1,400,function(){
-    pTimeout(200,function(){fade(l1,1,500,function(){
-      pTimeout(300,function(){fade(l2,1,700,function(){
-        pTimeout(500,function(){fade(l3,1,500,function(){
-          pTimeout(2600,function(){
-            fade(l1,0,400,null);fade(l2,0,400,null);fade(l3,0,400,null);
-            pTimeout(450,function(){fade(wrap2,0,400,done);});
-          });
-        });});
-      });});
-    });});
-  });
-}
-
-function phaseInfo(){
-  announce('Course info: CIS 4696 Ethical Hacking and Intrusion Forensics, Temple University, Fall 2026, target altoro.testfire.net, CompTIA PenTest+ PT0-003 aligned');
-  fade(document.getElementById('infoCard'),1,900,null);
-}
-
-setTimeout(function(){
-  phaseTerminal(function(){
-    phaseSlogan(function(){
-      phaseInfo();
-    });
-  });
-},600);
+setTimeout(runNext,600);
 </script>
 </body>
 </html>
