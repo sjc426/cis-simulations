@@ -122,9 +122,8 @@ html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Co
     <div class="isub">Temple University &nbsp;&bull;&nbsp; College of Science &amp; Technology &nbsp;&bull;&nbsp; Fall 2026</div>
     <div class="ibadges">
       <span class="ibadge">Semester <strong>Fall 2026</strong></span>
-      <span class="ibadge">Format <strong>Online &middot; Zoom</strong></span>
+      <span class="ibadge">Meetings <strong>Tuttleman 00402 &middot; T 5:30&ndash;8:00 PM</strong></span>
       <span class="ibadge">Target <strong>altoro.testfire.net</strong></span>
-      <span class="ibadge">Cert Align <strong>PT0-003</strong></span>
     </div>
     <div class="tagline">Learn to break into systems the way real attackers do — manually first, then with AI. By Week 12 you will simulate the kind of autonomous APT campaign that nation-state actors run. No prior hacking experience required. Just curiosity and a willingness to think like the adversary.</div>
   </div>
@@ -185,7 +184,7 @@ function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5)
 function drawBg(){
   if(!paused){
     // Soft black fade — creates the trail smear effect
-    bgX.fillStyle='rgba(0,0,0,0.06)';
+    bgX.fillStyle='rgba(0,0,0,0.12)';
     bgX.fillRect(0,0,bgC.width,bgC.height);
 
     bgX.font='bold 15px "Courier New",monospace';
@@ -216,17 +215,16 @@ function drawBg(){
         var ratio=1-(i/col.trailLen);
 
         if(i===0){
-          // Leading char — bright white or bright green
-          bgX.fillStyle=col.bright?'rgba(255,255,255,0.95)':'rgba(180,255,180,0.98)';
-          // Glow behind lead char
+          // Leading char — softer, blended white/green
+          bgX.fillStyle=col.bright?'rgba(255,255,255,0.55)':'rgba(180,255,180,0.60)';
           bgX.shadowColor='#00ff41';
-          bgX.shadowBlur=12;
+          bgX.shadowBlur=10;
         } else {
-          // Trail chars — green fading to dark
-          var green=Math.floor(180*ratio+20);
-          var alpha=Math.max(0.03,ratio*0.85);
+          // Trail chars — very subtle green fade
+          var green=Math.floor(160*ratio+10);
+          var alpha=Math.max(0.02,ratio*0.38);
           bgX.fillStyle='rgba(0,'+green+',0,'+alpha+')';
-          bgX.shadowBlur=ratio>0.6?6:0;
+          bgX.shadowBlur=ratio>0.7?3:0;
           bgX.shadowColor='#00ff41';
         }
         bgX.fillText(col.trail[i],col.x,cy);
