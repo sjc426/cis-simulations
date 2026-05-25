@@ -5,52 +5,37 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;background:#000;overflow:hidden;}
+html,body{width:100%;height:100%;overflow:hidden;background:#060e12;}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
-#heroWrap{width:100%;height:100%;position:relative;background:#000;}
+#heroWrap{width:100%;height:100%;position:relative;}
 #bgC{position:absolute;top:0;left:0;width:100%;height:100%;}
-#sceneC{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;opacity:0;}
-#cmdLine{position:absolute;top:8%;left:50%;transform:translateX(-50%);font-family:monospace;font-size:clamp(11px,1.5vw,14px);color:#22d3ee;opacity:0;z-index:20;text-align:center;white-space:nowrap;}
-#sceneLabel{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);font-size:clamp(14px,2vw,20px);color:#FFCCD5;letter-spacing:0.12em;text-transform:uppercase;opacity:0;white-space:nowrap;font-weight:700;z-index:20;font-family:Arial,sans-serif;}
 #stage{position:absolute;top:0;left:0;width:100%;height:100%;z-index:10;font-family:Arial,Helvetica,sans-serif;}
 .layer{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;}
-#p1 .big{font-size:clamp(42px,9vw,80px);font-weight:900;color:#fff;letter-spacing:0.08em;text-align:center;line-height:1;}
-#p1 .sub{font-size:clamp(14px,2.4vw,22px);color:#FFCCD5;letter-spacing:0.22em;text-align:center;margin-top:12px;text-transform:uppercase;}
+#p1 .big{font-size:clamp(38px,8vw,72px);font-weight:900;color:#fff;letter-spacing:0.08em;text-align:center;line-height:1;text-shadow:-1px -1px 0 rgba(0,0,0,0.9),1px -1px 0 rgba(0,0,0,0.9),-1px 1px 0 rgba(0,0,0,0.9),1px 1px 0 rgba(0,0,0,0.9),0 0 30px rgba(0,212,255,1),0 0 80px rgba(0,212,255,0.5);}
+#p1 .sub{font-size:clamp(13px,2.2vw,20px);color:#e0f7ff;letter-spacing:0.22em;text-align:center;margin-top:12px;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,0.95),0 0 20px rgba(0,212,255,0.6);}
 #pSlogan{flex-direction:column;text-align:center;padding:20px;}
-#sLine1{font-size:clamp(14px,2.4vw,22px);color:#FFCCD5;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;opacity:0;}
-#sLine2{font-size:clamp(32px,7vw,64px);font-weight:900;color:#fff;line-height:1.15;text-align:center;opacity:0;}
-#sLine2 span{color:#FFCCD5;}
-#sLine3{font-size:clamp(13px,1.8vw,18px);color:rgba(255,204,213,0.7);letter-spacing:0.14em;margin-top:16px;text-transform:uppercase;opacity:0;}
+#sLine1{font-size:clamp(13px,2.4vw,20px);color:#e0f7ff;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px;opacity:0;text-shadow:0 1px 8px rgba(0,0,0,0.9);}
+#sLine2{font-size:clamp(32px,7vw,68px);font-weight:900;color:#fff;line-height:1.15;text-align:center;opacity:0;text-shadow:-1px -1px 0 rgba(0,0,0,0.9),1px -1px 0 rgba(0,0,0,0.9),-1px 1px 0 rgba(0,0,0,0.9),1px 1px 0 rgba(0,0,0,0.9),0 0 40px rgba(168,85,247,0.9),0 0 80px rgba(168,85,247,0.4);}
+#sLine2 span{color:#a78bfa;}
+#sLine3{font-size:clamp(13px,2vw,18px);color:#e0f7ff;letter-spacing:0.14em;margin-top:16px;text-transform:uppercase;opacity:0;text-shadow:0 1px 8px rgba(0,0,0,0.9);}
 #p4{flex-direction:column;text-align:center;padding:24px 30px;}
-#p4 .ititle{font-size:clamp(24px,4.5vw,48px);color:#fff;font-weight:900;margin-bottom:10px;line-height:1.1;}
-#p4 .ititle span{color:#FFCCD5;}
-#p4 .isub{font-size:clamp(14px,2vw,20px);color:#FFCCD5;letter-spacing:0.07em;}
-#p4 .ibadges{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;}
-#p4 .ibadge{font-size:14px;padding:5px 14px;border-radius:20px;border:1px solid rgba(255,204,213,0.4);color:#fde8ec;background:rgba(157,34,53,0.3);}
-#p4 .ibadge strong{color:#FFCCD5;}
-#p4 .tagline{font-size:clamp(13px,1.6vw,16px);color:#c9b0b5;line-height:1.75;max-width:600px;margin:16px auto 0;font-style:italic;}
-#pauseBtn{
-  position:absolute;
-  bottom:14px;
-  right:14px;
-  z-index:9999;
-  background:rgba(157,34,53,0.9);
-  border:2px solid #FFCCD5;
-  border-radius:7px;
-  color:#FFCCD5;
-  font-size:14px;
-  font-weight:700;
-  padding:7px 16px;
-  cursor:pointer;
-  font-family:Arial,sans-serif;
-  line-height:1.3;
-}
-#pauseBtn:focus{outline:3px solid #fff;outline-offset:2px;}
-#pauseBtn:hover{background:#9D2235;}
+#p4 .ititle{font-size:clamp(24px,4.5vw,46px);color:#fff;font-weight:900;margin-bottom:10px;line-height:1.1;text-shadow:-1px -1px 0 rgba(0,0,0,0.9),1px -1px 0 rgba(0,0,0,0.9),-1px 1px 0 rgba(0,0,0,0.9),1px 1px 0 rgba(0,0,0,0.9),0 0 30px rgba(0,212,255,0.8);}
+#p4 .ititle span{color:#7dd3fc;}
+#p4 .isub{font-size:clamp(14px,2vw,19px);color:#fff;letter-spacing:0.07em;text-shadow:0 1px 6px rgba(0,0,0,0.9);}
+#p4 .ibadges{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center;max-width:620px;margin-left:auto;margin-right:auto;}
+#p4 .ibadge{font-size:14px;padding:5px 14px;border-radius:20px;border:1px solid rgba(0,212,255,0.35);color:#bae6fd;background:rgba(0,212,255,0.08);}
+#p4 .ibadge strong{color:#7dd3fc;}
+#p4 .tagline{font-size:clamp(13px,1.6vw,15px);color:#e2e8f0;line-height:1.75;max-width:600px;margin:14px auto 0;text-shadow:0 1px 4px rgba(0,0,0,0.9);}
+#cmdLine{position:absolute;top:9%;left:50%;transform:translateX(-50%);font-family:monospace;font-size:clamp(11px,1.5vw,14px);color:#22d3ee;opacity:0;z-index:20;text-align:center;white-space:nowrap;}
+#sceneLabel{position:absolute;bottom:9%;left:50%;transform:translateX(-50%);font-size:clamp(13px,2vw,18px);color:#7dd3fc;letter-spacing:0.12em;text-transform:uppercase;opacity:0;white-space:nowrap;font-weight:700;z-index:20;}
+#sceneC{position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;opacity:0;}
+#pauseBtn{position:absolute;bottom:14px;right:14px;z-index:9999;background:rgba(0,100,160,0.85);border:1.5px solid #7dd3fc;border-radius:7px;color:#bae6fd;font-size:14px;font-weight:700;padding:7px 16px;cursor:pointer;font-family:Arial,sans-serif;line-height:1.3;}
+#pauseBtn:focus{outline:3px solid #7dd3fc;outline-offset:2px;}
+#pauseBtn:hover{background:rgba(0,150,210,0.95);}
 </style>
 </head>
 <body>
-<h2 class="sr-only">CIS 4345 Introduction to Cloud Computing — Temple University animated course intro for Fall 2026.</h2>
+<h2 class="sr-only">CIS 4345 Introduction to Cloud Computing — Temple University animated course intro. Neural cloud background with AWS, Azure, and GCP provider scenes.</h2>
 <div id="heroWrap" role="img" aria-label="CIS 4345 Introduction to Cloud Computing, Temple University Fall 2026">
   <canvas id="bgC" aria-hidden="true"></canvas>
   <canvas id="sceneC" aria-hidden="true"></canvas>
@@ -89,10 +74,12 @@ var bgC=document.getElementById('bgC'),bgX=bgC.getContext('2d');
 var scC=document.getElementById('sceneC'),scX=scC.getContext('2d');
 var ariaLive=document.getElementById('ariaLive');
 var pauseBtn=document.getElementById('pauseBtn');
-var bgNodes=[],bgPackets=[],bgFrame=0,paused=false,cmdInt=null;
+var paused=false,cmdInt=null,bgFrame=0;
+
+// Neural cloud state
+var cloudNodes=[],dataStreams=[],constellations=[],cloudPulse=0;
 
 function announce(msg){ariaLive.textContent='';setTimeout(function(){ariaLive.textContent=msg;},60);}
-
 pauseBtn.addEventListener('click',function(){
   paused=!paused;
   pauseBtn.setAttribute('aria-pressed',paused?'true':'false');
@@ -106,70 +93,204 @@ function resize(){
   var h=wrap.offsetHeight||window.innerHeight;
   bgC.width=w;bgC.height=h;
   scC.width=w;scC.height=h;
-  initNodes();
+  initCloud();
 }
+resize();setTimeout(resize,200);window.addEventListener('resize',resize);
 
-function initNodes(){
-  bgNodes=[];bgPackets=[];
+function initCloud(){
   var w=bgC.width,h=bgC.height;
-  var cols=9,rows=5;
-  for(var r=0;r<rows;r++)for(var c=0;c<cols;c++){
-    bgNodes.push({
-      x:w*(0.04+c*(0.92/(cols-1)))+(Math.random()-0.5)*70,
-      y:h*(0.08+r*(0.84/(rows-1)))+(Math.random()-0.5)*50,
-      vx:(Math.random()-0.5)*0.09,vy:(Math.random()-0.5)*0.08,
+  cloudNodes=[];dataStreams=[];constellations=[];
+
+  // Cloud center
+  var cx=w*0.5,cy=h*0.38;
+  var cloudR=Math.min(w,h)*0.28;
+
+  // Neural nodes inside cloud — distributed organically
+  var COLORS=['#00d4ff','#a855f7','#ec4899','#ffffff','#7dd3fc','#c084fc'];
+  for(var i=0;i<38;i++){
+    var angle=Math.random()*Math.PI*2;
+    var r=Math.random()*cloudR*0.85;
+    cloudNodes.push({
+      x:cx+Math.cos(angle)*r*(0.7+Math.random()*0.5),
+      y:cy+Math.sin(angle)*r*0.65,
+      vx:(Math.random()-0.5)*0.18,
+      vy:(Math.random()-0.5)*0.12,
+      r:Math.random()<0.12?5:Math.random()<0.3?3:1.8,
+      col:COLORS[Math.floor(Math.random()*COLORS.length)],
       pulse:Math.random()*Math.PI*2,
-      size:Math.random()<0.12?5:Math.random()<0.3?3.5:2.2,
-      col:Math.random()<0.33?'#FF9900':Math.random()<0.5?'#0078D4':'#34A853'
+      pulseSpeed:0.02+Math.random()*0.03,
+      cx:cx,cy:cy,cloudR:cloudR*0.85
     });
   }
-}
 
-// Resize on load and after a small delay to catch iframe render
-resize();
-setTimeout(resize,200);
-window.addEventListener('resize',resize);
+  // Data streams falling from cloud base
+  var numStreams=16;
+  for(var s=0;s<numStreams;s++){
+    var sx=cx+(s-(numStreams/2))*((cloudR*1.1)/numStreams)+(Math.random()-0.5)*18;
+    dataStreams.push({
+      x:sx,
+      startY:cy+cloudR*0.45,
+      y:cy+cloudR*0.45+Math.random()*h*0.25,
+      speed:0.6+Math.random()*1.2,
+      length:40+Math.random()*80,
+      opacity:0.3+Math.random()*0.5,
+      col:Math.random()<0.6?'#00d4ff':Math.random()<0.5?'#a855f7':'#ffffff'
+    });
+  }
 
-function spawnPkt(){
-  if(bgPackets.length>28)return;
-  var a=Math.floor(Math.random()*bgNodes.length),b=Math.floor(Math.random()*bgNodes.length);
-  if(a===b)return;
-  var dx=bgNodes[a].x-bgNodes[b].x,dy=bgNodes[a].y-bgNodes[b].y;
-  if(Math.sqrt(dx*dx+dy*dy)>bgC.width*0.3)return;
-  bgPackets.push({a:a,b:b,t:0,speed:0.004+Math.random()*0.006,col:bgNodes[a].col});
+  // Constellation triangles on the sides
+  for(var ct=0;ct<3;ct++){
+    var pts=[];
+    var side=ct<2?-1:1;
+    var bx=cx+side*(cloudR*1.1+Math.random()*80);
+    var by=cy+(Math.random()-0.5)*cloudR*1.2;
+    for(var p=0;p<3;p++){
+      pts.push({
+        x:bx+(Math.random()-0.5)*120,
+        y:by+(Math.random()-0.5)*100,
+        vx:(Math.random()-0.5)*0.12,
+        vy:(Math.random()-0.5)*0.10
+      });
+    }
+    constellations.push({pts:pts,opacity:0.25+Math.random()*0.3});
+  }
 }
 
 function hexA(hex,a){var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b2=parseInt(hex.slice(5,7),16);return'rgba('+r+','+g+','+b2+','+a+')';}
 
-function drawBg(){
-  if(!paused){
-    bgX.fillStyle='rgba(5,0,10,0.18)';bgX.fillRect(0,0,bgC.width,bgC.height);
-    var maxD=bgC.width*0.21;
-    for(var i=0;i<bgNodes.length;i++)for(var j=i+1;j<bgNodes.length;j++){
-      var dx=bgNodes[i].x-bgNodes[j].x,dy=bgNodes[i].y-bgNodes[j].y,d=Math.sqrt(dx*dx+dy*dy);
-      if(d<maxD){bgX.strokeStyle='rgba(157,34,53,'+(1-d/maxD)*0.14+')';bgX.lineWidth=0.5;bgX.beginPath();bgX.moveTo(bgNodes[i].x,bgNodes[i].y);bgX.lineTo(bgNodes[j].x,bgNodes[j].y);bgX.stroke();}
+function drawCloud(){
+  var w=bgC.width,h=bgC.height;
+  var cx=w*0.5,cy=h*0.38;
+  var cloudR=Math.min(w,h)*0.28;
+  cloudPulse+=0.008;
+
+  // Background gradient — deep teal to dark
+  var grad=bgX.createRadialGradient(cx,cy,0,cx,cy,cloudR*2.2);
+  grad.addColorStop(0,'rgba(0,20,40,0.92)');
+  grad.addColorStop(0.5,'rgba(2,8,18,0.96)');
+  grad.addColorStop(1,'rgba(0,5,10,1)');
+  bgX.fillStyle=grad;
+  bgX.fillRect(0,0,w,h);
+
+  // Ambient glow behind cloud
+  var glowGrad=bgX.createRadialGradient(cx,cy,0,cx,cy,cloudR*1.3);
+  glowGrad.addColorStop(0,'rgba(0,100,180,0.18)');
+  glowGrad.addColorStop(0.4,'rgba(100,0,180,0.10)');
+  glowGrad.addColorStop(1,'rgba(0,0,0,0)');
+  bgX.fillStyle=glowGrad;
+  bgX.fillRect(0,0,w,h);
+
+  // Cloud puffs — layered soft circles
+  var puffs=[
+    {ox:0,oy:0,r:1.0},{ox:-0.28,oy:0.08,r:0.78},
+    {ox:0.28,oy:0.05,r:0.82},{ox:-0.15,oy:-0.18,r:0.65},
+    {ox:0.18,oy:-0.14,r:0.60},{ox:0,oy:-0.22,r:0.55},
+    {ox:-0.38,oy:0.18,r:0.52},{ox:0.38,oy:0.15,r:0.55}
+  ];
+  var pulse=1+0.018*Math.sin(cloudPulse);
+  puffs.forEach(function(puff,i){
+    var px=cx+puff.ox*cloudR*pulse;
+    var py=cy+puff.oy*cloudR*0.8*pulse;
+    var pr=puff.r*cloudR*pulse;
+    var cg=bgX.createRadialGradient(px,py-pr*0.15,pr*0.1,px,py,pr);
+    cg.addColorStop(0,'rgba(60,80,130,0.72)');
+    cg.addColorStop(0.5,'rgba(30,40,90,0.58)');
+    cg.addColorStop(1,'rgba(10,15,40,0)');
+    bgX.beginPath();bgX.arc(px,py,pr,0,Math.PI*2);
+    bgX.fillStyle=cg;bgX.fill();
+  });
+
+  // Cloud edge glow
+  var edgeGlow=bgX.createRadialGradient(cx,cy-cloudR*0.1,cloudR*0.3,cx,cy,cloudR*1.05);
+  edgeGlow.addColorStop(0,'rgba(0,150,255,0.0)');
+  edgeGlow.addColorStop(0.75,'rgba(0,150,255,0.06)');
+  edgeGlow.addColorStop(0.9,'rgba(0,200,255,0.14)');
+  edgeGlow.addColorStop(1,'rgba(0,200,255,0)');
+  bgX.beginPath();bgX.arc(cx,cy,cloudR*1.05*pulse,0,Math.PI*2);
+  bgX.fillStyle=edgeGlow;bgX.fill();
+
+  // Constellation lines
+  constellations.forEach(function(con){
+    con.pts.forEach(function(pt){pt.x+=pt.vx;pt.y+=pt.vy;});
+    for(var i=0;i<con.pts.length;i++){
+      for(var j=i+1;j<con.pts.length;j++){
+        bgX.beginPath();
+        bgX.moveTo(con.pts[i].x,con.pts[i].y);
+        bgX.lineTo(con.pts[j].x,con.pts[j].y);
+        bgX.strokeStyle='rgba(125,211,252,'+con.opacity+')';
+        bgX.lineWidth=0.8;bgX.stroke();
+      }
+      bgX.beginPath();bgX.arc(con.pts[i].x,con.pts[i].y,2,0,Math.PI*2);
+      bgX.fillStyle='rgba(200,230,255,'+con.opacity*1.8+')';bgX.fill();
     }
-    bgNodes.forEach(function(n){
-      n.pulse+=0.03;n.x+=n.vx;n.y+=n.vy;
-      if(n.x<8||n.x>bgC.width-8)n.vx*=-1;
-      if(n.y<8||n.y>bgC.height-8)n.vy*=-1;
-      var g=0.32+0.28*Math.sin(n.pulse);
-      bgX.beginPath();bgX.arc(n.x,n.y,n.size*2.6,0,Math.PI*2);bgX.fillStyle=hexA(n.col,g*0.13);bgX.fill();
-      bgX.beginPath();bgX.arc(n.x,n.y,n.size,0,Math.PI*2);bgX.fillStyle=n.col;bgX.fill();
-    });
-    for(var pi=bgPackets.length-1;pi>=0;pi--){
-      var p=bgPackets[pi];p.t+=p.speed;
-      if(p.t>=1){bgPackets.splice(pi,1);continue;}
-      var na=bgNodes[p.a],nb=bgNodes[p.b];if(!na||!nb)continue;
-      for(var tr=4;tr>=0;tr--){
-        var tt=Math.max(0,p.t-tr*0.02),tx=na.x+(nb.x-na.x)*tt,ty=na.y+(nb.y-na.y)*tt;
-        bgX.beginPath();bgX.arc(tx,ty,Math.max(0.5,2.4-tr*0.38),0,Math.PI*2);
-        bgX.fillStyle=hexA(p.col,tr===0?1:(5-tr)*0.13);bgX.fill();
+  });
+
+  // Neural connections between nearby nodes
+  var maxConnDist=cloudR*0.52;
+  for(var i=0;i<cloudNodes.length;i++){
+    for(var j=i+1;j<cloudNodes.length;j++){
+      var dx=cloudNodes[i].x-cloudNodes[j].x;
+      var dy=cloudNodes[i].y-cloudNodes[j].y;
+      var d=Math.sqrt(dx*dx+dy*dy);
+      if(d<maxConnDist){
+        var a=(1-d/maxConnDist)*0.35;
+        bgX.beginPath();
+        bgX.moveTo(cloudNodes[i].x,cloudNodes[i].y);
+        bgX.lineTo(cloudNodes[j].x,cloudNodes[j].y);
+        bgX.strokeStyle='rgba(0,212,255,'+a+')';
+        bgX.lineWidth=0.6;bgX.stroke();
       }
     }
-    if(bgFrame%14===0)spawnPkt();
-    bgFrame++;
   }
+
+  // Neural nodes
+  cloudNodes.forEach(function(n){
+    n.pulse+=n.pulseSpeed;
+    // Drift and bounce within cloud
+    n.x+=n.vx;n.y+=n.vy;
+    var dx=n.x-n.cx,dy=n.y-n.cy;
+    if(Math.sqrt(dx*dx+dy*dy)>n.cloudR){n.vx*=-1;n.vy*=-1;}
+    var g=0.5+0.5*Math.sin(n.pulse);
+    // Outer glow
+    bgX.beginPath();bgX.arc(n.x,n.y,n.r*3.5,0,Math.PI*2);
+    bgX.fillStyle=hexA(n.col,g*0.15);bgX.fill();
+    // Core
+    bgX.beginPath();bgX.arc(n.x,n.y,n.r,0,Math.PI*2);
+    bgX.fillStyle=n.col;
+    bgX.shadowColor=n.col;bgX.shadowBlur=n.r>3?14:7;
+    bgX.fill();bgX.shadowBlur=0;
+  });
+
+  // Data streams — vertical light beams falling from cloud
+  dataStreams.forEach(function(s){
+    s.y+=s.speed;
+    if(s.y>bgC.height+s.length){s.y=s.startY;}
+    var grad2=bgX.createLinearGradient(s.x,s.y-s.length,s.x,s.y);
+    grad2.addColorStop(0,'rgba(0,0,0,0)');
+    grad2.addColorStop(0.3,hexA(s.col,s.opacity*0.4));
+    grad2.addColorStop(0.8,hexA(s.col,s.opacity));
+    grad2.addColorStop(1,'rgba(0,0,0,0)');
+    bgX.beginPath();bgX.moveTo(s.x,s.y-s.length);bgX.lineTo(s.x,s.y);
+    bgX.strokeStyle=grad2;bgX.lineWidth=1.5;bgX.stroke();
+    // Bright head dot
+    bgX.beginPath();bgX.arc(s.x,s.y,2,0,Math.PI*2);
+    bgX.fillStyle=hexA(s.col,s.opacity*1.2);
+    bgX.shadowColor=s.col;bgX.shadowBlur=6;
+    bgX.fill();bgX.shadowBlur=0;
+  });
+
+  // City grid hint at the bottom
+  var cityY=h*0.82;
+  bgX.strokeStyle='rgba(0,150,200,0.08)';bgX.lineWidth=0.5;
+  for(var gx=0;gx<w;gx+=32){
+    bgX.beginPath();bgX.moveTo(gx,cityY);bgX.lineTo(gx,h);bgX.stroke();
+  }
+  bgX.beginPath();bgX.moveTo(0,cityY);bgX.lineTo(w,cityY);
+  bgX.strokeStyle='rgba(0,150,200,0.12)';bgX.lineWidth=0.7;bgX.stroke();
+}
+
+function drawBg(){
+  if(!paused){drawCloud();bgFrame++;}
   requestAnimationFrame(drawBg);
 }
 drawBg();
@@ -198,7 +319,7 @@ function drawProvider(prov,prog){
   var cx=scC.width/2,cy=scC.height/2,s=Math.min(scC.width,scC.height)/480;
   var col=prov==='aws'?'#FF9900':prov==='azure'?'#0078D4':'#34A853';
   var col2=prov==='aws'?'#ffb84d':prov==='azure'?'#50a8ff':'#7ddc94';
-  scX.shadowColor=hexA(col,0.6);scX.shadowBlur=22;
+  scX.shadowColor=col;scX.shadowBlur=22;
   if(prov==='aws'){
     var numR=5,rW=34*s,rH=22*s,rGap=5*s,totalH=numR*(rH+rGap),startY=cy-totalH/2;
     var vis=Math.min(numR,Math.ceil(prog*numR*1.5));
@@ -267,20 +388,20 @@ function runProvider(prov,cmds,label,ariaMsg,done){
 function phaseSlogan(done){
   var el=document.getElementById('pSlogan');
   var l1=document.getElementById('sLine1'),l2=document.getElementById('sLine2'),l3=document.getElementById('sLine3');
-  announce('One Course. Three Clouds. Zero Limits.');
+  announce('One Course. Three Clouds. Zero Limits. Temple University CIS Department Fall 2026.');
   fade(el,1,400,function(){
     pTimeout(200,function(){fade(l1,1,500,function(){pTimeout(300,function(){fade(l2,1,600,function(){pTimeout(400,function(){fade(l3,1,500,function(){pTimeout(2400,function(){fade(l1,0,400,null);fade(l2,0,400,null);fade(l3,0,400,null);pTimeout(450,function(){fade(el,0,400,done);});});});});});});});});
   });
 }
 
-function phase1(done){announce('CIS 4345 Introduction to Cloud Computing');var el=document.getElementById('p1');fade(el,1,700,function(){pTimeout(1800,function(){fade(el,0,500,done);});});}
+function phase1(done){announce('CIS 4345 Introduction to Cloud Computing, Temple University');var el=document.getElementById('p1');fade(el,1,700,function(){pTimeout(1800,function(){fade(el,0,500,done);});});}
 function phase2(done){
   runProvider('aws',AWS_CMDS,'AWS — Amazon Web Services','Now showing Amazon Web Services',function(){
     pTimeout(300,function(){runProvider('azure',AZ_CMDS,'Azure — Microsoft Azure','Now showing Microsoft Azure',function(){pTimeout(300,function(){runProvider('gcp',GCP_CMDS,'GCP — Google Cloud Platform','Now showing Google Cloud Platform',done);});});});
   });
 }
 function phase4(){announce('Course info: CIS 4345, Temple University, Fall 2026');fade(document.getElementById('p4'),1,900,null);}
-setTimeout(function(){phase1(function(){phase2(function(){phaseSlogan(function(){phase4();});});});},500);
+setTimeout(function(){phase1(function(){phase2(function(){phaseSlogan(function(){phase4();});});});},600);
 </script>
 </body>
 </html>
