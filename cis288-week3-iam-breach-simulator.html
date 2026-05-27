@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAM Breach Simulator — CIS 288 Week 3</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#12151f;--border:#2e3350;
+  --blue:#4f8ef7;--blue-dim:#1e2d4f;--green:#3ecf8e;--green-dim:#0d2e1f;
+  --yellow:#fbbf24;--red:#f87171;--red-dim:rgba(248,113,113,0.12);
+  --amber:#fb923c;--amber-dim:rgba(251,146,60,0.12);
+  --text:#e8eaf6;--text2:#8b92b8;--text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;padding:32px 20px}
+.wrap{max-width:720px;margin:0 auto}
+.back{font-family:var(--mono);font-size:12px;color:var(--text3);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-bottom:28px;transition:color .15s}
+.back:hover{color:var(--blue)}
+.page-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.course-tag{font-family:var(--mono);font-size:11px;color:var(--blue);letter-spacing:.08em;margin-bottom:8px}
+.page-title{font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px}
+.page-sub{font-size:14px;color:var(--text2);line-height:1.5}
+.screen{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.hdr-left{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--text3)}
+.pill{font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px;font-family:var(--mono)}
+.pill-secure{background:var(--green-dim);color:var(--green);border:1px solid #1a5c3a}
+.pill-breach{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
+.pill-info{background:var(--blue-dim);color:var(--blue);border:1px solid #2a3d70}
+.progress-row{display:flex;gap:8px;margin-bottom:20px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.dot.active{background:var(--blue)}
+.dot.ok{background:var(--green)}
+.dot.fail{background:var(--red)}
+.scenario-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
+.scenario-sub{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:18px;border-left:3px solid var(--border);padding-left:12px}
+.scene{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.node{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:80px}
+.node-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;border:1px solid var(--border);background:var(--surface)}
+.node-icon.red{background:var(--red-dim);border-color:rgba(248,113,113,0.4)}
+.node-icon.green{background:var(--green-dim);border-color:rgba(62,207,142,0.4)}
+.node-icon.amber{background:var(--amber-dim);border-color:rgba(251,146,60,0.4)}
+.node-label{font-size:11px;color:var(--text2);text-align:center;line-height:1.4;font-family:var(--mono)}
+.arrow-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.arrow-line{height:1px;width:100%;background:var(--border)}
+.arrow-line.red{background:rgba(248,113,113,0.6)}
+.arrow-line.green{background:rgba(62,207,142,0.5)}
+.arrow-label{font-size:10px;color:var(--text3);text-align:center;font-family:var(--mono);line-height:1.3}
+.question{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.opt{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;text-align:left;line-height:1.5;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blue);color:var(--text)}
+.opt.correct{border-color:rgba(62,207,142,0.6);background:var(--green-dim);color:var(--green)}
+.opt.wrong{border-color:rgba(248,113,113,0.6);background:var(--red-dim);color:var(--red)}
+.opt:disabled{cursor:default}
+.section-label{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);margin:16px 0 8px}
+.log-block{background:#080c12;border:1px solid #1a2540;border-radius:8px;padding:16px;font-family:var(--mono);font-size:12px;line-height:1.9;margin-bottom:14px}
+.log-block .lr{color:#f87171}
+.log-block .lg{color:#3ecf8e}
+.log-block .la{color:#fbbf24}
+.log-block .lw{color:#8b92b8}
+.log-block .lb{color:#4f8ef7}
+.lesson{border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:13px;line-height:1.6}
+.lesson.danger{background:var(--red-dim);border:1px solid rgba(248,113,113,0.25);color:#fca5a5}
+.lesson.success{background:var(--green-dim);border:1px solid rgba(62,207,142,0.25);color:#6ee7b7}
+.lesson strong{font-weight:600}
+.next-btn{width:100%;padding:12px;font-size:13px;font-weight:600;font-family:var(--mono);border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;letter-spacing:.04em;transition:border-color .15s,background .15s}
+.next-btn:hover{border-color:var(--blue);background:var(--blue-dim);color:var(--blue)}
+.report-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.report-row:last-child{border-bottom:none}
+.tag{font-family:var(--mono);font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px}
+.tag-b{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,0.3)}
+.tag-s{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,0.3)}
+.score-num{font-size:40px;font-weight:600;color:var(--text);margin:8px 0 4px}
+.score-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
+.missed-item{padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.6}
+.missed-item:last-child{border-bottom:none}
+.missed-item strong{color:var(--text);display:block;margin-bottom:4px}
+footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← back to simulations</a>
+  <div class="page-header">
+    <div class="course-tag">CIS 288 · WEEK 3 · IDENTITY &amp; ACCESS MANAGEMENT</div>
+    <h1 class="page-title">IAM Breach Simulator</h1>
+    <p class="page-sub">5 real-world IAM misconfigurations. Make the wrong call and watch the breach unfold — with a full audit log showing exactly what happened and why.</p>
+  </div>
+  <div id="game"></div>
+  <footer>
+    <span>CIS 288 — Cloud Computing · Community College of Philadelphia</span>
+    <span>Prof. Sonny Chang</span>
+  </footer>
+</div>
+<script>
+const S=[
+  {
+    id:1,title:"Scenario 1 — The wildcard S3 policy",
+    sub:"Your company stores customer PII in s3://acme-customer-data. A developer needs the backend Lambda to read config files from s3://acme-app-config. You're in a hurry.",
+    q:"Which IAM policy do you attach to the Lambda execution role?",
+    scene:{l:{ic:"⚡",lb:"Lambda\nfunction"},m:"needs config\nfiles only",r:{ic:"🗄️",lb:"S3 buckets\n(all)"}},
+    opts:[
+      {t:'{"Effect":"Allow","Action":"s3:*","Resource":"*"}',ok:false},
+      {t:'{"Effect":"Allow","Action":"s3:GetObject","Resource":"arn:aws:s3:::acme-app-config/*"}',ok:true},
+      {t:'{"Effect":"Allow","Action":"s3:GetObject","Resource":"arn:aws:s3:::acme-*/*"}',ok:false},
+      {t:'{"Effect":"Allow","Action":["s3:Get*","s3:List*"],"Resource":"*"}',ok:false}
+    ],
+    bs:{l:{ic:"💀",lb:"Attacker\n(via Lambda)",c:"red"},m:"s3:* on *\n= full access",r:{ic:"🗄️",lb:"ALL buckets\nexposed",c:"red"}},
+    ss:{l:{ic:"⚡",lb:"Lambda\nfunction",c:"green"},m:"s3:GetObject\nscoped ARN only",r:{ic:"🗄️",lb:"Other buckets\nblocked",c:"green"}},
+    lb:[
+      {c:"la",t:"[WARN]  2026-08-24T09:14:02Z  Lambda role assumed by external principal"},
+      {c:"lr",t:"[CRIT]  2026-08-24T09:14:03Z  s3:ListBuckets — 14 buckets enumerated"},
+      {c:"lr",t:"[CRIT]  2026-08-24T09:14:04Z  s3:GetObject — acme-customer-data/users.csv (4.2 MB)"},
+      {c:"lr",t:"[CRIT]  2026-08-24T09:14:04Z  s3:GetObject — acme-customer-data/payments.csv (1.8 MB)"},
+      {c:"lr",t:"[CRIT]  2026-08-24T09:14:05Z  s3:DeleteObject — acme-backups/ — 412 objects deleted"},
+      {c:"la",t:"[ROOT]  Action=s3:* + Resource=* grants unrestricted access to every S3 bucket"}
+    ],
+    ls:[
+      {c:"lg",t:"[OK]    2026-08-24T09:14:02Z  Lambda role assumed — policy evaluated"},
+      {c:"lg",t:"[OK]    2026-08-24T09:14:03Z  s3:GetObject — acme-app-config/settings.json — ALLOWED"},
+      {c:"lw",t:"[DENY]  2026-08-24T09:14:03Z  s3:ListBuckets — implicit DENY (not in policy)"},
+      {c:"lw",t:"[DENY]  2026-08-24T09:14:03Z  s3:GetObject — acme-customer-data — implicit DENY"},
+      {c:"lg",t:"[OK]    Least privilege enforced. Customer data never touched."}
+    ],
+    lbreason:"s3:* on Resource:* gives this Lambda permission to read, write, delete, and list every bucket in the account. One compromised function = full data exfiltration. Always scope both Action AND Resource to exactly what is needed.",
+    lsreason:"Scoping to s3:GetObject on a specific ARN means even a fully compromised Lambda can only read config files — nothing else. This is the principle of least privilege in action."
+  },
+  {
+    id:2,title:"Scenario 2 — No MFA on the root account",
+    sub:"You just created a new AWS account. You set a strong password on the root account and move on. A classmate suggests enabling MFA — you figure it's fine for now.",
+    q:"What do you do with the root account after initial setup?",
+    scene:{l:{ic:"👤",lb:"Root account\n(no MFA)"},m:"password\nonly",r:{ic:"☁️",lb:"Entire AWS\naccount"}},
+    opts:[
+      {t:"Leave it — a strong password is enough for a class project",ok:false},
+      {t:"Enable MFA immediately, then lock root and use an IAM admin for daily tasks",ok:true},
+      {t:"Delete root and use only IAM users going forward",ok:false},
+      {t:"Share root credentials with teammates for convenience",ok:false}
+    ],
+    bs:{l:{ic:"💀",lb:"Attacker\n(credential stuff)",c:"red"},m:"no MFA =\npassword is enough",r:{ic:"☁️",lb:"Full account\ntakeover",c:"red"}},
+    ss:{l:{ic:"👤",lb:"Root + MFA\nenabled",c:"green"},m:"2nd factor\nblocks attacker",r:{ic:"☁️",lb:"Account\nprotected",c:"green"}},
+    lb:[
+      {c:"la",t:"[WARN]  2026-08-24T22:07:14Z  Root login attempt from 185.220.101.47 (Tor exit node)"},
+      {c:"lr",t:"[CRIT]  2026-08-24T22:07:15Z  Root login SUCCESS — no MFA challenge issued"},
+      {c:"lr",t:"[CRIT]  2026-08-24T22:07:18Z  IAM: CreateUser 'backdoor-admin' + AdministratorAccess policy"},
+      {c:"lr",t:"[CRIT]  2026-08-24T22:07:22Z  EC2: RunInstances x20 — us-east-1, eu-west-1 (crypto mining)"},
+      {c:"lr",t:"[CRIT]  2026-08-24T22:07:30Z  Bill generated: $4,200 in 8 minutes"},
+      {c:"la",t:"[ROOT]  Root had no MFA. Password reuse/stuffing attack succeeded instantly."}
+    ],
+    ls:[
+      {c:"la",t:"[WARN]  2026-08-24T22:07:14Z  Root login attempt from 185.220.101.47 (Tor exit node)"},
+      {c:"lg",t:"[OK]    2026-08-24T22:07:15Z  MFA challenge issued"},
+      {c:"lw",t:"[DENY]  2026-08-24T22:07:16Z  Login BLOCKED — attacker cannot provide MFA token"},
+      {c:"lg",t:"[OK]    No resources created. No charges incurred. Account secure."}
+    ],
+    lbreason:"The root account has unrestricted access to everything — all services, all regions, billing. Without MFA, a leaked or guessed password gives an attacker god-mode access. Real incidents have generated $50,000+ bills overnight from crypto mining.",
+    lsreason:"Correct. Enable MFA on root immediately, then store the credentials securely and create an IAM admin user for all daily work. Root should almost never be used after initial account setup."
+  },
+  {
+    id:3,title:"Scenario 3 — Hardcoded credentials in code",
+    sub:"You're writing a Python script that uploads files to Azure Blob Storage. To make it work fast, you paste your storage account key directly into the script and push to a public GitHub repo.",
+    q:"What happens next?",
+    scene:{l:{ic:"🐍",lb:"Python script\n(key in code)"},m:"pushed to\npublic GitHub",r:{ic:"🔷",lb:"Azure Blob\nStorage"}},
+    opts:[
+      {t:"Nothing — my GitHub is public but nobody will notice one repo",ok:false},
+      {t:"Bots scan GitHub in real time and will find the key within minutes",ok:false},
+      {t:"Use Azure Key Vault or environment variables — never hardcode credentials",ok:true},
+      {t:"It's a school project — rotate the key after class and it's fine",ok:false}
+    ],
+    bs:{l:{ic:"🤖",lb:"GitHub scanner\nbot",c:"red"},m:"key found in\n< 3 minutes",r:{ic:"🔷",lb:"Storage\nexfiltrated",c:"red"}},
+    ss:{l:{ic:"🔑",lb:"Key Vault /\nenv variable",c:"green"},m:"no secrets\nin source code",r:{ic:"🔷",lb:"Blob Storage\nsecured",c:"green"}},
+    lb:[
+      {c:"lb",t:"[INFO]  2026-08-24T10:02:01Z  git push — github.com/student/cloud-project (public repo)"},
+      {c:"lr",t:"[CRIT]  2026-08-24T10:02:04Z  Automated scanner: Azure storage key detected in commit a3f9b2"},
+      {c:"lr",t:"[CRIT]  2026-08-24T10:02:09Z  BlobServiceClient authenticated with hardcoded key"},
+      {c:"lr",t:"[CRIT]  2026-08-24T10:02:11Z  3,847 files downloaded from container 'student-uploads'"},
+      {c:"lr",t:"[CRIT]  2026-08-24T10:02:14Z  Container deleted — data unrecoverable without backup"},
+      {c:"la",t:"[ROOT]  Storage account key committed in plaintext to public GitHub repository."}
+    ],
+    ls:[
+      {c:"lg",t:"[OK]    2026-08-24T10:02:01Z  Script reads os.environ['AZURE_STORAGE_KEY'] — no hardcoded value"},
+      {c:"lg",t:"[OK]    2026-08-24T10:02:01Z  GitHub push scanned — no secrets detected in diff"},
+      {c:"lg",t:"[OK]    Key never exposed. Rotation not required. Storage intact."}
+    ],
+    lbreason:"Automated bots scan every public GitHub push in real time for API keys, passwords, and connection strings. Average time to exploitation: under 3 minutes. Azure, AWS, and GCP all have their own GitHub secret scanning — but by the time they alert you, the key has likely already been used.",
+    lsreason:"Correct. Always use environment variables, a .env file listed in .gitignore, or a secrets manager (Azure Key Vault, AWS Secrets Manager, GCP Secret Manager). The rule is absolute: credentials never live in source code."
+  },
+  {
+    id:4,title:"Scenario 4 — Missing explicit DENY (AWS)",
+    sub:"Your team has an IAM policy that allows developers to launch EC2 instances. You want to block expensive GPU types (p3.*, p4.*) to protect the budget. You need to add a statement.",
+    q:"Which approach actually blocks GPU instances in AWS IAM?",
+    scene:{l:{ic:"👥",lb:"Dev team\nIAM role"},m:"launch EC2\ninstances",r:{ic:"🖥️",lb:"EC2\n(all types?)"}},
+    opts:[
+      {t:'Use "NotAction" to exclude GPU types from the Allow statement',ok:false},
+      {t:"Remove the Allow for ec2:RunInstances and rewrite it without GPU types",ok:false},
+      {t:'Add explicit {"Effect":"Deny","Action":"ec2:RunInstances","Condition":{"StringLike":{"ec2:InstanceType":["p3.*","p4.*"]}}}',ok:true},
+      {t:"Add a wiki note — developers will self-police based on team agreement",ok:false}
+    ],
+    bs:{l:{ic:"👥",lb:"Dev team",c:"amber"},m:"Allow exists\nno DENY = allowed",r:{ic:"🖥️",lb:"p4d.24xlarge\n$32/hr × 10",c:"red"}},
+    ss:{l:{ic:"👥",lb:"Dev team",c:"green"},m:"explicit DENY\nwins always",r:{ic:"🖥️",lb:"GPU instances\nblocked",c:"green"}},
+    lb:[
+      {c:"la",t:"[WARN]  2026-08-25T14:22:01Z  ec2:RunInstances — InstanceType=p4d.24xlarge — evaluating"},
+      {c:"lr",t:"[CRIT]  2026-08-25T14:22:02Z  Allow matched — no explicit DENY found — REQUEST ALLOWED"},
+      {c:"lr",t:"[CRIT]  2026-08-25T14:22:03Z  10x p4d.24xlarge instances launched — $32.77/hr each"},
+      {c:"lr",t:"[CRIT]  2026-08-25T14:22:03Z  Projected daily cost: $7,864.80"},
+      {c:"la",t:"[ROOT]  AWS evaluation order: explicit DENY > Allow > implicit DENY. No DENY = no block."}
+    ],
+    ls:[
+      {c:"lg",t:"[OK]    2026-08-25T14:22:01Z  ec2:RunInstances — InstanceType=p4d.24xlarge — evaluating"},
+      {c:"lw",t:"[DENY]  2026-08-25T14:22:01Z  Explicit Deny matched — ec2:InstanceType p4d.* — BLOCKED"},
+      {c:"lg",t:"[OK]    ec2:RunInstances — InstanceType=t3.medium — ALLOWED (not in deny list)"},
+      {c:"lg",t:"[OK]    GPU instances blocked. Budget protected."}
+    ],
+    lbreason:"In AWS IAM, an explicit DENY always overrides any ALLOW — but an ALLOW without a DENY does not block anything. Simply not granting a permission is an implicit DENY, but an existing Allow policy for ec2:RunInstances will still apply. You must add an explicit Deny with a Condition.",
+    lsreason:"Correct. The AWS policy evaluation order is: explicit DENY wins over everything, then explicit ALLOW, then implicit DENY. Adding an explicit Deny with a StringLike Condition on ec2:InstanceType is the only reliable way to block specific instance types."
+  },
+  {
+    id:5,title:"Scenario 5 — Over-permissioned service account (GCP)",
+    sub:"You're deploying a Cloud Run service that reads from one BigQuery dataset. You attach the default compute service account — it already has the Editor role on the project.",
+    q:"What is the correct approach?",
+    scene:{l:{ic:"🏃",lb:"Cloud Run\nservice"},m:"default compute\nEditor role",r:{ic:"🗄️",lb:"All GCP\nresources"}},
+    opts:[
+      {t:"Keep the default — Editor is fine, the service is internal only",ok:false},
+      {t:"Create a dedicated service account with roles/bigquery.dataViewer on that dataset only",ok:true},
+      {t:"Use Owner role to ensure the service always has what it needs",ok:false},
+      {t:"Disable the service account and use a hardcoded API key instead",ok:false}
+    ],
+    bs:{l:{ic:"💀",lb:"Attacker\n(SSRF exploit)",c:"red"},m:"Editor role =\nfull project access",r:{ic:"🗄️",lb:"All datasets,\nVMs, secrets",c:"red"}},
+    ss:{l:{ic:"🏃",lb:"Cloud Run\nservice",c:"green"},m:"dataViewer\none dataset only",r:{ic:"🗄️",lb:"One table\nnothing else",c:"green"}},
+    lb:[
+      {c:"la",t:"[WARN]  2026-08-26T16:44:01Z  SSRF vulnerability exploited in Cloud Run service"},
+      {c:"lr",t:"[CRIT]  2026-08-26T16:44:02Z  Metadata server queried — default SA token retrieved"},
+      {c:"lr",t:"[CRIT]  2026-08-26T16:44:03Z  Token has roles/editor — all GCP APIs available to attacker"},
+      {c:"lr",t:"[CRIT]  2026-08-26T16:44:04Z  bigquery.tables.list — 47 datasets enumerated"},
+      {c:"lr",t:"[CRIT]  2026-08-26T16:44:05Z  secretmanager.versions.access — 12 secrets exfiltrated"},
+      {c:"la",t:"[ROOT]  Default compute SA has project-wide Editor. SSRF = full project compromise."}
+    ],
+    ls:[
+      {c:"la",t:"[WARN]  2026-08-26T16:44:01Z  SSRF vulnerability exploited in Cloud Run service"},
+      {c:"lg",t:"[OK]    2026-08-26T16:44:02Z  Metadata server queried — dedicated SA token retrieved"},
+      {c:"lw",t:"[DENY]  2026-08-26T16:44:03Z  bigquery.tables.list — DENIED (scoped to one dataset)"},
+      {c:"lw",t:"[DENY]  2026-08-26T16:44:03Z  secretmanager.versions.access — DENIED (no binding)"},
+      {c:"lg",t:"[OK]    Blast radius contained. One table readable. Nothing else reachable."}
+    ],
+    lbreason:"GCP's default compute service account has the Editor role — read/write on almost everything in the project. An SSRF attack can steal its token from the metadata server in milliseconds. The blast radius is your entire GCP project. Always create dedicated service accounts with minimum required roles.",
+    lsreason:"Correct. A dedicated service account with roles/bigquery.dataViewer bound to one specific dataset means even a fully compromised Cloud Run instance can only read that one table. The blast radius shrinks to almost nothing."
+  }
+];
+
+let cur=0,res=[],done=false;
+
+function scene(sc,outcome){
+  const lc=outcome==='b'?'red':outcome==='s'?'green':'';
+  const ic=(c)=>c==='red'?'red':c==='green'?'green':c==='amber'?'amber':'';
+  return `<div class="scene">
+    <div class="node">
+      <div class="node-icon ${ic(sc.l.c||lc)}">${sc.l.ic}</div>
+      <div class="node-label">${(sc.l.lb||'').replace(/\n/g,'<br>')}</div>
+    </div>
+    <div class="arrow-col">
+      <div class="arrow-line ${lc}"></div>
+      <div class="arrow-label">${(sc.m||'').replace(/\n/g,'<br>')}</div>
+      <div class="arrow-line ${lc}"></div>
+    </div>
+    <div class="node">
+      <div class="node-icon ${ic(sc.r.c||lc)}">${sc.r.ic}</div>
+      <div class="node-label">${(sc.r.lb||'').replace(/\n/g,'<br>')}</div>
+    </div>
+  </div>`;
+}
+
+function log(lines){
+  return '<div class="log-block">'+lines.map(l=>`<div><span class="${l.c}">${l.t}</span></div>`).join('')+'</div>';
+}
+
+function dots(){
+  return S.map((_,i)=>`<div class="dot${i===cur?' active':i<cur?(res[i]?' ok':' fail'):''}"></div>`).join('');
+}
+
+function render(){
+  const s=S[cur];
+  document.getElementById('game').innerHTML=`
+  <div class="screen">
+    <div class="hdr">
+      <div class="hdr-left">⚡ IAM Breach Simulator</div>
+      <span class="pill pill-info">Scenario ${s.id} / ${S.length}</span>
+    </div>
+    <div class="progress-row">${dots()}</div>
+    <div class="scenario-title">${s.title}</div>
+    <div class="scenario-sub">${s.sub}</div>
+    ${scene(s.scene,'')}
+    <div class="question">${s.q}</div>
+    <div class="opts">${s.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${o.t}</button>`).join('')}</div>
+  </div>`;
+}
+
+function pick(i){
+  if(done)return;
+  done=true;
+  const s=S[cur];
+  const ok=s.opts[i].ok;
+  res[cur]=ok;
+  document.querySelectorAll('.opt').forEach(b=>b.setAttribute('disabled',''));
+  document.getElementById('o'+i).className='opt '+(ok?'correct':'wrong');
+  if(!ok) s.opts.forEach((o,j)=>{if(o.ok)document.getElementById('o'+j).className='opt correct';});
+
+  const extra=`
+    <div class="section-label">${ok?'SECURE STATE':'BREACH VISUALIZED'}</div>
+    ${scene(ok?s.ss:s.bs,ok?'s':'b')}
+    <div class="section-label">AUDIT LOG — WHAT HAPPENED</div>
+    ${log(ok?s.ls:s.lb)}
+    <div class="lesson ${ok?'success':'danger'}">
+      <strong>${ok?'Why this works:':'Root cause:'}</strong> ${ok?s.lsreason:s.lbreason}
+    </div>
+    <button class="next-btn" onclick="next()">${cur<S.length-1?'Next scenario →':'See damage report →'}</button>`;
+
+  document.querySelector('.screen').insertAdjacentHTML('beforeend',extra);
+}
+
+function next(){
+  done=false;
+  cur++;
+  if(cur>=S.length) report();
+  else render();
+}
+
+function report(){
+  const score=res.filter(Boolean).length;
+  const pct=Math.round(score/S.length*100);
+  const grade=pct===100?'No breaches. Clean record.':pct>=80?'Minor gaps — review what you missed.':pct>=60?'Several misconfigs — re-read the lesson boxes.':'High breach rate — revisit Week 3 before the quiz.';
+  const pc=pct===100?'pill-secure':pct>=60?'pill-info':'pill-breach';
+
+  const missed=S.filter((_,i)=>!res[i]).map(s=>`<div class="missed-item"><strong>${s.title.replace('Scenario '+s.id+' — ','')}</strong>${s.lbreason}</div>`).join('');
+
+  document.getElementById('game').innerHTML=`
+  <div class="screen">
+    <div class="hdr">
+      <div class="hdr-left">⚡ Damage Report</div>
+      <span class="pill ${pc}">${score}/${S.length} secured</span>
+    </div>
+    <div class="score-num">${pct}%</div>
+    <div class="score-sub">${grade}</div>
+    <div style="margin-bottom:20px">${S.map((s,i)=>`<div class="report-row"><span>${s.title.replace('Scenario '+s.id+' — ','')}</span><span class="tag ${res[i]?'tag-s':'tag-b'}">${res[i]?'SECURED':'BREACHED'}</span></div>`).join('')}</div>
+    <div class="section-label">FINAL AUDIT LOG</div>
+    <div class="log-block">
+      <div><span class="lb">BREACH SIMULATOR — FINAL SUMMARY — ${new Date().toISOString().substring(0,10)}</span></div>
+      ${S.map((s,i)=>`<div><span class="${res[i]?'lg':'lr'}">[${res[i]?'SECURE':'BREACH'}]  ${(s.title.replace('Scenario '+s.id+' — ','')).substring(0,44).padEnd(44)}  ${res[i]?'no incident':'compromised'}</span></div>`).join('')}
+      <div><span class="la">SCORE: ${score}/${S.length}  (${pct}%)  |  BREACHES: ${S.length-score}  |  SECURED: ${score}</span></div>
+    </div>
+    ${missed?`<div class="section-label">WHAT YOU MISSED — REVIEW</div>${missed}`:''}
+    <button class="next-btn" onclick="restart()" style="margin-top:16px">Play again</button>
+  </div>`;
+}
+
+function restart(){cur=0;res=[];done=false;render();}
+render();
+</script>
+</body>
+</html>
