@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -280,6 +280,7 @@ function dots(){
   return S.map((_,i)=>`<div class="dot${i===cur?' active':i<cur?(res[i]?' ok':' fail'):''}"></div>`).join('');
 }
 
+function escHtml(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function render(){
   const s=S[cur];
   document.getElementById('game').innerHTML=`
@@ -293,7 +294,7 @@ function render(){
     <div class="scenario-sub">${s.sub}</div>
     ${scene(s.scene,'')}
     <div class="question">${s.q}</div>
-    <div class="opts">${s.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${o.t}</button>`).join('')}</div>
+    <div class="opts">${s.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${escHtml(o.t)}</button>`).join('')}</div>
   </div>`;
 }
 
