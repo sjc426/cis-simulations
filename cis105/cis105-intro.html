@@ -192,7 +192,7 @@ var PARTS=[
   }}
 ];
 
-var STUDENTS=['Nia','Peterson','Luis','Kevin','Apollos','Elijah H.','Free','Anele','Emely','Richard','Reginald','Charmyce','Olly'];
+var STUDENTS=['Peterson','Luis','Kevin','Apollos','Elijah H.','Free','Anele','Emely','Richard','Reginald','Charmyce','Olly'];
 
 // ── Fade utility ──────────────────────────────────────────────
 function fade(el,to,ms,cb){
@@ -230,14 +230,9 @@ function runLoop(onDone){
 function startAll(){
   loopCount=0;
   runLoop(function(){
-    loopCount++;
-    // Reset all layers
-    ['p1','p2','p3'].forEach(function(id){document.getElementById(id).style.opacity=0;});
-    runLoop(function(){
-      // After 2 loops → show static page
-      document.getElementById('p3').style.opacity=0;
-      phase4();
-    });
+    // Single loop done → show static page
+    document.getElementById('p3').style.opacity=0;
+    phase4();
   });
 }
 
