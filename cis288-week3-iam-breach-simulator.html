@@ -294,8 +294,17 @@ function render(){
     <div class="scenario-sub">${s.sub}</div>
     ${scene(s.scene,'')}
     <div class="question">${s.q}</div>
-    <div class="opts">${s.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${escHtml(o.t)}</button>`).join('')}</div>
+    <div class="opts" id="opts-area"></div>
   </div>`;
+  // Build buttons via DOM so special chars (quotes, braces, backticks) render safely
+  s.opts.forEach(function(o,i){
+    var btn=document.createElement('button');
+    btn.className='opt';
+    btn.id='o'+i;
+    btn.textContent=o.t;
+    btn.onclick=(function(idx){return function(){pick(idx);};})(i);
+    document.getElementById('opts-area').appendChild(btn);
+  });
 }
 
 function pick(i){
