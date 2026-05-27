@@ -50,7 +50,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .arrow-line.green{background:rgba(62,207,142,0.5)}
 .arrow-label{font-size:10px;color:var(--text3);text-align:center;font-family:var(--mono);line-height:1.3}
 .question{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.opts{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px}
 .opt{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;font-family:var(--mono);color:var(--text2);cursor:pointer;text-align:left;line-height:1.5;transition:border-color .15s,background .15s}
 .opt:hover:not(:disabled){border-color:var(--blue);color:var(--text)}
 .opt.correct{border-color:rgba(62,207,142,0.6);background:var(--green-dim);color:var(--green)}
@@ -294,17 +294,8 @@ function render(){
     <div class="scenario-sub">${s.sub}</div>
     ${scene(s.scene,'')}
     <div class="question">${s.q}</div>
-    <div class="opts" id="opts-area"></div>
+    <div class="opts">${s.opts.map((o,i)=>`<button class="opt" id="o${i}" onclick="pick(${i})">${escHtml(o.t)}</button>`).join('')}</div>
   </div>`;
-  // Build buttons via DOM so special chars (quotes, braces, backticks) render safely
-  s.opts.forEach(function(o,i){
-    var btn=document.createElement('button');
-    btn.className='opt';
-    btn.id='o'+i;
-    btn.textContent=o.t;
-    btn.onclick=(function(idx){return function(){pick(idx);};})(i);
-    document.getElementById('opts-area').appendChild(btn);
-  });
 }
 
 function pick(i){
