@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 288 — Network Fortress 🏰 Design Your Cloud Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  padding-bottom:3rem;
+}
+
+.header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:1.25rem 1.5rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+
+.logo-area {
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+}
+
+.logo {
+  display:flex;
+  gap:0.35rem;
+}
+
+.dot {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+}
+
+.dot.aws { background:var(--aws); }
+.dot.azure { background:var(--azure); }
+.dot.gcp { background:var(--gcp); }
+
+.header h1 {
+  font-size:1.5rem;
+  font-weight:600;
+  color:var(--text);
+}
+
+.stats {
+  display:flex;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+
+.pill {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.4rem 0.9rem;
+  font-family:var(--mono);
+  font-size:0.9rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.pill-label {
+  color:var(--text3);
+  font-size:0.85rem;
+}
+
+.pill-value {
+  color:var(--text);
+  font-weight:600;
+}
+
+.pill.streak {
+  background:var(--yellow-dim);
+  border-color:var(--yellow);
+}
+
+.pill.streak .pill-value {
+  color:var(--yellow);
+}
+
+.progress-bar {
+  height:3px;
+  background:var(--surface2);
+  position:relative;
+  overflow:hidden;
+}
+
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--aws), var(--azure), var(--gcp));
+  transition: width 0.4s ease;
+  width:0%;
+}
+
+.container {
+  max-width:800px;
+  margin:2rem auto;
+  padding:0 1.5rem;
+}
+
+.round-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:2rem;
+  margin-bottom:1.5rem;
+}
+
+.round-label {
+  font-family:var(--mono);
+  font-size:0.85rem;
+  color:var(--text3);
+  margin-bottom:0.5rem;
+}
+
+.round-title {
+  font-size:1.75rem;
+  font-weight:600;
+  margin-bottom:1rem;
+  color:var(--text);
+}
+
+.round-body {
+  font-size:1.05rem;
+  color:var(--text2);
+  margin-bottom:1.5rem;
+  line-height:1.7;
+}
+
+.concept-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:0.5rem 1rem;
+  margin-bottom:1.5rem;
+}
+
+.concept-emoji {
+  font-size:1.3rem;
+}
+
+.concept-text {
+  display:flex;
+  flex-direction:column;
+  gap:0.1rem;
+}
+
+.concept-main {
+  font-weight:600;
+  font-size:0.95rem;
+  color:var(--text);
+}
+
+.concept-sub {
+  font-size:0.8rem;
+  color:var(--text3);
+  font-family:var(--mono);
+}
+
+.question {
+  font-size:1.15rem;
+  font-weight:600;
+  margin-bottom:1rem;
+  color:var(--text);
+}
+
+.options {
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  margin-bottom:1.5rem;
+}
+
+.option-btn {
+  background:var(--surface2);
+  border:2px solid var(--border);
+  border-radius:8px;
+  padding:1rem 1.25rem;
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:1rem;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.option-btn:hover:not(:disabled) {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+  transform:translateX(4px);
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.6;
+}
+
+.option-btn.correct {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+
+.option-btn.wrong {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb {
+  background:var(--surface2);
+  border-radius:12px;
+  padding:1.5rem;
+  margin-top:1.5rem;
+  border-left:4px solid var(--border);
+}
+
+.fb.success {
+  border-left-color:var(--green);
+  background:var(--green-dim);
+}
+
+.fb.error {
+  border-left-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb-title {
+  font-size:1.25rem;
+  font-weight:600;
+  margin-bottom:0.75rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.fb-text {
+  color:var(--text2);
+  margin-bottom:1rem;
+  line-height:1.7;
+}
+
+.fb-breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:0.6rem;
+  margin-top:1rem;
+  padding-top:1rem;
+  border-top:1px solid var(--border);
+}
+
+.fb-row {
+  display:flex;
+  align-items:flex-start;
+  gap:0.75rem;
+  font-size:0.95rem;
+}
+
+.fb-icon {
+  font-size:1.1rem;
+  flex-shrink:0;
+}
+
+.fb-row-text {
+  color:var(--text2);
+}
+
+.next-btn {
+  background:var(--blue);
+  border:none;
+  border-radius:8px;
+  padding:0.9rem 2rem;
+  color:white;
+  font-family:var(--sans);
+  font-size:1.05rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  margin-top:1rem;
+}
+
+.next-btn:hover {
+  background:var(--azure);
+  transform:translateY(-2px);
+}
+
+.hidden {
+  display:none;
+}
+
+.final-screen {
+  text-align:center;
+  padding:2rem;
+}
+
+.final-score-big {
+  font-size:5rem;
+  font-weight:600;
+  color:var(--green);
+  font-family:var(--mono);
+  margin:1rem 0;
+}
+
+.final-title {
+  font-size:2rem;
+  margin-bottom:0.5rem;
+}
+
+.final-subtitle {
+  color:var(--text2);
+  font-size:1.1rem;
+  margin-bottom:2rem;
+}
+
+.final-stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:1rem;
+  margin:2rem 0;
+}
+
+.stat-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1.5rem;
+}
+
+.stat-value {
+  font-size:2rem;
+  font-weight:600;
+  font-family:var(--mono);
+  color:var(--text);
+}
+
+.stat-label {
+  color:var(--text3);
+  font-size:0.9rem;
+  margin-top:0.25rem;
+}
+
+.replay-btn {
+  background:var(--blue);
+  border:none;
+  border-radius:8px;
+  padding:1rem 2.5rem;
+  color:white;
+  font-family:var(--sans);
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s ease;
+  margin-top:1rem;
+}
+
+.replay-btn:hover {
+  background:var(--azure);
+  transform:translateY(-2px);
+}
+
+@keyframes streakFlash {
+  0%, 100% { transform:scale(1); }
+  50% { transform:scale(1.15); }
+}
+
+.streak-flash {
+  animation: streakFlash 0.4s ease;
+}
+
+@media (max-width: 600px) {
+  .header h1 {
+    font-size:1.2rem;
+  }
+  .round-title {
+    font-size:1.4rem;
+  }
+  .final-score-big {
+    font-size:3.5rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-area">
+    <div class="logo">
+      <div class="dot aws"></div>
+      <div class="dot azure"></div>
+      <div class="dot gcp"></div>
+    </div>
+    <h1>Network Fortress 🏰</h1>
+  </div>
+  <div class="stats">
+    <div class="pill">
+      <span class="pill-label">Score:</span>
+      <span class="pill-value" id="score-display">0</span>
+    </div>
+    <div class="pill">
+      <span class="pill-label">Round:</span>
+      <span class="pill-value" id="round-display">1/5</span>
+    </div>
+    <div class="pill streak hidden" id="streak-pill">
+      <span class="pill-label">🔥 Streak:</span>
+      <span class="pill-value" id="streak-display">0</span>
+    </div>
+  </div>
+</div>
+
+<div class="progress-bar">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<div class="container">
+  <div id="game-area">
+    <div class="round-card">
+      <div class="round-label" id="scenario-label">Scenario 1</div>
+      <h2 class="round-title" id="scenario-title">Loading...</h2>
+      <div class="concept-badge">
+        <span class="concept-emoji" id="concept-emoji">🔒</span>
+        <div class="concept-text">
+          <span class="concept-main" id="concept-main">Core Concept</span>
+          <span class="concept-sub" id="concept-sub">subtitle</span>
+        </div>
+      </div>
+      <div class="round-body" id="scenario-body">
+        Loading scenario...
+      </div>
+      <div class="question" id="scenario-question">Which option is correct?</div>
+      <div class="options" id="options-container"></div>
+      <div class="fb hidden" id="feedback"></div>
+      <button class="next-btn hidden" id="next-btn">Next Scenario →</button>
+    </div>
+  </div>
+
+  <div id="final-screen" class="final-screen hidden">
+    <div class="round-card">
+      <h2 class="final-title">🏆 Fortress Complete!</h2>
+      <div class="final-score-big" id="final-score">0</div>
+      <p class="final-subtitle" id="final-message">Great work!</p>
+      <div class="final-stats">
+        <div class="stat-box">
+          <div class="stat-value" id="final-correct">0</div>
+          <div class="stat-label">Correct Answers</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="final-streak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="final-percentage">0%</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+      </div>
+      <button class="replay-btn" onclick="location.reload()">🔄 Replay Simulation</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — VPC Setup Decision",
+    title: "Your First Day at CloudMart",
+    body: "You just started as a junior cloud engineer at CloudMart, an e-commerce startup. Your manager asks you to set up the company's first AWS VPC for their production web application. The app has a public-facing website and a private database that should never be accessible from the internet. What's the best VPC setup approach?",
+    concept: "VPC Architecture Planning",
+    conceptEmoji: "🏰",
+    conceptSub: "Network isolation design",
+    question: "Which VPC design should you recommend?",
+    options: [
+      "A. Single public subnet — put everything in one subnet with security groups controlling access",
+      "B. Public and private subnets — web servers in public subnet, database in private subnet with NAT gateway",
+      "C. All private subnets — keep everything private and use VPN for all access",
+      "D. Multiple VPCs — one VPC for web servers, another VPC for database"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Perfect! Public/private subnet architecture is the industry-standard pattern for web applications. Your web servers sit in the public subnet with internet access, while your database lives safely in a private subnet with no direct internet route. The NAT gateway lets your database reach the internet for updates without exposing it to inbound traffic.",
+      wrong: "The correct answer is B — public and private subnets. This is the foundational pattern for secure cloud architecture. Single public subnets expose your database to the internet (bad security). All-private setups make your website unreachable. Multiple VPCs add unnecessary complexity and cost for a simple app.",
+      breakdown: [
+        {icon:"✅", text:"Public subnets have routes to an Internet Gateway — use for web servers"},
+        {icon:"🔒", text:"Private subnets have NO internet route — use for databases and backends"},
+        {icon:"💡", text:"NAT gateways let private resources reach the internet outbound-only (for updates)"},
+        {icon:"⚠️", text:"Never put databases in public subnets — even with security groups, you're one misconfiguration away from disaster"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — CIDR Block Planning",
+    title: "Subnet IP Planning Crisis",
+    body: "Your team is expanding rapidly. You're setting up an Azure Virtual Network and need to plan for growth. Marketing wants to deploy 50 VMs this quarter, Engineering needs 150 VMs, and DevOps wants room for 100 test environments. You're choosing a CIDR block for the VNet. Which block gives you enough space without wasting address ranges?",
+    concept: "CIDR Block Sizing",
+    conceptEmoji: "🔢",
+    conceptSub: "IP address planning",
+    question: "Which CIDR block should you choose?",
+    options: [
+      "A. 10.0.0.0/28 (16 addresses) — small and efficient",
+      "B. 10.0.0.0/24 (256 addresses) — enough for current needs",
+      "C. 10.0.0.0/20 (4,096 addresses) — room for growth",
+      "D. 10.0.0.0/8 (16 million addresses) — unlimited space"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Excellent planning! A /20 CIDR block gives you 4,096 IP addresses — plenty for your 300 current VMs plus tons of room for growth, test environments, and future expansion. You're thinking like a real cloud architect: not too small (limiting), not too large (wasteful and complex), but just right with headroom.",
+      wrong: "The correct answer is C — 10.0.0.0/20. A /28 only gives 16 IPs (way too small). A /24 gives 256 IPs, which sounds like enough for 300 VMs, but Azure reserves 5 IPs per subnet, you need multiple subnets, and you have zero room for growth. A /8 is absurdly large and makes subnet planning a nightmare.",
+      breakdown: [
+        {icon:"📐", text:"Smaller CIDR number = MORE addresses: /16 is bigger than /24"},
+        {icon:"💡", text:"Rule of thumb: /20 to /16 are sweet spots for most company VPCs"},
+        {icon:"⚠️", text:"Azure/AWS/GCP all reserve ~5 IPs per subnet for network, gateway, DNS, and broadcast"},
+        {icon:"✅", text:"Plan for 3-5x growth — you can't easily change VPC CIDR blocks later"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — Security Group Rules",
+    title: "The Database Breach That Never Was",
+    body: "A security audit just flagged your GCP project. Your production PostgreSQL database running on a Compute Engine instance has a firewall rule allowing inbound traffic on port 5432 from 0.0.0.0/0 (the entire internet). Your web application needs to connect to this database. How should you fix this firewall rule?",
+    concept: "Security Group Configuration",
+    conceptEmoji: "🔐",
+    conceptSub: "Firewall rules & least privilege",
+    question: "What's the most secure firewall rule fix?",
+    options: [
+      "A. Allow port 5432 from your web server's specific internal IP address only",
+      "B. Allow port 5432 from your VPC's CIDR block (e.g., 10.0.0.0/16)",
+      "C. Allow port 5432 from your office's public IP address",
+      "D. Keep 0.0.0.0/0 but add a strong password — firewalls are overkill"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Perfect! Allowing traffic only from the specific web server IP is the principle of least privilege in action. Your database is now locked down to exactly the resource that needs it — nothing more. This is the gold standard for production security. If you have multiple web servers, you'd allow each of their IPs individually or use a network tag/security group reference.",
+      wrong: "The correct answer is A — allow only the web server's specific IP. Allowing the entire VPC CIDR (B) is better than the internet, but still gives access to every VM in your VPC (too broad). Your office IP (C) doesn't help your web app connect. And D... just no. Passwords don't matter if your database is exposed to every bot and hacker on the planet scanning port 5432.",
+      breakdown: [
+        {icon:"🔒", text:"Default deny, explicit allow — start with no access, then grant the minimum needed"},
+        {icon:"💡", text:"Use internal/private IPs for cloud-to-cloud communication (they never leave the cloud network)"},
+        {icon:"⚠️", text:"0.0.0.0/0 means THE ENTIRE INTERNET — never use this for databases, SSH, or RDP"},
+        {icon:"✅", text:"AWS Security Groups, Azure NSGs, and GCP Firewall Rules all work the same way"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — Subnet Configuration",
+    title: "The NAT Gateway Mystery",
+    body: "Your colleague set up an AWS VPC with public and private subnets. Web servers in the public subnet work fine, but EC2 instances in the private subnet can't download software updates from the internet. The route table for the private subnet points to a NAT Gateway, which is deployed in the private subnet. What's wrong?",
+    concept: "NAT Gateway & Routing",
+    conceptEmoji: "🛣️",
+    conceptSub: "Outbound internet access",
+    question: "Why can't the private instances reach the internet?",
+    options: [
+      "A. NAT Gateways don't work in AWS — you need a NAT Instance instead",
+      "B. The NAT Gateway is in the wrong place — it must be in a PUBLIC subnet",
+      "C. Private subnets can never access the internet — that's why they're private",
+      "D. The route table needs to point to an Internet Gateway, not a NAT Gateway"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Bingo! This is a classic mistake. NAT Gateways must live in PUBLIC subnets because they need their own internet access to forward traffic from private instances. Think of the NAT Gateway as a middleman: your private instances send traffic to the NAT Gateway, and the NAT Gateway forwards it to the internet via the Internet Gateway. If the NAT Gateway itself is stuck in a private subnet, it can't reach the internet either.",
+      wrong: "The correct answer is B — the NAT Gateway must be in a public subnet. NAT Gateways absolutely work in AWS (they're managed AWS services, unlike NAT Instances which you have to manage yourself). Private subnets CAN reach the internet outbound-only via NAT. And private subnet route tables point to NAT Gateways, not Internet Gateways directly.",
+      breakdown: [
+        {icon:"✅", text:"NAT Gateway = lives in PUBLIC subnet, receives traffic from PRIVATE subnet"},
+        {icon:"🛣️", text:"Private subnet route: 0.0.0.0/0 → NAT Gateway ID"},
+        {icon:"🌐", text:"Public subnet route: 0.0.0.0/0 → Internet Gateway ID"},
+        {icon:"💡", text:"Azure calls this a NAT Gateway too; GCP calls it Cloud NAT (same concept, three landlords!)"}
+      ]
+    }
+  },
+  {
+    id: 5,
+    label: "Scenario 5 — Network Troubleshooting",
+    title: "The Case of the Unreachable API",
+    body: "You deployed a new REST API on an Azure VM in a private subnet. Your mobile app (running on the internet) needs to call this API, but requests time out. The VM is healthy, the app code works, and the Network Security Group allows inbound HTTPS (port 443) from 0.0.0.0/0. What's the most likely problem?",
+    concept: "Network Troubleshooting",
+    conceptEmoji: "🔍",
+    conceptSub: "Diagnosing connectivity issues",
+    question: "Why can't the mobile app reach the API?",
+    options: [
+      "A. The VM is in a private subnet with no public IP — it's not reachable from the internet",
+      "B. HTTPS requires port 80, not 443 — wrong port in the NSG rule",
+      "C. Azure VMs don't support inbound traffic from mobile apps",
+      "D. The mobile app needs to be in the same VNet as the VM"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Exactly! Private subnets don't have routes to the internet, and VMs in private subnets don't get public IPs. Your mobile app (on the internet) has no way to route to a private IP address like 10.0.5.20. To fix this, either: (1) move the API VM to a public subnet and assign it a public IP, (2) put an Application Load Balancer or Azure Application Gateway in front of it in a public subnet, or (3) use Azure API Management as a public-facing gateway.",
+      wrong: "The correct answer is A — the VM is unreachable because it's in a private subnet. HTTPS is definitely port 443 (80 is HTTP). Azure VMs absolutely support inbound traffic from anywhere if properly configured. And mobile apps on the internet can't join your VNet — that's the whole point of VNets being private networks.",
+      breakdown: [
+        {icon:"🔒", text:"Private subnet = no inbound internet access, even with NSG rules allowing it"},
+        {icon:"💡", text:"Solution: Use a load balancer or API gateway in a PUBLIC subnet as the entry point"},
+        {icon:"✅", text:"Public IPs are required for any resource that needs to accept inbound internet traffic"},
+        {icon:"⚠️", text:"NSG/Security Group rules don't matter if there's no network route to the resource"}
+      ]
+    }
+  }
+];
+
+let currentScenario = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let correctCount = 0;
+let answered = false;
+
+function updateUI() {
+  const scenario = scenarios[currentScenario];
+  document.getElementById('scenario-label').textContent = scenario.label;
+  document.getElementById('scenario-title').textContent = scenario.title;
+  document.getElementById('scenario-body').textContent = scenario.body;
+  document.getElementById('concept-emoji').textContent = scenario.conceptEmoji;
+  document.getElementById('concept-main').textContent = scenario.concept;
+  document.getElementById('concept-sub').textContent = scenario.conceptSub;
+  document.getElementById('scenario-question').textContent = scenario.question;
+  
+  const optionsContainer = document.getElementById('options-container');
+  optionsContainer.innerHTML = '';
+  scenario.options.forEach((option, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.onclick = () => selectAnswer(index);
+    optionsContainer.appendChild(btn);
+  });
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('round-display').textContent = `${currentScenario + 1}/5`;
+  document.getElementById('progress-fill').style.width = `${((currentScenario) / 5) * 100}%`;
+  
+  if (streak >= 3) {
+    document.getElementById('streak-pill').classList.remove('hidden');
+    document.getElementById('streak-display').textContent = streak;
+  } else {
+    document.getElementById('streak-pill').classList.add('hidden');
+  }
+
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  answered = false;
+}
+
+function selectAnswer(selectedIndex) {
+  if (answered) return;
+  answered = true;
+
+  const scenario = scenarios[currentScenario];
+  const correct = selectedIndex === scenario.correct;
+  const buttons = document.querySelectorAll('.option-btn');
+  
+  buttons.forEach((btn, index) => {
+    btn.disabled = true;
+    if (index === scenario.correct) {
+      btn.classList.add('correct');
+    } else if (index === selectedIndex && !correct) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  if (correct) {
+    let points = 10;
+    streak++;
+    correctCount++;
+    if (streak >= 3) {
+      points += 5;
+    }
+    score += points;
+    if (streak > bestStreak) bestStreak = streak;
+    
+    if (streak >= 3) {
+      const streakPill = document.getElementById('streak-pill');
+      streakPill.classList.add('streak-flash');
+      setTimeout(() => streakPill.classList.remove('streak-flash'), 400);
+    }
+    
+    showFeedback(true, scenario.feedback.correct, scenario.feedback.breakdown);
+  } else {
+    score = Math.max(0, score - 2);
+    streak = 0;
+    showFeedback(false, scenario.feedback.wrong, scenario.feedback.breakdown);
+  }
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function showFeedback(isCorrect, text, breakdown) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'fb ' + (isCorrect ? 'success' : 'error');
+  
+  let html = `
+    <div class="fb-title">${isCorrect ? '✅ Correct!' : '❌ Not Quite'}</div>
+    <div class="fb-text">${text}</div>
+    <div class="fb-breakdown">
+  `;
+  
+  breakdown.forEach(item => {
+    html += `
+      <div class="fb-row">
+        <span class="fb-icon">${item.icon}</span>
+        <span class="fb-row-text">${item.text}</span>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  fb.innerHTML = html;
+  fb.classList.remove('hidden');
+}
