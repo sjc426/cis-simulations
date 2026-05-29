@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4696 — Ethical Hacker Mindset ⚖️ Your Brand + Your Weapon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.skip-link {
+  position:absolute;
+  top:-40px;
+  left:0;
+  background:var(--blue);
+  color:#fff;
+  padding:8px 16px;
+  text-decoration:none;
+  font-weight:600;
+  z-index:100;
+}
+.skip-link:focus {
+  top:0;
+}
+
+header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:1rem 2rem;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+
+.logo-area {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.dots {
+  display:flex;
+  gap:6px;
+}
+.dot {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+}
+.dot.aws { background:var(--aws); }
+.dot.azure { background:var(--azure); }
+.dot.gcp { background:var(--gcp); }
+
+h1 {
+  font-size:1.5rem;
+  font-weight:600;
+  color:var(--text);
+}
+
+.stats {
+  display:flex;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+
+.pill {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:0.4rem 0.9rem;
+  border-radius:20px;
+  font-family:var(--mono);
+  font-size:0.9rem;
+  color:var(--text2);
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.pill strong {
+  color:var(--text);
+  font-weight:600;
+}
+
+.pill.streak strong {
+  color:var(--yellow);
+}
+
+.progress-bar-container {
+  width:100%;
+  height:3px;
+  background:var(--surface2);
+  position:relative;
+  overflow:hidden;
+}
+
+.progress-bar {
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), var(--green));
+  width:0%;
+  transition:width 0.4s ease;
+}
+
+main {
+  flex:1;
+  max-width:900px;
+  width:100%;
+  margin:0 auto;
+  padding:2rem;
+}
+
+.round-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:2rem;
+  margin-bottom:1.5rem;
+}
+
+.scenario-label {
+  font-family:var(--mono);
+  font-size:0.85rem;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:0.5rem;
+}
+
+h2 {
+  font-size:1.75rem;
+  margin-bottom:1rem;
+  color:var(--text);
+}
+
+.scenario-body {
+  color:var(--text2);
+  margin-bottom:1.5rem;
+  line-height:1.7;
+  font-size:1.05rem;
+}
+
+.concept-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  background:var(--blue-dim);
+  border:1px solid var(--blue);
+  padding:0.5rem 1rem;
+  border-radius:8px;
+  margin-bottom:1.5rem;
+}
+
+.concept-badge .emoji {
+  font-size:1.3rem;
+}
+
+.concept-text {
+  display:flex;
+  flex-direction:column;
+  gap:0.1rem;
+}
+
+.concept-text strong {
+  color:var(--blue);
+  font-size:0.95rem;
+}
+
+.concept-text small {
+  color:var(--text3);
+  font-size:0.8rem;
+}
+
+.question {
+  font-size:1.1rem;
+  font-weight:600;
+  margin-bottom:1rem;
+  color:var(--text);
+}
+
+.options {
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  margin-bottom:1.5rem;
+}
+
+.option-btn {
+  background:var(--surface2);
+  border:2px solid var(--border);
+  color:var(--text);
+  padding:1rem 1.25rem;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:1rem;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+
+.option-btn:hover:not(:disabled) {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+  transform:translateX(4px);
+}
+
+.option-btn:focus-visible {
+  outline:3px solid var(--blue);
+  outline-offset:2px;
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.6;
+}
+
+.option-btn.selected {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+
+.option-btn.correct {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+
+.option-btn.wrong {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb {
+  background:var(--surface2);
+  border-left:4px solid var(--blue);
+  padding:1.5rem;
+  border-radius:8px;
+  margin-top:1.5rem;
+}
+
+.fb.success {
+  border-left-color:var(--green);
+  background:var(--green-dim);
+}
+
+.fb.error {
+  border-left-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb.partial {
+  border-left-color:var(--yellow);
+  background:var(--yellow-dim);
+}
+
+.fb-header {
+  font-size:1.2rem;
+  font-weight:600;
+  margin-bottom:0.75rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.fb.success .fb-header {
+  color:var(--green);
+}
+
+.fb.error .fb-header {
+  color:var(--red);
+}
+
+.fb.partial .fb-header {
+  color:var(--yellow);
+}
+
+.fb-text {
+  color:var(--text2);
+  margin-bottom:1rem;
+  line-height:1.6;
+}
+
+.breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:0.6rem;
+}
+
+.breakdown-item {
+  display:flex;
+  align-items:flex-start;
+  gap:0.75rem;
+  font-size:0.95rem;
+  color:var(--text2);
+}
+
+.breakdown-item .icon {
+  flex-shrink:0;
+  font-size:1.1rem;
+}
+
+.next-btn {
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  padding:0.85rem 2rem;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:1.05rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:1rem;
+  transition:all 0.2s;
+}
+
+.next-btn:hover {
+  background:var(--azure);
+  transform:translateY(-2px);
+}
+
+.next-btn:focus-visible {
+  outline:3px solid var(--blue);
+  outline-offset:2px;
+}
+
+.final-screen {
+  text-align:center;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:3rem 2rem;
+}
+
+.final-score {
+  font-size:4rem;
+  font-weight:600;
+  color:var(--green);
+  margin-bottom:0.5rem;
+  font-family:var(--mono);
+}
+
+.final-label {
+  font-size:1.2rem;
+  color:var(--text2);
+  margin-bottom:2rem;
+}
+
+.stat-boxes {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:1rem;
+  margin-bottom:2rem;
+}
+
+.stat-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:1.5rem;
+}
+
+.stat-box .num {
+  font-size:2rem;
+  font-weight:600;
+  color:var(--text);
+  font-family:var(--mono);
+  display:block;
+}
+
+.stat-box .label {
+  color:var(--text3);
+  font-size:0.9rem;
+  margin-top:0.25rem;
+}
+
+.replay-btn {
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  padding:1rem 2.5rem;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+
+.replay-btn:hover {
+  background:var(--azure);
+  transform:translateY(-2px);
+}
+
+.replay-btn:focus-visible {
+  outline:3px solid var(--blue);
+  outline-offset:2px;
+}
+
+.hidden {
+  display:none;
+}
+
+.streak-flash {
+  animation:flash 0.6s ease;
+}
+
+@keyframes flash {
+  0%, 100% { background:var(--surface2); }
+  50% { background:var(--yellow-dim); border-color:var(--yellow); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding:1rem;
+  }
+  h1 {
+    font-size:1.2rem;
+  }
+  main {
+    padding:1rem;
+  }
+  .round-card {
+    padding:1.5rem;
+  }
+  h2 {
+    font-size:1.4rem;
+  }
+  .final-score {
+    font-size:3rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-area">
+    <div class="dots">
+      <div class="dot aws"></div>
+      <div class="dot azure"></div>
+      <div class="dot gcp"></div>
+    </div>
+    <h1>CIS 4696 — Ethical Hacker Mindset ⚖️</h1>
+  </div>
+  <div class="stats">
+    <div class="pill">
+      <span>Score:</span>
+      <strong id="score-display" aria-live="polite" aria-atomic="true">0</strong>
+    </div>
+    <div class="pill">
+      <span>Scenario:</span>
+      <strong id="round-display" aria-live="polite" aria-atomic="true">1/4</strong>
+    </div>
+    <div class="pill streak">
+      <span aria-hidden="true">🔥</span>
+      <span>Streak:</span>
+      <strong id="streak-display" aria-live="polite" aria-atomic="true">0</strong>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar-container">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-container"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — Authorization & Scope",
+    title: "The Eager Client Request",
+    body: "You're a freelance penetration tester. A startup CEO contacts you directly on LinkedIn, offering $5,000 to test their cloud infrastructure 'ASAP.' They mention their CTO is on vacation and they want to 'surprise him' with a security report. The CEO provides admin credentials and asks you to start tonight.",
+    concept: "Authorized vs Unauthorized Testing",
+    conceptEmoji: "⚖️",
+    conceptSub: "Legal boundaries of engagement",
+    question: "What is your immediate course of action?",
+    options: [
+      "A. Accept the job — the CEO has authority to authorize testing on company assets",
+      "B. Decline and explain you need written authorization from legal stakeholders and IT leadership",
+      "C. Begin testing but only document findings without exploiting vulnerabilities",
+      "D. Contact the CTO directly to verify the CEO's request before proceeding"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct. Even with CEO approval, penetration testing requires proper legal authorization through documented contracts, stakeholder sign-off, and coordination with technical leadership. The 'surprise' framing and absence of the CTO are major red flags for potential unauthorized access.",
+      wrong: "This approach creates serious legal risk. Penetration testing without proper written authorization, stakeholder consensus, and technical coordination can be prosecuted as unauthorized access under the CFAA. The CEO's 'surprise' request and CTO's absence are red flags indicating improper authorization.",
+      breakdown: [
+        {icon:"✅", text:"Always require written Rules of Engagement signed by legal and technical stakeholders"},
+        {icon:"💡", text:"'Surprise' security tests bypass necessary coordination and can disrupt production systems"},
+        {icon:"⚠️", text:"Testing without IT leadership knowledge can trigger incident response and legal action"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — Scope Definition",
+    title: "Cloud Boundary Confusion",
+    body: "You're conducting a penetration test for a healthcare company. Your signed scope document lists their Azure tenant ID and three specific resource groups. During reconnaissance, you discover their Azure AD is federated with a third-party identity provider (Okta) and their data lake connects to an AWS S3 bucket owned by a vendor. Both systems are accessible from your test position.",
+    concept: "Scope Definition & Boundaries",
+    conceptEmoji: "🎯",
+    conceptSub: "Defining test boundaries",
+    question: "How should you handle these external systems?",
+    options: [
+      "A. Test everything accessible from your position — if it's reachable, it's in scope",
+      "B. Stop testing immediately and request scope clarification for the Okta and AWS systems",
+      "C. Document the external connections but don't interact with systems outside the original tenant",
+      "D. Test the Okta instance but avoid the AWS bucket since it's a different cloud provider"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct. Third-party systems (Okta, vendor AWS) are legally separate entities even if technically connected. Testing them without explicit authorization could constitute unauthorized access to systems you don't have permission to test. Always request scope amendments in writing before testing any system not explicitly listed.",
+      wrong: "This creates legal and business risk. Third-party systems (identity providers, vendor resources) are separate legal entities requiring their own authorization. Just because a system is technically accessible doesn't mean it's legally in scope. Testing without explicit written authorization exposes you to legal liability.",
+      breakdown: [
+        {icon:"✅", text:"Scope is defined by written authorization, not technical accessibility"},
+        {icon:"💡", text:"Federated systems and vendor resources require separate authorization from their owners"},
+        {icon:"⚠️", text:"Unauthorized testing of third-party systems can breach contracts and violate CFAA"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — Legal Compliance",
+    title: "The HIPAA Data Discovery",
+    body: "During a web application penetration test for a medical billing company, you successfully exploit an SQL injection vulnerability. In the database, you discover a table with 50,000 patient records including names, SSNs, diagnoses, and insurance details. Your Rules of Engagement document includes a clause: 'Tester may access systems to demonstrate impact but must not exfiltrate sensitive data.'",
+    concept: "Legal Compliance & Data Handling",
+    conceptEmoji: "🔒",
+    conceptSub: "Regulatory requirements",
+    question: "What is the appropriate way to document this finding?",
+    options: [
+      "A. Export the full database to prove impact, then store it encrypted in your report archive",
+      "B. Take a screenshot showing row count and column names, document one sanitized example record",
+      "C. Export 100 sample records to demonstrate severity, then delete them after the engagement",
+      "D. Immediately exit the database and report only that 'sensitive data was accessible'"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct. This approach demonstrates impact without creating a HIPAA breach. Showing record count, schema, and a sanitized example proves the vulnerability severity while respecting the 'no exfiltration' clause. Actual patient data must never be extracted, stored, or included in reports.",
+      wrong: "This approach violates HIPAA and potentially creates legal liability. Exfiltrating actual patient records — even temporarily — constitutes a data breach requiring notification. Penetration testers must prove impact through metadata, screenshots, and sanitized examples, not by extracting regulated data.",
+      breakdown: [
+        {icon:"✅", text:"Demonstrate impact through schema, record counts, and sanitized examples"},
+        {icon:"💡", text:"HIPAA violations during pentesting expose both you and the client to regulatory penalties"},
+        {icon:"⚠️", text:"Never exfiltrate PII, PHI, or PCI data — document access without extracting actual records"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — Ethical Decision Making",
+    title: "The Critical Vulnerability Dilemma",
+    body: "On day 2 of a 5-day engagement, you discover an unauthenticated remote code execution vulnerability in the client's public-facing GCP Cloud Run service. You verify you can execute commands as root. The service processes customer payments. Your report isn't due until day 7. The client's security team is only monitoring email during business hours.",
+    concept: "Penetration Testing Methodology",
+    conceptEmoji: "🚨",
+    conceptSub: "Escalation procedures",
+    question: "What is the most appropriate immediate action?",
+    options: [
+      "A. Continue testing as planned and include the finding in your final report on day 7",
+      "B. Immediately contact the designated emergency contact via phone and email to report the critical finding",
+      "C. Exploit the vulnerability to install a temporary patch, then document it in your report",
+      "D. Send an email to the security team and continue testing other systems while waiting for response"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct. Critical vulnerabilities (especially RCE on payment systems) require immediate out-of-band notification per standard penetration testing methodology. Your RoE should define escalation contacts and procedures — use them immediately. Waiting until the scheduled report delivery puts customer data and business operations at severe risk.",
+      wrong: "This response fails to follow proper escalation procedures for critical findings. Production systems processing payments with RCE vulnerabilities require immediate notification outside normal reporting channels. Professional pentesters have an ethical duty to prevent active harm by escalating critical issues immediately.",
+      breakdown: [
+        {icon:"✅", text:"Critical findings (RCE, SQLi on production, exposed PII) require immediate escalation"},
+        {icon:"💡", text:"Rules of Engagement should define emergency contacts and escalation thresholds"},
+        {icon:"⚠️", text:"Never 'fix' vulnerabilities yourself — report immediately and let the client remediate"}
+      ]
+    }
+  }
+];
+
+let currentScenario = 0;
+let score = 0;
+let streak = 0;
+let answered = false;
+
+const gameContainer = document.getElementById('game-container');
+const scoreDisplay = document.getElementById('score-display');
+const roundDisplay = document.getElementById('round-display');
+const streakDisplay = document.getElementById('streak-display');
+const progressBar = document.getElementById('progress-bar');
+
+function updateProgress() {
+  const progress = ((currentScenario) / scenarios.length) * 100;
+  progressBar.style.width = progress + '%';
+  progressBar.setAttribute('aria-valuenow', Math.round(progress));
+}
+
+function updateStats() {
+  scoreDisplay.textContent = score;
+  roundDisplay.textContent = `${currentScenario + 1}/${scenarios.length}`;
+  streakDisplay.textContent = streak;
+}
+
+function renderScenario() {
+  answered = false;
+  const s = scenarios[currentScenario];
+  
+  const html = `
+    <section class="round-card" aria-labelledby="scenario-title-${s.id}">
+      <div class="scenario-label">${s.label}</div>
+      <h2 id="scenario-title-${s.id}">${s.title}</h2>
+      <div class="scenario-body">${s.body}</div>
+      <div class="concept-badge">
+        <span class="emoji" role="img" aria-label="${s.concept}">${s.conceptEmoji}</span>
+        <div class="concept-text">
+          <strong>${s.concept}</strong>
+          <small>${s.conceptSub}</small>
+        </div>
+      </div>
+      <div class="question">${s.question}</div>
+      <div class="options" role="group" aria-label="Answer options">
+        ${s.options.map((opt, idx) => `
+          <button class="option-btn" data-index="${idx}" aria-pressed="false">
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+      <div id="feedback-container"></div>
+    </section>
+  `;
+  
+  gameContainer.innerHTML = html;
+  
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.addEventListener('click', () => handleAnswer(parseInt(btn.dataset.index)));
+  });
+  
+  updateStats();
+  updateProgress();
+}
+
+function handleAnswer(selectedIndex) {
+  if (answered) return;
+  answered = true;
+  
+  const s = scenarios[currentScenario];
+  const isCorrect = selectedIndex === s.correct;
+  
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    btn.setAttribute('aria-pressed', 'false');
+    if (idx === s.correct) {
+      btn.classList.add('correct');
+    }
+    if (idx === selectedIndex && !isCorrect) {
+      btn.classList.add('wrong');
+    }
+    if (idx === selectedIndex) {
+      btn.setAttribute('aria-pressed', 'true');
+    }
+  });
+  
+  if (isCorrect) {
+    let points = 10;
+    streak++;
+    if (streak >= 3) {
+      points += 5;
+      const streakPill = document.querySelector('.pill.streak');
+      streakPill.classList.add('streak-flash');
+      setTimeout(() => streakPill.classList.remove('streak-flash'), 600);
+    }
+    score += points;
+  } else {
+    score = Math.max(0, score - 2);
+    streak = 0;
+  }
+  
+  updateStats();
+  showFeedback(isCorrect);
+}
+
+function showFeedback(isCorrect) {
+  const s = scenarios[currentScenario];
+  const fbContainer = document.getElementById('feedback-container');
+  
+  const fbClass = isCorrect ? 'success' : 'error';
+  const fbIcon = isCorrect ? '✅' : '❌';
+  const fbTitle = isCorrect ? 'Correct!' : 'Not Quite';
+  const fbText = isCorrect ? s.feedback.correct : s.feedback.wrong;
+  
+  const html = `
+    <div class="fb ${fbClass}" role="alert" aria-live="assertive">
+      <div class="fb-header">
+        <span aria-hidden="true">${fbIcon}</span>
+        <span>${fbTitle}</span>
+      </div>
+      <div class="fb-text">${fbText}</div>
+      <div class="breakdown">
+        ${s.feedback.breakdown.map(item => `
+          <div class="breakdown-item">
+            <span class="icon" aria-hidden="true">${item.icon}</span>
+            <span>${item.text}</span>
+          </div>
+        `).join('')}
+      </div>
+      <button class="next-btn" onclick="nextScenario()">
+        ${currentScenario < scenarios.length - 1 ? 'Next Scenario →' : 'See Results →'}
+      </button>
+    </div>
+  `;
+  
+  fbContainer.innerHTML = html;
+  
+  // Focus the next button for accessibility
+  setTimeout(() => {
+    document.querySelector('.next-btn').focus();
+  }, 100);
+}
+
+function nextScenario() {
+  currentScenario++;
+  if (currentScenario < scenarios.length) {
+    renderScenario();
+  } else {
+    showFinalScreen();
+  }
+}
+
+function showFinalScreen() {
+  updateProgress();
+  
+  const maxScore = scenarios.length * 10;
+  const percentage = Math.round((score / maxScore) * 100);
+  
+  let message = '';
+  if (percentage >= 90) {
+    message = 'Outstanding! You have a strong ethical hacker mindset.';
+  } else if (percentage >= 70) {
+    message = 'Good work! You understand key ethical boundaries.';
+  } else if (percentage >= 50) {
+    message = 'Solid foundation. Review scope and authorization procedures.';
+  } else {
+    message = 'Keep learning. Authorization and legal compliance are critical.';
+  }
+  
+  const html = `
+    <div class="final-screen">
+      <div class="final-score" aria-label="Final score">${score}</div>
+      <div class="final-label">points earned</div>
+      <div class="stat-boxes">
+        <div class="stat-box">
+          <span class="num">${percentage}%</span>
+          <span class="label">Accuracy</span>
+        </div>
+        <div class="stat-box">
+          <span class="num">${scenarios.length}</span>
+          <span class="label">Scenarios Completed</span>
+        </div>
+        <div class="stat-box">
+          <span class="num">${Math.max(...[streak, 0])}</span>
+          <span class="label">Best Streak</span>
+        </div>
+      </div>
+      <p style="color:var(--text2); margin-bottom:2rem; font-size:1.1rem;">${message}</p>
+      <button class="replay-btn" onclick="restartGame()">
+        <span aria-hidden="true">🔄</span> Replay Simulation
+      </button>
+    </div>
+  `;
+  
+  gameContainer.innerHTML = html;
+}
+
+function restartGame() {
+  currentScenario = 0;
+  score = 0;
+  streak = 0;
+  renderScenario();
+}
+
+// Initialize
+renderScenario();
+</script>
+
+</body>
+</html>
