@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4696 — Web Attack Defense 🛡️ Block the Breach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  padding-bottom:3rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.skip-link {
+  position:absolute;
+  top:-40px;
+  left:0;
+  background:var(--blue);
+  color:#fff;
+  padding:8px 16px;
+  text-decoration:none;
+  font-weight:600;
+  z-index:100;
+}
+
+.skip-link:focus {
+  top:0;
+}
+
+button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.header-content {
+  max-width:900px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:1rem;
+}
+
+.logo-area {
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+}
+
+.dots {
+  display:flex;
+  gap:4px;
+}
+
+.dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
+}
+
+.dot:nth-child(1) { background:var(--aws); }
+.dot:nth-child(2) { background:var(--azure); }
+.dot:nth-child(3) { background:var(--gcp); }
+
+.logo-text {
+  font-family:var(--mono);
+  font-size:1.1rem;
+  font-weight:600;
+  color:var(--text);
+}
+
+.stats {
+  display:flex;
+  gap:0.75rem;
+  flex-wrap:wrap;
+}
+
+.pill {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:0.4rem 0.9rem;
+  border-radius:20px;
+  font-family:var(--mono);
+  font-size:0.85rem;
+  color:var(--text2);
+}
+
+.pill strong {
+  color:var(--text);
+  margin-left:0.3rem;
+}
+
+.progress-bar {
+  height:3px;
+  background:var(--surface2);
+  position:relative;
+}
+
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), var(--green));
+  width:0%;
+  transition:width 0.4s ease;
+}
+
+main {
+  max-width:900px;
+  margin:2rem auto;
+  padding:0 1.5rem;
+}
+
+.round-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:2rem;
+  margin-bottom:2rem;
+}
+
+.scenario-label {
+  font-family:var(--mono);
+  font-size:0.8rem;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:0.5rem;
+}
+
+.scenario-title {
+  font-size:1.6rem;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:1rem;
+}
+
+.scenario-body {
+  color:var(--text2);
+  margin-bottom:1.5rem;
+  font-size:1.05rem;
+}
+
+.concept-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  background:var(--blue-dim);
+  border:1px solid var(--blue);
+  padding:0.5rem 1rem;
+  border-radius:8px;
+  margin-bottom:1.5rem;
+}
+
+.concept-badge-emoji {
+  font-size:1.3rem;
+}
+
+.concept-badge-text {
+  display:flex;
+  flex-direction:column;
+  gap:0.1rem;
+}
+
+.concept-badge-main {
+  font-weight:600;
+  color:var(--blue);
+  font-size:0.9rem;
+}
+
+.concept-badge-sub {
+  font-size:0.75rem;
+  color:var(--text2);
+}
+
+.question {
+  font-size:1.1rem;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:1rem;
+}
+
+.options {
+  display:flex;
+  flex-direction:column;
+  gap:0.75rem;
+  margin-bottom:1.5rem;
+}
+
+.option-btn {
+  background:var(--surface2);
+  border:2px solid var(--border);
+  color:var(--text);
+  padding:1rem 1.25rem;
+  text-align:left;
+  font-family:var(--sans);
+  font-size:1rem;
+  border-radius:8px;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+.option-btn:hover {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.6;
+}
+
+.option-btn.selected {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+
+.option-btn.correct {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+
+.option-btn.incorrect {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb {
+  background:var(--surface2);
+  border-left:4px solid var(--blue);
+  padding:1.5rem;
+  border-radius:8px;
+  margin-top:1.5rem;
+  display:none;
+}
+
+.fb.show {
+  display:block;
+}
+
+.fb.success {
+  border-left-color:var(--green);
+}
+
+.fb.error {
+  border-left-color:var(--red);
+}
+
+.fb-title {
+  font-weight:600;
+  font-size:1.1rem;
+  margin-bottom:0.75rem;
+  display:flex;
+  align-items:center;
+  gap:0.5rem;
+}
+
+.fb-text {
+  color:var(--text2);
+  margin-bottom:1rem;
+  line-height:1.7;
+}
+
+.breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:0.6rem;
+  margin-top:1rem;
+}
+
+.breakdown-item {
+  display:flex;
+  gap:0.6rem;
+  align-items:flex-start;
+}
+
+.breakdown-icon {
+  font-size:1.1rem;
+  flex-shrink:0;
+}
+
+.breakdown-text {
+  color:var(--text2);
+  font-size:0.95rem;
+}
+
+.next-btn {
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  padding:0.9rem 2rem;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:1rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:1rem;
+  transition:all 0.2s ease;
+}
+
+.next-btn:hover {
+  background:#6ba3f9;
+  transform:translateY(-1px);
+}
+
+.final-screen {
+  display:none;
+  text-align:center;
+}
+
+.final-screen.show {
+  display:block;
+}
+
+.final-score {
+  font-size:4rem;
+  font-weight:600;
+  color:var(--green);
+  margin:2rem 0;
+  font-family:var(--mono);
+}
+
+.final-message {
+  font-size:1.3rem;
+  color:var(--text2);
+  margin-bottom:2rem;
+}
+
+.stat-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:1rem;
+  margin:2rem 0;
+}
+
+.stat-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:1.5rem;
+  border-radius:8px;
+}
+
+.stat-label {
+  font-size:0.85rem;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:0.5rem;
+}
+
+.stat-value {
+  font-size:2rem;
+  font-weight:600;
+  font-family:var(--mono);
+  color:var(--text);
+}
+
+.replay-btn {
+  background:var(--green);
+  color:#fff;
+  border:none;
+  padding:1rem 2.5rem;
+  border-radius:8px;
+  font-family:var(--sans);
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+  margin-top:1rem;
+  transition:all 0.2s ease;
+}
+
+.replay-btn:hover {
+  background:#50dda0;
+  transform:translateY(-2px);
+}
+
+.streak-flash {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  background:var(--yellow);
+  color:var(--bg);
+  padding:2rem 3rem;
+  border-radius:16px;
+  font-size:2.5rem;
+  font-weight:600;
+  z-index:100;
+  animation:flashIn 0.6s ease;
+  pointer-events:none;
+}
+
+@keyframes flashIn {
+  0% { opacity:0; transform:translate(-50%, -50%) scale(0.5); }
+  50% { opacity:1; transform:translate(-50%, -50%) scale(1.1); }
+  100% { opacity:0; transform:translate(-50%, -50%) scale(1); }
+}
+
+.hidden {
+  display:none;
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="header">
+  <div class="header-content">
+    <div class="logo-area">
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="logo-text">Web Attack Defense 🛡️</div>
+    </div>
+    <div class="stats">
+      <div class="pill" aria-live="polite" aria-atomic="true" id="score-display">Score: <strong id="score-el">0</strong></div>
+      <div class="pill">Round: <strong id="round-el">1</strong>/<strong id="total-el">5</strong></div>
+      <div class="pill" aria-live="polite" aria-atomic="true" id="streak-display">Streak: <strong id="streak-el">0</strong> <span aria-hidden="true">🔥</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area">
+    <section class="round-card" id="scenario-card" aria-labelledby="scenario-title">
+      <div class="scenario-label" id="scenario-label">Scenario 1 — SQL Injection</div>
+      <h2 class="scenario-title" id="scenario-title">Vulnerable Login Form</h2>
+      <div class="scenario-body" id="scenario-body">
+        You're conducting a web application pentest for a financial services client. On their customer portal login page, you notice that entering a single quote (') in the username field returns a database error message. The error reveals the SQL query structure and database type (MySQL). Your team needs to document this finding.
+      </div>
+      <div class="concept-badge">
+        <span role="img" aria-label="Lock" class="concept-badge-emoji" id="concept-emoji">🔐</span>
+        <div class="concept-badge-text">
+          <div class="concept-badge-main" id="concept-main">SQL Injection Detection</div>
+          <div class="concept-badge-sub" id="concept-sub">Input validation vulnerability</div>
+        </div>
+      </div>
+      <div class="question" id="question-text">What is the MOST critical next step in your testing methodology?</div>
+      <div class="options" id="options-container" role="group" aria-label="Answer options">
+        <!-- Options populated by JS -->
+      </div>
+      <div class="fb" id="feedback-panel" role="alert" aria-live="assertive">
+        <div class="fb-title" id="fb-title"></div>
+        <div class="fb-text" id="fb-text"></div>
+        <div class="breakdown" id="breakdown-container"></div>
+      </div>
+      <button class="next-btn hidden" id="next-btn">Next Scenario →</button>
+    </section>
+  </div>
+
+  <div class="final-screen" id="final-screen">
+    <h2 style="font-size:2rem; margin-bottom:1rem;">🛡️ Web Attack Defense Complete!</h2>
+    <div class="final-score" id="final-score">0</div>
+    <div class="final-message" id="final-message">Great work, penetration tester!</div>
+    <div class="stat-grid">
+      <div class="stat-box">
+        <div class="stat-label">Correct Answers</div>
+        <div class="stat-value" id="final-correct">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Accuracy</div>
+        <div class="stat-value" id="final-accuracy">0%</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Max Streak</div>
+        <div class="stat-value" id="final-streak">0</div>
+      </div>
+    </div>
+    <button class="replay-btn" id="replay-btn">🔄 Replay Simulation</button>
+  </div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — SQL Injection",
+    title: "Vulnerable Login Form",
+    body: "You're conducting a web application pentest for a financial services client. On their customer portal login page, you notice that entering a single quote (') in the username field returns a database error message. The error reveals the SQL query structure and database type (MySQL). Your team needs to document this finding.",
+    concept: "SQL Injection Detection",
+    conceptEmoji: "🔐",
+    conceptSub: "Input validation vulnerability",
+    question: "What is the MOST critical next step in your testing methodology?",
+    options: [
+      "A. Immediately attempt to extract the entire user database using UNION-based injection",
+      "B. Document the error message, test for injection type (error-based, blind, etc.), then proceed with authorized exploitation within scope",
+      "C. Report the finding to the client immediately and wait for permission before any further testing",
+      "D. Use sqlmap with aggressive settings to automate full database extraction"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! Following proper pentest methodology means systematically identifying the vulnerability type, documenting evidence, and exploiting within the defined scope and rules of engagement. This approach ensures thorough documentation for your report while respecting boundaries.",
+      wrong: "The correct approach is to document the error message, test for injection type, then proceed with authorized exploitation within scope. Jumping immediately to extraction skips critical analysis steps, and you already have written authorization in your RoE—no need to pause for additional permission for in-scope testing.",
+      breakdown: [
+        {icon:"✅", text:"SQL injection testing follows a progression: detection → classification → exploitation → impact assessment"},
+        {icon:"💡", text:"Your pentest report (WI requirement) needs detailed technical evidence of vulnerability type and exploitability"},
+        {icon:"⚠️", text:"Automated tools like sqlmap can be noisy and may trigger WAFs—use them strategically, not as a first step"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — XSS Attack",
+    title: "Reflected XSS in Search",
+    body: "During a black-box pentest of an e-commerce platform, you discover the search function reflects user input directly into the HTML response without encoding. You successfully inject <script>alert('XSS')</script> and see the popup. The client's Azure-hosted application handles customer payment data. Your ROE permits exploitation to demonstrate impact.",
+    concept: "Cross-Site Scripting (XSS)",
+    conceptEmoji: "⚡",
+    conceptSub: "Client-side injection attack",
+    question: "What is the BEST way to demonstrate real-world impact for your pentest report?",
+    options: [
+      "A. Screenshot the alert box and document it as a low-severity finding since it's just a popup",
+      "B. Craft a payload that steals session cookies and sends them to your controlled server, then demonstrate session hijacking in a sandboxed test account",
+      "C. Inject cryptocurrency mining JavaScript to show the potential for financial damage",
+      "D. Use the XSS to deface the homepage with a harmless message proving access"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Exactly right! Demonstrating session hijacking shows the actual business risk of XSS—attackers can steal authenticated sessions and access customer accounts. Using a sandboxed test account keeps your test ethical and within scope while providing concrete evidence of impact for your WI report.",
+      wrong: "The best demonstration is crafting a session-stealing payload and showing session hijacking on a test account. Alert boxes don't convey real risk to stakeholders, and crypto mining/defacement exceed typical RoE boundaries even when exploitation is permitted—always demonstrate impact in the least invasive way possible.",
+      breakdown: [
+        {icon:"✅", text:"XSS severity depends on what attackers can DO with it—session theft, credential harvesting, or account takeover elevate it to High/Critical"},
+        {icon:"💡", text:"Your pentest report needs to explain business impact in terms executives understand: 'Attackers can hijack customer sessions and access payment data'"},
+        {icon:"⚠️", text:"Always use test accounts you control when demonstrating attacks that involve data exfiltration or account access"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — CSRF Vulnerability",
+    title: "State-Changing Request Without Token",
+    body: "While testing a healthcare provider's patient portal (AWS-hosted), you notice that password change requests are submitted via GET with no CSRF token or referer validation. The request looks like: GET /changePassword?new=attackerpass123. You're in the post-engagement phase and need to write this up for your milestone report.",
+    concept: "Cross-Site Request Forgery",
+    conceptEmoji: "🎣",
+    conceptSub: "Session riding attack",
+    question: "How should you classify and describe this vulnerability in your pentest report?",
+    options: [
+      "A. High severity: explain that an attacker can embed the malicious URL in an email or website, causing victims to unwittingly change their password when clicked while authenticated",
+      "B. Medium severity: requires user interaction so it's less dangerous than XSS or SQLi",
+      "C. Low severity: modern browsers block cross-site GET requests automatically",
+      "D. Critical severity: this is a zero-click remote code execution vulnerability"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Absolutely correct! CSRF enabling password changes is High severity because it allows account takeover with minimal social engineering—just a link click. Your report should explain the attack chain clearly: authenticated victim clicks attacker link → password silently changed → attacker logs in with new password. This is exactly the kind of business-risk translation expected in WI assignments.",
+      wrong: "This is High severity. CSRF is not RCE (it doesn't execute code on the server), and modern browsers do NOT automatically block cross-site GET requests. User interaction requirement doesn't reduce severity significantly when the interaction is as simple as clicking a link that could be disguised in a phishing email—especially in healthcare where account takeover can expose HIPAA-protected data.",
+      breakdown: [
+        {icon:"✅", text:"CSRF protection requires unpredictable tokens in state-changing requests AND validation of those tokens server-side"},
+        {icon:"💡", text:"Using GET for state-changing operations (password change, fund transfer, data deletion) violates REST principles and enables trivial CSRF"},
+        {icon:"⚠️", text:"In your report, always include remediation: use POST for state changes, implement CSRF tokens, validate referer headers, and require current password for password changes"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — File Upload Bypass",
+    title: "Unrestricted File Upload",
+    body: "You're testing a GCP-hosted document management system for a law firm. The application allows users to upload profile pictures with client-side validation checking for .jpg/.png extensions. Using Burp Suite, you intercept the request and change evil.php.png to evil.php after it passes client-side checks. The server accepts and executes it. This is a critical finding.",
+    concept: "File Upload Vulnerabilities",
+    conceptEmoji: "📤",
+    conceptSub: "Remote code execution risk",
+    question: "What additional tests should you perform to fully assess the scope of this vulnerability for your report?",
+    options: [
+      "A. Only document the basic finding—uploading a web shell is enough to prove criticality",
+      "B. Test multiple bypass techniques (double extensions, null bytes, MIME type manipulation), verify code execution, check if uploaded files are accessible via web, and attempt privilege escalation",
+      "C. Use the web shell to download the entire customer database to prove maximum impact",
+      "D. Report it immediately as RCE without further testing since that's already critical"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Perfect methodology! Thorough testing reveals the full attack surface: can ALL bypass methods work? Can you execute code? Are uploaded files in the webroot? Can you pivot to other systems? This level of detail strengthens your pentest report by showing exactly how an attacker would chain this into full compromise—critical for your WI milestone where technical depth matters.",
+      wrong: "The correct answer is comprehensive testing of bypass methods and exploitation paths. While RCE is indeed critical, your report needs technical depth showing reproducible steps, alternative attack vectors, and realistic attack chains. Downloading customer data exceeds necessary proof-of-impact and risks violating data handling clauses in your RoE.",
+      breakdown: [
+        {icon:"✅", text:"File upload vulnerabilities can lead to: RCE (webshells), stored XSS (malicious SVG/HTML), DoS (zip bombs), and local file inclusion"},
+        {icon:"💡", text:"Proper mitigation requires: server-side validation, whitelist allowed extensions, store uploads outside webroot, randomize filenames, scan with antivirus, and restrict execution permissions"},
+        {icon:"⚠️", text:"When you achieve RCE in a pentest, establish persistence carefully and document exactly what you accessed—don't 'explore freely' beyond what's needed to prove impact"}
+      ]
+    }
+  },
+  {
+    id: 5,
+    label: "Scenario 5 — API Authentication Flaw",
+    title: "Broken Object Level Authorization",
+    body: "Testing a mobile banking API (Azure), you intercept API calls using Burp. The endpoint GET /api/accounts/{accountID}/transactions returns transaction history. You notice your account ID is 10234. You change it to 10233 and receive another user's complete transaction history—including account numbers and amounts. No error, no authentication check. This is a textbook BOLA/IDOR vulnerability.",
+    concept: "Broken Access Control",
+    conceptEmoji: "🚪",
+    conceptSub: "Authorization bypass",
+    question: "What is the appropriate way to handle this finding during active testing and in your report?",
+    options: [
+      "A. Test with 2-3 nearby account IDs to confirm the pattern, document the finding with sanitized examples, and immediately stop testing other users' accounts",
+      "B. Write a script to enumerate all account IDs and download all transactions to prove the full scope of the data breach",
+      "C. Only test with your own account IDs since accessing others' data is illegal even during authorized pentests",
+      "D. Report it as Medium severity since it only exposes transaction history, not account credentials"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Exactly the right balance! Testing 2-3 IDs confirms it's a systematic vulnerability (not a fluke), provides reproducible evidence for your report, and respects data privacy. Your pentest report should document the vulnerability pattern, potential scope (all X users affected), and business impact (regulatory violation, data breach) without actually exfiltrating massive amounts of PII. This is professional, ethical pentesting.",
+      wrong: "The correct approach is limited testing (2-3 IDs) to confirm the pattern, then stop. Mass enumeration violates the principle of least-invasive testing—you've already proven the vulnerability exists and is exploitable. Your RoE authorizes testing but doesn't give carte blanche to exfiltrate all customer data. This is Critical severity due to PII exposure and regulatory implications (PCI-DSS, GLBA for banking data).",
+      breakdown: [
+        {icon:"✅", text:"BOLA/IDOR is in OWASP API Top 10 #1 and consistently leads to massive data breaches—requires object-level permission checks, not just authentication"},
+        {icon:"💡", text:"Your pentest report should explain regulatory impact: GDPR fines up to 4% of revenue, PCI-DSS violations can revoke payment processing ability"},
+        {icon:"⚠️", text:"When you discover access control flaws affecting user data, test the minimum necessary to prove exploitability—use test accounts when possible, or document with sanitized/redacted examples"}
+      ]
+    }
+  }
+];
+
+let currentScenario = 0;
+let score = 0;
+let streak = 0;
+let maxStreak = 0;
+let correctCount = 0;
+let answered = false;
+
+const scoreEl = document.getElementById('score-el');
+const roundEl = document.getElementById('round-el');
+const totalEl = document.getElementById('total-el');
+const streakEl = document.getElementById('streak-el');
+const progressFill = document.getElementById('progress-fill');
+const progressBar = document.querySelector('.progress-bar');
+
+const scenarioLabel = document.getElementById('scenario-label');
+const scenarioTitle = document.getElementById('scenario-title');
+const scenarioBody = document.getElementById('scenario-body');
+const conceptEmoji = document.getElementById('concept-emoji');
+const conceptMain = document.getElementById('concept-main');
+const conceptSub = document.getElementById('concept-sub');
+const questionText = document.getElementById('question-text');
+const optionsContainer = document.getElementById('options-container');
+const feedbackPanel = document.getElementById('feedback-panel');
+const fbTitle = document.getElementById('fb-title');
+const fbText = document.getElementById('fb-text');
+const breakdownContainer = document.getElementById('breakdown-container');
+const nextBtn = document.getElementById('next-btn');
+
+const gameArea = document.getElementById('game-area');
+const finalScreen = document.getElementById('final-screen');
+const finalScore = document.getElementById('final-score');
+const finalMessage = document.getElementById('final-message');
+const finalCorrect = document.getElementById('final-correct');
+const finalAccuracy = document.getElementById('final-accuracy');
+const finalStreak = document.getElementById('final-streak');
+const replayBtn = document.getElementById('replay-btn');
+
+totalEl.textContent = scenarios.length;
+
+function loadScenario() {
+  answered = false;
+  const s = scenarios[currentScenario];
+  
+  scenarioLabel.textContent = s.label;
+  scenarioTitle.textContent = s.title;
+  scenarioBody.textContent = s.body;
+  conceptEmoji.textContent = s.conceptEmoji;
+  conceptEmoji.setAttribute('aria-label', s.concept);
+  conceptMain.textContent = s.concept;
+  conceptSub.textContent = s.conceptSub;
+  questionText.textContent = s.question;
+  
+  optionsContainer.innerHTML = '';
+  s.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = opt;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.onclick = () => selectAnswer(idx);
+    optionsContainer.appendChild(btn);
+  });
+  
+  feedbackPanel.classList.remove('show', 'success', 'error');
+  nextBtn.classList.add('hidden');
+  
+  roundEl.textContent = currentScenario +
