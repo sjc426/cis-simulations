@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4696 — Reading the Blueprint 🔍 Nmap Scan Decision Tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 3rem;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--blue);
+  color: var(--bg);
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot.aws { background: var(--aws); }
+.dot.azure { background: var(--azure); }
+.dot.gcp { background: var(--gcp); }
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stats {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--text2);
+}
+
+.pill strong {
+  color: var(--text);
+  margin-left: 0.3rem;
+}
+
+#streak-el.hot {
+  background: var(--yellow-dim);
+  border-color: var(--yellow);
+  color: var(--yellow);
+  animation: streakFlash 0.6s ease;
+}
+
+@keyframes streakFlash {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.progress-bar {
+  height: 3px;
+  background: var(--surface);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+main {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+}
+
+.round-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.scenario-label {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--blue);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.scenario-body {
+  color: var(--text2);
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+}
+
+.concept-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.concept-badge .emoji {
+  font-size: 1.2rem;
+}
+
+.concept-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.concept-main {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.concept-sub {
+  font-size: 0.8rem;
+  color: var(--text3);
+}
+
+.question {
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.option-btn {
+  background: var(--surface2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.option-btn:hover {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+}
+
+.option-btn:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.option-btn[aria-pressed="true"] {
+  border-color: var(--blue);
+  background: var(--blue-dim);
+}
+
+.option-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.option-btn.correct {
+  border-color: var(--green);
+  background: var(--green-dim);
+}
+
+.option-btn.wrong {
+  border-color: var(--red);
+  background: var(--red-dim);
+}
+
+.fb {
+  background: var(--surface2);
+  border-left: 4px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: none;
+}
+
+.fb.show { display: block; }
+
+.fb.success { border-left-color: var(--green); }
+.fb.error { border-left-color: var(--red); }
+
+.fb-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-bottom: 0.75rem;
+}
+
+.fb-title .icon {
+  font-size: 1.3rem;
+}
+
+.fb-body {
+  color: var(--text2);
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.breakdown-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.breakdown-row .icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.next-btn, .replay-btn {
+  background: var(--blue);
+  color: var(--bg);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.next-btn:hover, .replay-btn:hover {
+  background: var(--green);
+  transform: translateY(-1px);
+}
+
+.next-btn:focus-visible, .replay-btn:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.next-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.final-screen {
+  text-align: center;
+  display: none;
+}
+
+.final-screen.show { display: block; }
+
+.final-score {
+  font-size: 4rem;
+  font-weight: 600;
+  color: var(--green);
+  margin-bottom: 1rem;
+  font-family: var(--mono);
+}
+
+.final-msg {
+  font-size: 1.5rem;
+  margin-bottom: 2rem;
+  color: var(--text2);
+}
+
+.stat-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 1.1rem; }
+  h2 { font-size: 1.3rem; }
+  .final-score { font-size: 3rem; }
+  .round-card { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-area">
+    <div class="dots">
+      <div class="dot aws"></div>
+      <div class="dot azure"></div>
+      <div class="dot gcp"></div>
+    </div>
+    <h1>CIS 4696 — Reading the Blueprint 🔍</h1>
+  </div>
+  <div class="stats">
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-el">Score: <strong>0</strong></div>
+    <div class="pill" id="round-el">Scenario: <strong>1/8</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-el">Streak: <strong>0</strong> <span aria-hidden="true">🔥</span></div>
+  </div>
+</header>
+
+<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area">
+    <section class="round-card" aria-labelledby="scenario-title">
+      <div class="scenario-label" id="scenario-label">Scenario 1</div>
+      <h2 id="scenario-title">Loading...</h2>
+      <p class="scenario-body" id="scenario-body"></p>
+      <div class="concept-badge">
+        <span class="emoji" role="img" aria-label="concept icon" id="concept-emoji">🔍</span>
+        <div class="concept-text">
+          <span class="concept-main" id="concept-main">Loading...</span>
+          <span class="concept-sub" id="concept-sub">Core scanning technique</span>
+        </div>
+      </div>
+      <div class="question" id="question">Which approach should you use?</div>
+      <div class="options" id="options" role="group" aria-label="Answer options"></div>
+    </section>
+
+    <div class="fb" id="feedback" role="alert" aria-live="assertive">
+      <div class="fb-title">
+        <span class="icon" id="fb-icon">✅</span>
+        <span id="fb-title-text">Correct!</span>
+      </div>
+      <div class="fb-body" id="fb-body"></div>
+      <div class="breakdown" id="breakdown"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" disabled>Next Scenario →</button>
+  </div>
+
+  <div class="final-screen" id="final-screen">
+    <div class="final-score" id="final-score-display">0</div>
+    <div class="final-msg" id="final-msg">Scan Complete!</div>
+    <div class="stat-boxes">
+      <div class="stat-box">
+        <div class="stat-label">Correct</div>
+        <div class="stat-value" id="final-correct">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Wrong</div>
+        <div class="stat-value" id="final-wrong">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Best Streak</div>
+        <div class="stat-value" id="final-streak">0</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Accuracy</div>
+        <div class="stat-value" id="final-accuracy">0%</div>
+      </div>
+    </div>
+    <button class="replay-btn" id="replay-btn">Run Another Scan 🔄</button>
+  </div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — Choosing Scan Type",
+    title: "Stealth Reconnaissance on Production Network",
+    body: "You're conducting an authorized pentest on a client's production web server during business hours. The client is concerned about network disruption and IDS alerts. They want you to enumerate open ports without completing the TCP handshake.",
+    concept: "SYN Scan vs Connect Scan",
+    conceptEmoji: "🕵️",
+    conceptSub: "Stealth vs full connection",
+    question: "Which Nmap scan type should you use?",
+    options: [
+      "A. nmap -sT (TCP Connect scan) — completes full handshake",
+      "B. nmap -sS (SYN scan) — half-open, doesn't complete handshake",
+      "C. nmap -sU (UDP scan) — checks UDP services",
+      "D. nmap -sN (Null scan) — sends packets with no flags"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! SYN scan (-sS) is the 'stealth scan' that sends SYN packets and waits for SYN/ACK responses without completing the handshake. It's faster, less likely to be logged, and won't disrupt services.",
+      wrong: "The correct answer is B (nmap -sS). SYN scan is ideal for stealth reconnaissance because it never completes the TCP handshake, making it harder to detect and less disruptive to production systems.",
+      breakdown: [
+        {icon:"✅", text:"-sS (SYN scan) is the default and most popular scan type — stealthy and fast"},
+        {icon:"💡", text:"-sT (Connect scan) completes handshakes and gets logged by applications"},
+        {icon:"⚠️", text:"SYN scans require root/admin privileges; Connect scans don't"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — UDP vs TCP",
+    title: "Investigating DNS and SNMP Services",
+    body: "During a network assessment for an Azure-hosted infrastructure, you've already identified TCP services. Now you need to check for DNS vulnerabilities and misconfigured SNMP agents, which both run on UDP.",
+    concept: "UDP Scanning",
+    conceptEmoji: "📡",
+    conceptSub: "Scanning connectionless protocols",
+    question: "How do you scan for UDP services?",
+    options: [
+      "A. nmap -sS — SYN scan works for both TCP and UDP",
+      "B. nmap -sU — UDP scan specifically targets UDP ports",
+      "C. nmap -sT -p 53,161 — Connect scan on specific ports",
+      "D. nmap -A — aggressive scan includes all protocols"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! The -sU flag performs UDP scanning. DNS (53) and SNMP (161) are UDP services. UDP scans are slower than TCP because they rely on ICMP unreachable responses or service-specific probes.",
+      wrong: "The correct answer is B (nmap -sU). UDP scanning requires the -sU flag because UDP is connectionless — Nmap must use different techniques than TCP scanning, often waiting for ICMP port unreachable messages.",
+      breakdown: [
+        {icon:"✅", text:"UDP scan with -sU can be combined with TCP scans: nmap -sS -sU"},
+        {icon:"💡", text:"UDP scans are much slower; use -p to specify ports like 53,161,162,500"},
+        {icon:"⚠️", text:"Many UDP services require NSE scripts for accurate version detection"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — Service Version Detection",
+    title: "Identifying Vulnerable Apache Instance",
+    body: "You've found port 80 open on a GCP-hosted web server. The CVE you're investigating affects Apache 2.4.49 specifically. You need to confirm the exact version of the web server to determine if it's vulnerable.",
+    concept: "Service & Version Detection",
+    conceptEmoji: "🏷️",
+    conceptSub: "Fingerprinting software versions",
+    question: "Which Nmap flag enables version detection?",
+    options: [
+      "A. nmap -sV (service version detection)",
+      "B. nmap -A (aggressive scan with everything)",
+      "C. nmap -O (OS detection only)",
+      "D. nmap --script=banner (custom banner grab)"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Correct! The -sV flag performs service version detection by sending probes to open ports and analyzing responses. This is critical for vulnerability assessment because exploits are often version-specific.",
+      wrong: "The correct answer is A (nmap -sV). Version detection probes services to identify exact software and version numbers. While -A includes -sV, it also runs scripts that may be unnecessary or noisy.",
+      breakdown: [
+        {icon:"✅", text:"-sV intensity can be controlled with --version-intensity [0-9], default is 7"},
+        {icon:"💡", text:"Combine with -sS for efficiency: nmap -sS -sV targethost"},
+        {icon:"⚠️", text:"Version detection is slower and noisier than simple port scanning"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — OS Fingerprinting",
+    title: "Identifying the Operating System",
+    body: "Your AWS pentest report needs to document the OS of each target. You've found several hosts with SSH (22) and HTTP (80) open, but you need to determine if they're running Ubuntu, CentOS, or Windows to tailor your exploit selection.",
+    concept: "OS Fingerprinting",
+    conceptEmoji: "🖥️",
+    conceptSub: "TCP/IP stack analysis",
+    question: "Which flag enables OS detection?",
+    options: [
+      "A. nmap -O (OS detection via TCP/IP fingerprinting)",
+      "B. nmap -sV (service version detection)",
+      "C. nmap --script=os-detect (custom script)",
+      "D. nmap -A -O (both required together)"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Correct! The -O flag performs OS detection by analyzing TCP/IP stack behavior, TTL values, window sizes, and other network characteristics. It provides an educated guess with confidence percentages.",
+      wrong: "The correct answer is A (nmap -O). OS fingerprinting analyzes how the target responds to various TCP/IP probes. This technique doesn't rely on application banners but on subtle differences in network stack implementations.",
+      breakdown: [
+        {icon:"✅", text:"-O requires at least one open and one closed port for accuracy"},
+        {icon:"💡", text:"Combine with -sV for comprehensive fingerprinting: nmap -O -sV"},
+        {icon:"⚠️", text:"OS detection requires root/admin privileges and can be blocked by firewalls"}
+      ]
+    }
+  },
+  {
+    id: 5,
+    label: "Scenario 5 — NSE Script Selection",
+    title: "Testing for SMB Vulnerabilities",
+    body: "You're assessing a Windows Server environment for EternalBlue (MS17-010) vulnerability. Basic scanning shows port 445 (SMB) is open. You need to run a specific check for this critical vulnerability before attempting exploitation.",
+    concept: "NSE Script Targeting",
+    conceptEmoji: "📜",
+    conceptSub: "Nmap Scripting Engine for specific vulns",
+    question: "How do you run the EternalBlue vulnerability check?",
+    options: [
+      "A. nmap -sV -p 445 (version detection is enough)",
+      "B. nmap --script=smb-vuln-ms17-010 (specific vulnerability script)",
+      "C. nmap -A (aggressive scan includes all scripts)",
+      "D. nmap --script=vuln (run all vulnerability scripts)"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! The --script flag with smb-vuln-ms17-010 runs a targeted NSE script to check for EternalBlue. This is faster and less noisy than running all vulnerability scripts, and provides clear yes/no results.",
+      wrong: "The correct answer is B. NSE scripts provide targeted checks for specific vulnerabilities. While --script=vuln runs many checks, specifying smb-vuln-ms17-010 is faster, quieter, and gives you exactly what you need.",
+      breakdown: [
+        {icon:"✅", text:"NSE scripts are in /usr/share/nmap/scripts/ — browse with ls or searchsploit"},
+        {icon:"💡", text:"Use --script-help=scriptname to see what a script does before running"},
+        {icon:"⚠️", text:"Some vuln scripts can crash services; test in isolated environments first"}
+      ]
+    }
+  },
+  {
+    id: 6,
+    label: "Scenario 6 — Scan Timing & Evasion",
+    title: "Evading IDS During Red Team Exercise",
+    body: "You're on a red team engagement and need to scan a network with an active Snort IDS. Speed isn't critical — you have 48 hours — but detection would end the exercise. You need the slowest, most evasive scan timing.",
+    concept: "Timing Templates",
+    conceptEmoji: "⏱️",
+    conceptSub: "Speed vs stealth tradeoff",
+    question: "Which timing template should you use?",
+    options: [
+      "A. -T4 (aggressive timing, fast and loud)",
+      "B. -T0 (paranoid timing, extremely slow, 5min between probes)",
+      "C. -T3 (normal timing, default speed)",
+      "D. -T2 (polite timing, slower but not extremely slow)"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! -T0 (paranoid) sends one probe every 5 minutes, making correlation nearly impossible for IDS systems. It's painfully slow but ideal when stealth is paramount and time isn't a constraint.",
+      wrong: "The correct answer is B (-T0). For maximum IDS evasion, use paranoid timing (-T0) or sneaky (-T1). These spread probes over long periods, preventing signature-based and anomaly-based detection.",
+      breakdown: [
+        {icon:"✅", text:"Timing scale: T0 (paranoid) → T1 (sneaky) → T2 (polite) → T3 (normal) → T4 (aggressive) → T5 (insane)"},
+        {icon:"💡", text:"Default is -T3; use -T4 for CTFs and labs where speed matters"},
+        {icon:"⚠️", text:"-T0 and -T1 can take hours or days for a single host"}
+      ]
+    }
+  },
+  {
+    id: 7,
+    label: "Scenario 7 — Interpreting Port States",
+    title: "Understanding Firewall Filtering",
+    body: "You're scanning an Azure VM and seeing three different port states in your Nmap results: 'open' on 22, 'closed' on 23, and 'filtered' on 3389. The client asks you to explain what each state means for their security posture.",
+    concept: "Port State Interpretation",
+    conceptEmoji: "🚦",
+    conceptSub: "Open vs closed vs filtered",
+    question: "What does 'filtered' mean for port 3389?",
+    options: [
+      "A. The service is running but refusing connections",
+      "B. A firewall or packet filter is blocking probes — state is unknown",
+      "C. The port is open and accepting connections",
+      "D. The port is closed and the service is not running"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! 'Filtered' means Nmap can't determine if the port is open because a firewall, NSG, or packet filter is dropping probes or sending back ICMP unreachable messages. It's the most ambiguous state.",
+      wrong: "The correct answer is B. Filtered ports are being protected by a firewall or security group that's preventing Nmap from determining the true state. This is actually good security — it reveals nothing to attackers.",
+      breakdown: [
+        {icon:"✅", text:"Open = service listening; Closed = no service; Filtered = firewall blocking"},
+        {icon:"💡", text:"Other states exist: open|filtered, closed|filtered (ambiguous responses)"},
+        {icon:"⚠️", text:"Filtered doesn't mean vulnerable — it often means proper firewall configuration"}
+      ]
+    }
+  },
+  {
+    id: 8,
+    label: "Scenario 8 — CVE Lookup Integration",
+    title: "Matching Scan Results to Exploits",
+    body: "Your Nmap scan with -sV shows an AWS EC2 instance running 'OpenSSH 7.4 (protocol 2.0)'. You need to search for known vulnerabilities in this version to include in your pentest report and determine exploitation viability.",
+    concept: "CVE Research Workflow",
+    conceptEmoji: "🔎",
+    conceptSub: "From version detection to exploit",
+    question: "What's the best first step to find CVEs for OpenSSH 7.4?",
+    options: [
+      "A. Run: searchsploit openssh 7.4 (local exploit database)",
+      "B. Immediately run Metasploit against the target",
+      "C. Google 'openssh hack' and try random exploits",
+      "D. Run nmap --script=vuln again"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Correct! searchsploit is the command-line interface to Exploit-DB. Running 'searchsploit openssh 7.4' will show you known exploits and CVEs for that specific version, which you can then research further on CVE.org or NVD.",
+      wrong: "The correct answer is A (searchsploit openssh 7.4). This local database search is fast, offline-capable, and gives you exploit IDs and CVE numbers to research. Always research before running exploits blindly.",
+      breakdown: [
+        {icon:"✅", text:"Workflow: nmap -sV → searchsploit → CVE lookup → exploit assessment"},
+        {icon:"💡", text:"Also check: cvedetails.com, nvd.nist.gov, and vendor security advisories"},
+        {icon:"⚠️", text:"Version numbers can be misleading — backported patches may fix CVEs in 'old' versions"}
+      ]
+    }
+  }
+];
+
+let currentScenario = 0;
+let score = 0;
+let streak = 0;
+let bestStreak = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answered = false;
+
+const scoreEl = document.getElementById('score-el');
+const roundEl = document.getElementById('round-el');
+const streakEl = document.getElementById('streak-el');
+const progressFill = document.getElementById('progress-fill');
+const scenarioLabel = document.getElementById('scenario-label');
+const scenarioTitle = document
