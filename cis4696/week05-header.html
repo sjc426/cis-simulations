@@ -767,4 +767,16 @@
             finalContainer.innerHTML = `
                 <div class="round-card">
                     <h2 class="scenario-title">Mission Complete! 🎯</h2>
-                    <div class="final-score">${score
+                    <div class="final-score">${score/10} pts
+                </div>
+                <p class="final-grade">You scored ${percentage}%</p>
+                <p style="margin-top:12px;font-size:.95em;opacity:.8;">Week 5 complete — Picking the Lock 🔓</p>
+            </div>
+        `;
+        }
+
+        renderScenario();
+
+    </script>
+</body>
+</html>
