@@ -626,8 +626,6 @@
         const progressFill = document.getElementById('progress-fill');
         const progressBar = document.querySelector('.progress-bar');
 
-        renderScenario();
-
         function updateProgress() {
             const progress = ((currentScenario) / scenarios.length) * 100;
             progressFill.style.width = progress + '%';
