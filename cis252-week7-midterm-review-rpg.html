@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Operation Northstar: Midterm Review RPG</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+  :root{
+    --navy:#0D1B2A;--navy2:#0A1520;--navy3:#162236;
+    --accent:#2E86C1;--cyan:#5DADE2;--white:#F4F8FC;--gray:#8B9BB4;
+    --green:#27AE60;--red:#E74C3C;--amber:#E67E22;--purple:#8E44AD;
+    --gold:#F1C40F;--border:rgba(46,134,193,0.25);--card-bg:rgba(22,34,54,0.95);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--navy2);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(46,134,193,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(46,134,193,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 20px 60px;}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .badge-cis{background:var(--accent);color:#fff;}
+  .badge-w7{background:var(--navy3);color:var(--gold);border:1px solid rgba(241,196,15,0.3);}
+  .topbar-title{font-size:13px;color:var(--gray);}
+
+  .hp-bar-wrap{display:flex;align-items:center;gap:10px;}
+  .hp-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);}
+  .hp-track{background:rgba(231,76,60,0.15);border:1px solid rgba(231,76,60,0.3);border-radius:4px;width:120px;height:8px;overflow:hidden;}
+  .hp-fill{height:100%;background:var(--red);transition:width .5s ease;border-radius:4px;}
+  .hp-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red);}
+
+  .screen{display:none;}.screen.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* LANDING */
+  .rpg-hero{text-align:center;padding:40px 0 36px;}
+  .rpg-hero .codename{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;}
+  .rpg-hero h1{font-size:clamp(28px,5vw,50px);font-weight:700;line-height:1.1;margin-bottom:8px;}
+  .rpg-hero h1 .op{color:var(--cyan);}
+  .rpg-hero h1 .star{color:var(--gold);}
+  .rpg-hero .tagline{font-size:15px;color:var(--gray);max-width:540px;margin:0 auto 32px;line-height:1.7;}
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:32px;}
+  @media(max-width:560px){.stat-row{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center;}
+  .stat-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--cyan);margin-bottom:4px;}
+  .stat-lbl{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .week-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:32px;}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid;background:transparent;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+  .btn-gold{background:var(--gold);color:var(--navy2);}
+  .btn-gold:hover{filter:brightness(1.1);transform:translateY(-1px);}
+  .btn-secondary{background:transparent;color:var(--cyan);border:1px solid var(--border);padding:10px 20px;font-size:13px;}
+  .btn-secondary:hover{border-color:var(--cyan);}
+
+  /* GAME */
+  .quest-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .quest-meta{display:flex;flex-direction:column;gap:6px;}
+  .week-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;display:inline-block;}
+  .quest-title{font-size:19px;font-weight:700;color:#fff;line-height:1.3;}
+
+  .narrative-box{background:rgba(10,21,32,0.9);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:10px;padding:18px 20px;margin-bottom:20px;font-size:14px;color:var(--white);line-height:1.7;font-style:italic;}
+  .question-text{font-size:16px;font-weight:500;color:var(--white);line-height:1.6;margin-bottom:18px;}
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .option{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;}
+  .option:hover:not(.locked){border-color:var(--gold);background:rgba(241,196,15,0.06);}
+  .option.selected{border-color:var(--gold);background:rgba(241,196,15,0.1);}
+  .option.correct{border-color:var(--green);background:rgba(39,174,96,0.1);}
+  .option.wrong{border-color:var(--red);background:rgba(231,76,60,0.1);}
+  .option.locked{cursor:default;}
+  .opt-key{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--gold);min-width:20px;margin-top:1px;}
+  .opt-text{font-size:14px;color:var(--white);line-height:1.5;}
+
+  .feedback-box{border-radius:8px;padding:16px 20px;margin-bottom:20px;border:1px solid;line-height:1.6;}
+  .feedback-box.correct{background:rgba(39,174,96,0.08);border-color:var(--green);color:#a8e6bc;}
+  .feedback-box.wrong{background:rgba(231,76,60,0.08);border-color:var(--red);color:#f0a09a;}
+  .feedback-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .feedback-text{font-size:14px;line-height:1.7;}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;}
+  .progress-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray);}
+  .xp-gained{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);margin-top:4px;}
+
+  /* RESULTS */
+  .results-hero{text-align:center;padding:36px 0 28px;}
+  .rank-badge{font-size:64px;margin-bottom:16px;}
+  .rank-title{font-size:26px;font-weight:700;margin-bottom:8px;}
+  .rank-sub{font-size:14px;color:var(--gray);max-width:500px;margin:0 auto 28px;line-height:1.6;}
+  .score-ring{width:130px;height:130px;margin:0 auto 20px;position:relative;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  .score-big{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;}
+  .score-sub2{font-size:11px;color:var(--gray);margin-top:2px;}
+  .week-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px;}
+  @media(max-width:560px){.week-breakdown{grid-template-columns:repeat(2,1fr);}}
+  .wb-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;}
+  .wb-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;margin-bottom:3px;}
+  .wb-lbl{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .missed-list{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;text-align:left;}
+  .missed-item{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start;}
+  .missed-week{font-family:'JetBrains Mono',monospace;font-size:10px;padding:2px 8px;border-radius:3px;white-space:nowrap;margin-top:2px;}
+  .missed-q{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;}
+  .missed-a{font-size:12px;color:var(--gray);}
+</style>
+</head><body>
+<div class="wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="badge badge-cis">CIS 252</span>
+      <span class="badge badge-w7">Week 7</span>
+      <span class="topbar-title">Operation Northstar — Midterm Review RPG</span>
+    </div>
+    <div class="hp-bar-wrap" id="hp-display" style="display:none">
+      <span class="hp-label">HP</span>
+      <div class="hp-track"><div class="hp-fill" id="hp-fill" style="width:100%"></div></div>
+      <span class="hp-num" id="hp-num">100</span>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="screen active" id="screen-landing">
+    <div class="rpg-hero">
+      <div class="codename">⚔ Midterm Review · Weeks 1–6</div>
+      <h1><span class="op">Operation</span> <span class="star">Northstar</span></h1>
+      <p class="tagline">CCP's network infrastructure is under threat. Six domains of server knowledge stand between the attackers and total compromise. Answer correctly to advance — each wrong answer costs HP. Survive all six zones to secure the network.</p>
+    </div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="stat-val">12</div><div class="stat-lbl">Questions</div></div>
+      <div class="stat-card"><div class="stat-val">100</div><div class="stat-lbl">Starting HP</div></div>
+      <div class="stat-card"><div class="stat-val">6</div><div class="stat-lbl">Weeks Covered</div></div>
+      <div class="stat-card"><div class="stat-val">∞</div><div class="stat-lbl">Attempts</div></div>
+    </div>
+    <div class="week-chips">
+      <span class="chip" style="color:#5DADE2;border-color:rgba(93,173,226,0.4)">W1: Server Admin Foundations</span>
+      <span class="chip" style="color:#27AE60;border-color:rgba(39,174,96,0.4)">W2: Virtualization & Cloud</span>
+      <span class="chip" style="color:#8E44AD;border-color:rgba(142,68,173,0.4)">W3: Active Directory</span>
+      <span class="chip" style="color:#E67E22;border-color:rgba(230,126,34,0.4)">W4: Physical & Network Security</span>
+      <span class="chip" style="color:#E74C3C;border-color:rgba(231,76,60,0.4)">W5: Server Hardware & Hardening</span>
+      <span class="chip" style="color:#F1C40F;border-color:rgba(241,196,15,0.4)">W6: Storage Management</span>
+    </div>
+    <div style="text-align:center">
+      <button class="btn btn-gold" onclick="startGame()">⚔ Launch Operation Northstar</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="screen-game">
+    <div class="quest-header">
+      <div class="quest-meta">
+        <span class="week-tag" id="q-tag">WEEK 1</span>
+        <div class="quest-title" id="q-title">Loading…</div>
+      </div>
+    </div>
+    <div class="narrative-box" id="q-narrative"></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback-box" id="q-feedback" style="display:none"></div>
+    <div class="nav-row">
+      <div>
+        <div class="progress-text" id="q-progress">1 / 12</div>
+        <div class="xp-gained" id="xp-gained" style="display:none"></div>
+      </div>
+      <button class="btn btn-gold" id="btn-next" style="display:none" onclick="nextQuestion()">Advance →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="results-hero">
+      <div class="rank-badge" id="rank-badge">🏆</div>
+      <div class="score-ring">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(46,134,193,0.15)" stroke-width="10"/>
+          <circle cx="65" cy="65" r="56" fill="none" stroke-width="10" stroke-linecap="round" id="score-arc" style="stroke-dasharray:351.86;stroke-dashoffset:351.86;transition:stroke-dashoffset 1.2s ease;"/>
+        </svg>
+        <div class="score-num">
+          <div class="score-big" id="score-big">0/12</div>
+          <div class="score-sub2">SCORE</div>
+        </div>
+      </div>
+      <div class="rank-title" id="rank-title">Mission Complete</div>
+      <div class="rank-sub" id="rank-sub"></div>
+    </div>
+    <div class="week-breakdown" id="week-breakdown"></div>
+    <div class="missed-list" id="missed-list"></div>
+    <div style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="restartGame()">↺ Run Again</button>
+      <a class="btn btn-secondary" href="https://ccp.instructure.com/courses/2103664/modules" target="_top">← Back to Canvas</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // WEEK 1 — Server Admin Foundations
+  {
+    week:1, weekLabel:"WEEK 1 · SERVER FOUNDATIONS", weekColor:"#5DADE2", weekBg:"rgba(93,173,226,0.15)",
+    title:"Zone 1 — The Bare Metal Reconnaissance",
+    narrative:"Intel reports the attackers' first target is a Dell PowerEdge R750 — a dual-socket server sitting in CCP's data center. Your team needs to know exactly what you're defending.",
+    question:"A Dell PowerEdge R750 is configured as a dual-socket server with Intel Xeon processors. Each socket has 20 cores with hyperthreading enabled. How many logical CPUs does the OS see?",
+    options:[
+      {l:"A",t:"20 — the OS only sees physical cores, not logical threads."},
+      {l:"B",t:"40 — one socket × 20 cores × 2 threads."},
+      {l:"C",t:"80 — two sockets × 20 cores × 2 threads per core."},
+      {l:"D",t:"160 — hyperthreading quadruples the core count."}
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct. 2 sockets × 20 cores × 2 threads (hyperthreading) = 80 logical CPUs. The OS sees each hyperthread as a separate processor. This matters for licensing, VM sizing, and NUMA architecture decisions.",
+      wrong:"The calculation is: sockets × cores per socket × threads per core. 2 × 20 × 2 = 80. Hyperthreading doubles the logical core count per physical core — it doesn't quadruple it."
+    }
+  },
+  {
+    week:1, weekLabel:"WEEK 1 · SERVER FOUNDATIONS", weekColor:"#5DADE2", weekBg:"rgba(93,173,226,0.15)",
+    title:"Zone 1 — Server vs. Desktop Hardware",
+    narrative:"The attackers planted a desktop PC disguised as a server in the rack. You need to identify it fast.",
+    question:"Which combination of features definitively identifies hardware as enterprise server-grade rather than consumer desktop-grade?",
+    options:[
+      {l:"A",t:"Fast NVMe SSD + Windows 11 Pro + 64GB RAM."},
+      {l:"B",t:"ECC RAM + redundant hot-swap PSUs + IPMI/iDRAC out-of-band management + server-grade CPU (Xeon/EPYC)."},
+      {l:"C",t:"Tower chassis + multiple hard drives + Intel Core i9 processor."},
+      {l:"D",t:"High wattage power supply + dedicated GPU + 10GbE NIC."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. The four defining features of enterprise server hardware: ECC RAM (error correction), redundant hot-swap PSUs (no downtime for PSU failure), IPMI/iDRAC (out-of-band management), and server-grade CPUs (Xeon/EPYC). None of these appear in consumer desktop hardware.",
+      wrong:"Consumer hardware can have fast SSDs, lots of RAM, multiple drives, and high-wattage PSUs — but not ECC RAM, not hot-swap redundant PSUs, and not out-of-band management controllers. Those three together define enterprise server hardware."
+    }
+  },
+  // WEEK 2 — Virtualization & Cloud
+  {
+    week:2, weekLabel:"WEEK 2 · VIRTUALIZATION & CLOUD", weekColor:"#27AE60", weekBg:"rgba(39,174,96,0.15)",
+    title:"Zone 2 — The Hypervisor Battlefield",
+    narrative:"Attackers found an unpatched hypervisor. They're attempting a VM escape to reach the host OS. Understanding the architecture is critical.",
+    question:"What is the key security difference between a Type 1 hypervisor (ESXi, Hyper-V) and a Type 2 hypervisor (VirtualBox, VMware Workstation)?",
+    options:[
+      {l:"A",t:"Type 1 runs directly on bare metal with no host OS below it; Type 2 runs on top of a host OS. A VM escape on Type 1 hits the hypervisor — on Type 2 it hits the host OS."},
+      {l:"B",t:"Type 1 uses software virtualization; Type 2 uses hardware-assisted virtualization (VT-x/AMD-V)."},
+      {l:"C",t:"Type 1 can only run Windows VMs; Type 2 supports all operating systems."},
+      {l:"D",t:"Type 1 requires more RAM because it runs the full host OS plus all VMs simultaneously."}
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct. Type 1 hypervisors run directly on hardware — there's no host OS layer. Type 2 run on top of a general-purpose OS (Windows, macOS, Linux). The security implication: a VM escape on a Type 2 hypervisor gives the attacker access to the full host OS and everything on it. Type 1 is more secure by design for production workloads.",
+      wrong:"Both types use hardware-assisted virtualization (VT-x/AMD-V). Type 1 actually requires LESS overhead because it eliminates the host OS layer. Both support multiple OS types. The key difference is the presence (Type 2) or absence (Type 1) of a host OS."
+    }
+  },
+  {
+    week:2, weekLabel:"WEEK 2 · VIRTUALIZATION & CLOUD", weekColor:"#27AE60", weekBg:"rgba(39,174,96,0.15)",
+    title:"Zone 2 — The GCP Firewall Decision",
+    narrative:"CCP's new cloud server is exposed. The attacker is probing it with nmap. You need to lock it down in GCP before they find an open port.",
+    question:"You created a GCP Compute Engine VM (Ubuntu). By default, which ports are open from the internet, and what is the correct first hardening step?",
+    options:[
+      {l:"A",t:"All ports are open by default — GCP uses a default-allow policy. Enable the built-in firewall immediately."},
+      {l:"B",t:"No ports are open by default — GCP's default VPC uses a default-deny policy for ingress. You must explicitly add firewall rules to allow traffic (e.g., tcp:22 for SSH)."},
+      {l:"C",t:"Port 80 and 443 are open by default for web traffic; all other ports are blocked."},
+      {l:"D",t:"Only port 22 is open by default to allow initial SSH access; all other ports are blocked."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. GCP's default VPC network uses an implicit deny-all ingress rule. Nothing is reachable until you explicitly add a firewall rule. This is the correct cloud security posture — default deny, explicit allow. The lab had you add a rule for tcp:22 specifically for SSH access.",
+      wrong:"GCP defaults to deny-all for ingress — it does not open any ports automatically. This is different from some other cloud providers and is actually the most secure default posture. You must add explicit allow rules for every port you need."
+    }
+  },
+  // WEEK 3 — Active Directory
+  {
+    week:3, weekLabel:"WEEK 3 · ACTIVE DIRECTORY", weekColor:"#8E44AD", weekBg:"rgba(142,68,173,0.15)",
+    title:"Zone 3 — The Domain Controller Siege",
+    narrative:"The attackers compromised a user account and are enumerating the domain. Understanding AD structure is your defense.",
+    question:"An attacker has compromised a standard domain user account (not admin). Using this account, what can they do in Active Directory by default?",
+    options:[
+      {l:"A",t:"Nothing — standard domain users have read-only access to AD and cannot enumerate any domain information."},
+      {l:"B",t:"Enumerate the entire AD structure: list all users, groups, computers, OUs, and GPOs. AD read access is granted to all authenticated users by default."},
+      {l:"C",t:"Only see their own user object and group memberships — other objects are hidden from standard users."},
+      {l:"D",t:"Access only resources explicitly assigned to them via Group Policy — no general AD enumeration."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct — and this is one of the most dangerous AD defaults. Every authenticated domain user can read almost the entire AD directory: all users, computers, groups, OUs, and many attributes. This is why attackers love domain user compromises as a starting point — they immediately get a full map of the environment. Tools like BloodHound exploit this extensively.",
+      wrong:"This is a critical misconception. By design, all authenticated domain users can enumerate the directory. AD was built on the assumption that anyone with a domain account is trusted — modern attacks exploit this assumption completely."
+    }
+  },
+  {
+    week:3, weekLabel:"WEEK 3 · ACTIVE DIRECTORY", weekColor:"#8E44AD", weekBg:"rgba(142,68,173,0.15)",
+    title:"Zone 3 — The GPO Ambush",
+    narrative:"The attacker modified a Group Policy Object. You need to understand what that means for every machine in the domain.",
+    question:"A Group Policy Object (GPO) is linked to the 'Faculty Computers' OU. What happens when a faculty member logs into their workstation?",
+    options:[
+      {l:"A",t:"The GPO settings apply only to the faculty member's user profile, not the computer itself."},
+      {l:"B",t:"The GPO is downloaded once during domain join and never changes until the admin manually pushes an update."},
+      {l:"C",t:"The GPO settings are applied to both the computer and user — computer settings at startup, user settings at logon. GPO refreshes automatically every 90 minutes (±30 min offset)."},
+      {l:"D",t:"GPO settings only apply if the computer has direct network access to a Domain Controller at the time of logon."}
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct. GPO has two separate policy trees: Computer Configuration (applied at machine startup, targets the computer object) and User Configuration (applied at user logon, targets the user object). Both trees refresh automatically every 90 minutes with a randomized offset to prevent DC overload. This is why a malicious GPO modification is so powerful — it propagates to all affected machines automatically.",
+      wrong:"GPO applies to both computer and user objects, not just one. It refreshes every 90 minutes automatically — admins don't need to push updates manually. And while network connectivity to a DC is needed for initial application, cached GPO settings apply even if the DC is temporarily unreachable."
+    }
+  },
+  // WEEK 4 — Physical & Network Security
+  {
+    week:4, weekLabel:"WEEK 4 · PHYSICAL & NETWORK SECURITY", weekColor:"#E67E22", weekBg:"rgba(230,126,34,0.15)",
+    title:"Zone 4 — The Physical Breach",
+    narrative:"Intelligence confirms the attackers have a person inside the building. Physical security is the last line of defense before the server room.",
+    question:"An unauthorized person tailgates through a secured door behind a legitimate employee. Which physical security control is specifically designed to prevent tailgating?",
+    options:[
+      {l:"A",t:"CCTV cameras with motion detection — recording the tailgating for later review."},
+      {l:"B",t:"Mantrap (airlock vestibule) — a two-door entry system where the first door must close and verify identity before the second opens. Only one person can pass at a time."},
+      {l:"C",t:"Bollards — concrete posts preventing vehicle-based attacks at building perimeters."},
+      {l:"D",t:"Faraday cage — electromagnetic shielding preventing wireless signal interception."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. A mantrap is specifically engineered to prevent tailgating — it's a physical airlock with two interlocking doors. The first door closes and confirms identity before the second opens. One person at a time, authenticated. CCTV records it but doesn't prevent it. Bollards stop vehicles, not people. Faraday cages block electromagnetic signals.",
+      wrong:"Each physical control has a specific purpose: bollards = vehicle attacks, Faraday cage = electromagnetic, CCTV = recording (not preventing). The mantrap is the one specifically designed to prevent tailgating — one authorized person per entry."
+    }
+  },
+  {
+    week:4, weekLabel:"WEEK 4 · PHYSICAL & NETWORK SECURITY", weekColor:"#E67E22", weekBg:"rgba(230,126,34,0.15)",
+    title:"Zone 4 — The Firewall Incident",
+    narrative:"The attackers are inside the network. A stateful firewall is all that stands between them and the critical servers.",
+    question:"How does a stateful firewall differ from a stateless (packet-filter) firewall — and why does it matter against an attacker already inside the network?",
+    options:[
+      {l:"A",t:"A stateful firewall inspects packet headers only — IP, port, protocol. A stateless firewall also inspects payload content."},
+      {l:"B",t:"A stateful firewall tracks the state of every active connection and allows reply traffic automatically. A stateless firewall evaluates each packet in isolation — an attacker can forge 'reply' packets that a stateless firewall won't catch."},
+      {l:"C",t:"A stateful firewall blocks all traffic by default and requires explicit allow rules. A stateless firewall uses default-allow."},
+      {l:"D",t:"Stateful firewalls only work on TCP traffic. Stateless firewalls handle both TCP and UDP."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. A stateless firewall evaluates each packet independently — it has no memory of previous packets. An attacker can forge packets that appear to be legitimate reply traffic (e.g., a TCP ACK) that a stateless firewall passes. A stateful firewall maintains a connection table — it knows which connections were legitimately established and rejects forged replies that don't match any known session.",
+      wrong:"It's the opposite — stateless firewalls inspect only packet headers (IP, port, protocol) in isolation. Stateful firewalls track connection state. Both can handle TCP and UDP. The key difference is connection state awareness, not payload inspection (that's deep packet inspection, which is different)."
+    }
+  },
+  // WEEK 5 — Server Hardware & Hardening
+  {
+    week:5, weekLabel:"WEEK 5 · SERVER HARDWARE & HARDENING", weekColor:"#E74C3C", weekBg:"rgba(231,76,60,0.15)",
+    title:"Zone 5 — The Hardening Race",
+    narrative:"A fresh Windows Server 2025 is about to go live. The attackers know it's unpatched. You have one hardening window before they strike.",
+    question:"Rank these four hardening actions in order of HIGHEST to LOWEST priority for a server going live in 30 minutes:",
+    options:[
+      {l:"A",t:"1) Rename Administrator account  2) Enable NLA for RDP  3) Disable Print Spooler  4) Enable audit logging"},
+      {l:"B",t:"1) Enable NLA for RDP  2) Rename Administrator account  3) Enable audit logging  4) Disable Print Spooler"},
+      {l:"C",t:"1) Enable audit logging  2) Disable Print Spooler  3) Enable NLA for RDP  4) Rename Administrator account"},
+      {l:"D",t:"All four are equally urgent — do them simultaneously with a PowerShell script."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. NLA first because port 3389 is the most attacked service on Windows servers — scanners find it within hours of deployment. NLA stops unauthenticated connection attempts cold. Rename Administrator second because automated bots already know the username. Audit logging third so you can see the attacks happening. Print Spooler fourth — critical vulnerability but requires active exploitation, not just scanning.",
+      wrong:"NLA for RDP is the highest priority because RDP without NLA is actively exploited by automated scanners within hours of a server going live. The rename is important but an attacker still needs the correct password. Without NLA, they get to the login screen and can launch attacks from there."
+    }
+  },
+  {
+    week:5, weekLabel:"WEEK 5 · SERVER HARDWARE & HARDENING", weekColor:"#E74C3C", weekBg:"rgba(231,76,60,0.15)",
+    title:"Zone 5 — The iDRAC Trap",
+    narrative:"The attackers found an iDRAC with default credentials. Before they use it, your team needs to explain exactly what damage is possible.",
+    question:"An attacker has iDRAC root access with the default 'calvin' password. Which action is NOT possible through iDRAC alone?",
+    options:[
+      {l:"A",t:"Remotely power cycle the server, causing a hard reboot and potential data corruption."},
+      {l:"B",t:"Mount a virtual USB drive with a malicious ISO and reboot into it to bypass all OS-level controls."},
+      {l:"C",t:"Read and exfiltrate encrypted BitLocker volumes without the recovery key."},
+      {l:"D",t:"Access a full HTML5 virtual console showing the server's screen as if sitting at the keyboard."}
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct — iDRAC cannot break BitLocker encryption. iDRAC gives full hardware-level control: power, virtual media, virtual console. But BitLocker encryption protects the volume at the storage level — even with physical or out-of-band hardware access, encrypted data remains ciphertext without the key. This is why encryption at rest is a critical defense-in-depth layer.",
+      wrong:"iDRAC can do A, B, and D — all hardware-level operations. It CANNOT break BitLocker encryption. Even mounting the physical drive or booting from a USB only gets you access to encrypted blobs. The one thing iDRAC cannot overcome is proper encryption at rest — which is why BitLocker is mandatory on production servers."
+    }
+  },
+  // WEEK 6 — Storage Management
+  {
+    week:6, weekLabel:"WEEK 6 · STORAGE MANAGEMENT", weekColor:"#F1C40F", weekBg:"rgba(241,196,15,0.1)",
+    title:"Zone 6 — The RAID Decision",
+    narrative:"The final zone. The attackers are targeting CCP's student records database. Storage architecture and backup strategy are all that stand between them and a catastrophic data loss.",
+    question:"The student records database (2TB, 99.9% uptime required) uses RAID 5 with 4 drives. One drive fails Monday. Before the rebuild completes Wednesday, a second drive fails. What is the outcome — and what configuration would have prevented total data loss?",
+    options:[
+      {l:"A",t:"RAID 5 survives two drive failures — the array remains online with reduced performance. No data loss."},
+      {l:"B",t:"Total data loss. RAID 5 tolerates only 1 drive failure. A second failure during rebuild destroys the array. RAID 6 (dual parity, tolerates 2 failures) or RAID 10 would have prevented this."},
+      {l:"C",t:"The hot spare activates automatically and rebuilds both failed drives, preventing data loss."},
+      {l:"D",t:"The array goes read-only during rebuild, protecting data from corruption until the second drive is replaced."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. This is the infamous 'RAID 5 write hole' problem — during rebuild, the entire array is vulnerable. One more failure = total data loss. For a 99.9% uptime, 2TB production database, the correct choices are RAID 6 (dual parity, survives 2 simultaneous failures) or RAID 10 (mirrored stripes, survives one failure per mirror set). RAID 5 is not appropriate for large, high-stakes arrays.",
+      wrong:"RAID 5 absolutely does NOT survive two simultaneous drive failures — it has only one set of parity data. A hot spare helps in single-failure scenarios but if the second drive fails before or during the rebuild of the first, the array is destroyed regardless."
+    }
+  },
+  {
+    week:6, weekLabel:"WEEK 6 · STORAGE MANAGEMENT", weekColor:"#F1C40F", weekBg:"rgba(241,196,15,0.1)",
+    title:"Zone 6 — The Final Backup Stand",
+    narrative:"The attackers deployed ransomware. VSS shadow copies are gone. This is the last question standing between CCP and a ransom payment.",
+    question:"The ransomware deleted all VSS shadow copies before encrypting the data. The IT team has these backup sets available: Sunday full backup (tape, offsite), Monday–Friday daily incrementals (NAS, on-site, all encrypted by ransomware). Today is Friday evening. What is the recovery strategy and what data is lost?",
+    options:[
+      {l:"A",t:"Restore from Monday's incremental — it's the most recent unencrypted backup. Only Friday's data is lost."},
+      {l:"B",t:"Restore Sunday's full backup from offsite tape, then apply Monday through Thursday's incrementals in order. Friday's changes are lost (up to ~24 hours of data depending on backup window)."},
+      {l:"C",t:"The Monday–Thursday incrementals are useless since VSS was deleted — restore only from Sunday full backup and lose the entire week's data."},
+      {l:"D",t:"Restore from the NAS backups — ransomware only encrypts live files, not backup sets stored on a separate NAS."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. The air-gapped offsite Sunday tape is untouched — ransomware cannot reach an offline backup. The on-site NAS incrementals are also encrypted (the ransomware got them). But wait — the question says the NAS incrementals are encrypted. So the recovery is: Sunday tape + whatever incrementals were already offsite or taken before the ransomware hit. Maximum loss is Friday's data. This is exactly the value of the GFS rotation — the Father tape saved CCP.",
+      wrong:"The NAS backups are explicitly stated as encrypted by ransomware — they're useless. The VSS deletion removed local snapshots. The ONLY clean recovery point is the offsite Sunday tape, supplemented by any incrementals that were taken before the encryption occurred. This is why the 3-2-1 rule requires an AIR-GAPPED offline copy."
+    }
+  }
+];
+
+let current=0, score=0, hp=100, answered=[], selectedOpt=null;
+
+function startGame(){
+  document.getElementById('screen-landing').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('hp-display').style.display='flex';
+  answered=new Array(questions.length).fill(null);
+  current=0; score=0; hp=100; selectedOpt=null;
+  updateHP();
+  renderQuestion();
+}
+
+function updateHP(){
+  document.getElementById('hp-fill').style.width=hp+'%';
+  document.getElementById('hp-num').textContent=hp;
+  document.getElementById('hp-fill').style.background=hp>60?'#E74C3C':hp>30?'#E67E22':'#8E44AD';
+}
+
+function renderQuestion(){
+  const q=questions[current];
+  document.getElementById('q-tag').textContent=q.weekLabel;
+  document.getElementById('q-tag').style.background=q.weekBg;
+  document.getElementById('q-tag').style.color=q.weekColor;
+  document.getElementById('q-title').textContent=q.title;
+  document.getElementById('q-narrative').textContent=q.narrative;
+  document.getElementById('q-text').textContent=q.question;
+  document.getElementById('q-progress').textContent=(current+1)+' / '+questions.length;
+  document.getElementById('q-feedback').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('xp-gained').style.display='none';
+  selectedOpt=null;
+  const optsEl=document.getElementById('q-options');
+  optsEl.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const div=document.createElement('div');
+    div.className='option';
+    div.innerHTML=`<span class="opt-key">${opt.l}</span><span class="opt-text">${opt.t}</span>`;
+    div.onclick=()=>selectOption(i,div);
+    optsEl.appendChild(div);
+  });
+}
+
+function selectOption(idx,el){
+  if(document.getElementById('q-feedback').style.display!=='none') return;
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOpt=idx;
+  submitAnswer();
+}
+
+function submitAnswer(){
+  if(selectedOpt===null) return;
+  const q=questions[current];
+  const ok=selectedOpt===q.correct;
+  document.querySelectorAll('.option').forEach((o,i)=>{
+    o.classList.add('locked');
+    if(i===q.correct) o.classList.add('correct');
+    else if(i===selectedOpt&&!ok) o.classList.add('wrong');
+  });
+  if(ok){ score++; const xp=document.getElementById('xp-gained'); xp.textContent='+10 XP — Zone Secured'; xp.style.display='block'; }
+  else{ hp=Math.max(0,hp-15); updateHP(); }
+  answered[current]=ok;
+  const fb=document.getElementById('q-feedback');
+  fb.className='feedback-box '+(ok?'correct':'wrong');
+  fb.innerHTML=`<div class="feedback-label">${ok?'✅ Zone Secured':'❌ HP Lost — '+hp+' remaining'}</div><div class="feedback-text">${ok?q.feedback.correct:q.feedback.wrong}</div>`;
+  fb.style.display='block';
+  document.getElementById('btn-next').style.display='inline-flex';
+  document.getElementById('btn-next').textContent=current<questions.length-1?'Advance →':'See Results →';
+}
+
+function nextQuestion(){
+  current++;
+  if(current>=questions.length){showResults();return;}
+  renderQuestion();
+}
+
+function showResults(){
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-results').classList.add('active');
+  const pct=Math.round(score/questions.length*100);
+  const arc=document.getElementById('score-arc');
+  arc.style.stroke=pct>=80?'#F1C40F':pct>=60?'#E67E22':'#E74C3C';
+  setTimeout(()=>{arc.style.strokeDashoffset=351.86*(1-pct/100);},100);
+  document.getElementById('score-big').textContent=score+'/'+questions.length;
+  const ranks=[['🔴','Mission Failed — Study Required','Score below 50%. Several critical concepts from Weeks 1–6 need review before the midterm. Focus on the missed questions.'],
+    ['🟡','Partial Success — Almost Ready','Score 50–69%. You have solid foundations but some gaps. Review the feedback on missed questions carefully.'],
+    ['🔵','Mission Successful — Well Prepared','Score 70–89%. Strong understanding across most weeks. A few edge cases tripped you up — quick review recommended.'],
+    ['🏆','Operation Northstar Complete — Exam Ready','Score 90%+. Outstanding command of Weeks 1–6 content. You are ready for the midterm.']];
+  const ri=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  document.getElementById('rank-badge').textContent=ranks[ri][0];
+  document.getElementById('rank-title').textContent=ranks[ri][1];
+  document.getElementById('rank-sub').textContent=ranks[ri][2];
+
+  const weekNums=[1,2,3,4,5,6];
+  const weekColors=['#5DADE2','#27AE60','#8E44AD','#E67E22','#E74C3C','#F1C40F'];
+  let wbHTML='';
+  weekNums.forEach((w,wi)=>{
+    const qs=questions.filter(q=>q.week===w);
+    const correct=qs.filter((q,qi)=>answered[questions.indexOf(q)]).length;
+    wbHTML+=`<div class="wb-card"><div class="wb-val" style="color:${weekColors[wi]}">${correct}/${qs.length}</div><div class="wb-lbl">Week ${w}</div></div>`;
+  });
+  document.getElementById('week-breakdown').innerHTML=wbHTML;
+
+  let missedHTML='';
+  questions.forEach((q,i)=>{
+    if(!answered[i]){
+      missedHTML+=`<div class="missed-item"><span class="missed-week" style="background:${q.weekBg};color:${q.weekColor}">W${q.week}</span><div><div class="missed-q">${q.title}</div><div class="missed-a">Correct: ${q.options[q.correct].t.substring(0,90)}…</div></div></div>`;
+    }
+  });
+  if(!missedHTML) missedHTML='<div style="text-align:center;color:#27AE60;padding:20px;font-size:14px;">✅ No missed questions — perfect preparation!</div>';
+  document.getElementById('missed-list').innerHTML=missedHTML;
+}
+
+function restartGame(){
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-landing').classList.add('active');
+  document.getElementById('hp-display').style.display='none';
+  hp=100; score=0; current=0; answered=[]; selectedOpt=null;
+}
+</script>
+</body></html>
