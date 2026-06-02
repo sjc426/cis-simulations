@@ -8,115 +8,146 @@
 html,body{width:100%;height:100%;background:#000;font-family:'Courier New',monospace;overflow:hidden;}
 
 /* ── SCAN LINE ── */
-.scan{position:fixed;left:0;right:0;height:2px;background:rgba(0,200,100,0.12);
-  animation:scanMove 5s linear infinite;pointer-events:none;z-index:100;}
+.scan{position:fixed;left:0;right:0;height:2px;
+  background:rgba(0,200,100,0.1);
+  animation:scanMove 6s linear infinite;pointer-events:none;z-index:100;}
 @keyframes scanMove{0%{top:-2px}100%{top:100%}}
 
 /* ── TITLE BAR ── */
 .titlebar{
-  height:32px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;
-  display:flex;align-items:center;padding:0 12px;gap:8px;
+  height:36px;background:#0a0a0a;border-bottom:1px solid #1a1a1a;
+  display:flex;align-items:center;padding:0 14px;gap:10px;
 }
 .tb-dots{display:flex;gap:5px;margin-right:8px;}
-.dot{width:10px;height:10px;border-radius:50%;}
-.tb-label{font-size:10px;color:#555;letter-spacing:1.5px;text-transform:uppercase;}
+.dot{width:11px;height:11px;border-radius:50%;}
+.tb-label{font-size:11px;color:#555;letter-spacing:1.5px;text-transform:uppercase;}
 .tb-label span{color:#888;}
-.tb-status{margin-left:auto;font-size:10px;letter-spacing:1px;}
+.tb-status{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:1px;}
 
 /* ── SPLIT LAYOUT ── */
-.split{display:grid;grid-template-columns:1fr 1px 1fr;height:calc(100vh - 32px - 28px);}
+.split{display:grid;grid-template-columns:1fr 1px 1fr;
+  height:calc(100vh - 36px - 32px);}
 .divider{background:#1a1a1a;position:relative;}
 .divider::after{
   content:'VS';position:absolute;top:50%;left:50%;
   transform:translate(-50%,-50%);
-  font-size:9px;font-weight:700;color:#333;letter-spacing:2px;
-  background:#000;padding:6px 2px;
+  font-size:9px;font-weight:700;color:#2a2a2a;letter-spacing:2px;
+  background:#000;padding:8px 2px;
 }
 
 /* ── PANELS ── */
 .panel{display:flex;flex-direction:column;overflow:hidden;}
 .panel-header{
-  padding:6px 12px;display:flex;align-items:center;gap:8px;
+  padding:8px 14px;display:flex;align-items:center;gap:10px;
   border-bottom:1px solid #1a1a1a;flex-shrink:0;
 }
-.ph-icon{font-size:14px;}
-.ph-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.ph-icon{font-size:16px;}
+.ph-title{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;}
 .ph-badge{
-  margin-left:auto;font-size:9px;font-weight:700;
-  letter-spacing:1.5px;padding:2px 8px;border-radius:2px;
+  margin-left:auto;font-size:10px;font-weight:700;
+  letter-spacing:1.5px;padding:3px 10px;border-radius:2px;
 }
 
-/* ATTACK panel */
+/* attack panel */
 .panel-attack .panel-header{background:#0d0000;}
 .panel-attack .ph-title{color:#ff4444;}
-.panel-attack .ph-badge{background:#1a0000;color:#ff4444;border:1px solid #330000;}
+.panel-attack .ph-badge{background:#1a0000;color:#ff5533;border:1px solid #330000;}
 
-/* DEFENSE panel */
+/* defense panel */
 .panel-defense .panel-header{background:#000d00;}
 .panel-defense .ph-title{color:#00ff88;}
-.panel-defense .ph-badge{background:#001a00;color:#00ff88;border:1px solid #003300;}
+.panel-defense .ph-badge{background:#001500;color:#00ff88;border:1px solid #003300;}
 
 /* ── LOG AREAS ── */
 .log-area{
-  flex:1;overflow:hidden;padding:8px 10px;
-  display:flex;flex-direction:column;gap:1px;
+  flex:1;overflow:hidden;padding:10px 14px;
+  display:flex;flex-direction:column;gap:3px;
 }
 
 /* ── LOG LINES ── */
 .log-line{
-  font-size:10.5px;line-height:1.6;opacity:0;
-  animation:lineIn .2s ease forwards;
+  font-size:13px;line-height:1.65;opacity:0;
+  animation:lineIn .25s ease forwards;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-@keyframes lineIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+@keyframes lineIn{
+  from{opacity:0;transform:translateX(-6px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+/* ── COMMAND LINES — the teaching moment ── */
+.log-line.is-cmd{
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.3px;
+  padding:4px 8px;
+  border-radius:3px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.panel-attack  .log-line.is-cmd{background:rgba(255,40,0,.12); color:#ff6644;}
+.panel-defense .log-line.is-cmd{background:rgba(0,255,100,.07); color:#00ffaa;}
 
 /* attack line colors */
-.atk-probe{color:#ff6644;}
-.atk-brute{color:#ff4422;}
-.atk-found{color:#ffaa00;}
-.atk-cve  {color:#ff8800;font-weight:700;}
-.atk-block{color:#ff2200;text-decoration:line-through;opacity:.4!important;}
-.atk-dead {color:#333;}
+.atk-probe{color:#cc5533;font-size:13px;}
+.atk-brute{color:#ff4422;font-size:13px;}
+.atk-found{color:#ffaa00;font-size:13px;}
+.atk-cve  {color:#ff8800;font-weight:700;font-size:13px;}
+.atk-block{color:#992200;text-decoration:line-through;opacity:.5!important;}
+.atk-dead {color:#3a3a3a;font-size:12px;}
 
 /* defense line colors */
-.def-action{color:#00cc66;}
-.def-check {color:#00ff88;font-weight:700;}
-.def-info  {color:#448866;}
-.def-warn  {color:#ffaa00;}
-.def-system{color:#2266aa;}
+.def-action{color:#00cc66;font-size:13px;}
+.def-check {color:#00ff88;font-weight:700;font-size:13px;}
+.def-info  {color:#336655;font-size:12px;}
+.def-warn  {color:#cc9900;font-size:13px;}
+.def-system{color:#336699;font-size:12px;}
 
 /* ── THREAT METER ── */
 .threat-section{
-  flex-shrink:0;padding:6px 12px 8px;border-top:1px solid #1a0000;
-  background:#0a0000;
+  flex-shrink:0;padding:8px 14px 10px;
+  border-top:1px solid #1a0000;background:#080000;
 }
-.threat-label{font-size:9px;color:#ff4444;letter-spacing:2px;margin-bottom:4px;}
-.threat-track{background:#110000;border:1px solid #220000;border-radius:2px;height:10px;overflow:hidden;}
+.threat-label{
+  font-size:11px;color:#cc4433;letter-spacing:2px;
+  margin-bottom:5px;font-weight:700;
+}
+.threat-track{
+  background:#110000;border:1px solid #220000;
+  border-radius:3px;height:12px;overflow:hidden;
+}
 .threat-fill{
-  height:100%;border-radius:2px;
+  height:100%;border-radius:3px;width:0%;
   transition:width .8s ease, background .8s ease;
   background:#ff2200;
 }
 
-/* ── DEFENSE SCORE ── */
+/* ── DEFENSE CHECKLIST ── */
 .defense-section{
-  flex-shrink:0;padding:6px 12px 8px;border-top:1px solid #001a00;
-  background:#000a00;
+  flex-shrink:0;padding:8px 14px 10px;
+  border-top:1px solid #001a00;background:#000800;
 }
-.defense-label{font-size:9px;color:#00ff88;letter-spacing:2px;margin-bottom:4px;}
-.checklist{display:flex;flex-direction:column;gap:2px;}
+.defense-label{
+  font-size:11px;color:#00cc66;letter-spacing:2px;
+  margin-bottom:6px;font-weight:700;
+}
+.checklist{display:flex;flex-direction:column;gap:4px;}
 .check-item{
-  font-size:9.5px;color:#224422;letter-spacing:.5px;
+  font-size:12px;color:#1e3d28;letter-spacing:.3px;
   transition:color .4s ease;
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:8px;
+  line-height:1.4;
 }
-.check-item.done{color:#00ff88;}
-.check-item.done .ci-box{background:#00ff88;color:#000;}
+.check-item.done{color:#00ee77;}
 .ci-box{
-  width:12px;height:12px;border:1px solid #224422;border-radius:2px;
+  width:14px;height:14px;border:1px solid #1e3d28;border-radius:2px;
   display:inline-flex;align-items:center;justify-content:center;
-  font-size:8px;color:transparent;flex-shrink:0;
+  font-size:9px;color:transparent;flex-shrink:0;
   transition:all .4s ease;
+}
+.check-item.done .ci-box{
+  background:#00ee77;color:#000;border-color:#00ee77;
 }
 
 /* ── VICTORY OVERLAY ── */
@@ -126,31 +157,32 @@ html,body{width:100%;height:100%;background:#000;font-family:'Courier New',monos
   pointer-events:none;z-index:50;
   transition:background .8s ease;
 }
-.victory.show{background:rgba(0,0,0,.7);}
+.victory.show{background:rgba(0,0,0,.75);}
 .victory-card{
-  text-align:center;opacity:0;transform:scale(.8);
-  transition:all .6s ease;
+  text-align:center;opacity:0;transform:scale(.85);
+  transition:all .7s cubic-bezier(.34,1.56,.64,1);
 }
 .victory.show .victory-card{opacity:1;transform:scale(1);}
-.victory-icon{font-size:48px;margin-bottom:12px;display:block;}
+.victory-icon{font-size:52px;margin-bottom:14px;display:block;}
 .victory-title{
-  font-size:18px;font-weight:700;letter-spacing:4px;
-  color:#00ff88;text-transform:uppercase;margin-bottom:6px;
+  font-size:20px;font-weight:700;letter-spacing:5px;
+  color:#00ff88;text-transform:uppercase;margin-bottom:8px;
 }
-.victory-sub{font-size:10px;color:#448866;letter-spacing:2px;}
+.victory-sub{font-size:12px;color:#336655;letter-spacing:2px;}
 
 /* ── STATUS BAR ── */
 .statusbar{
-  height:28px;background:#060606;border-top:1px solid #111;
-  display:flex;align-items:center;padding:0 12px;gap:16px;flex-shrink:0;
+  height:32px;background:#060606;border-top:1px solid #111;
+  display:flex;align-items:center;padding:0 14px;gap:16px;
 }
-.sb{font-size:9.5px;letter-spacing:1px;font-weight:700;}
+.sb{font-size:11px;letter-spacing:1px;font-weight:700;}
 .blink{animation:blink .8s step-end infinite;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 </style>
 </head><body>
 
 <div class="scan"></div>
+
 <div class="victory" id="victory">
   <div class="victory-card">
     <span class="victory-icon">🛡</span>
@@ -166,8 +198,12 @@ html,body{width:100%;height:100%;background:#000;font-family:'Courier New',monos
     <div class="dot" style="background:#ffbd2e"></div>
     <div class="dot" style="background:#28ca42"></div>
   </div>
-  <span class="tb-label">CIS 252 · Week 5 · <span>Server Hardware &amp; Server Hardening</span></span>
-  <span class="tb-status" id="tb-status" style="color:#ff4444">● ATTACK IN PROGRESS</span>
+  <span class="tb-label">CIS 252 · Week 5 ·
+    <span>Server Hardware &amp; Server Hardening</span>
+  </span>
+  <span class="tb-status" id="tb-status" style="color:#ff5533">
+    ● ATTACK IN PROGRESS
+  </span>
 </div>
 
 <!-- SPLIT -->
@@ -182,12 +218,15 @@ html,body{width:100%;height:100%;background:#000;font-family:'Courier New',monos
     </div>
     <div class="log-area" id="atk-log"></div>
     <div class="threat-section">
-      <div class="threat-label">THREAT LEVEL <span id="threat-pct">0%</span></div>
-      <div class="threat-track"><div class="threat-fill" id="threat-fill" style="width:0%"></div></div>
+      <div class="threat-label">
+        THREAT LEVEL &nbsp;<span id="threat-pct">0%</span>
+      </div>
+      <div class="threat-track">
+        <div class="threat-fill" id="threat-fill"></div>
+      </div>
     </div>
   </div>
 
-  <!-- DIVIDER -->
   <div class="divider"></div>
 
   <!-- RIGHT: DEFENDER -->
@@ -208,112 +247,140 @@ html,body{width:100%;height:100%;background:#000;font-family:'Courier New',monos
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-  <span class="sb" style="color:#444">TARGET: CCP-LAB-SRV-01</span>
-  <span class="sb" style="color:#333">|</span>
-  <span class="sb" style="color:#444">OS: Windows Server 2025</span>
-  <span class="sb" style="color:#333">|</span>
-  <span class="sb" style="color:#444">IP: 10.0.14.88</span>
-  <span class="sb blink" style="color:#ff4444;margin-left:auto" id="sb-right">⚠ UNPATCHED</span>
+  <span class="sb" style="color:#333">TARGET: CCP-LAB-SRV-01</span>
+  <span class="sb" style="color:#222">|</span>
+  <span class="sb" style="color:#333">OS: Windows Server 2025</span>
+  <span class="sb" style="color:#222">|</span>
+  <span class="sb" style="color:#333">IP: 10.0.14.88</span>
+  <span class="sb blink" style="color:#ff5533;margin-left:auto"
+    id="sb-right">⚠ UNPATCHED — VULNERABLE
+  </span>
 </div>
 
 <script>
-// ── CHECKLIST ITEMS ──────────────────────────────────────────
+// ── CHECKLIST ────────────────────────────────────────────────
 var checks = [
-  { id:'rename',  label:'Rename Administrator account' },
-  { id:'spooler', label:'Disable Print Spooler (CVE-2021-34527)' },
-  { id:'registry',label:'Disable Remote Registry' },
-  { id:'audit',   label:'Enable Audit Logging' },
-  { id:'nla',     label:'Enable NLA for RDP' },
-  { id:'fw',      label:'Restrict RDP firewall rules' },
+  { id:'rename',   label:'Rename Administrator account'         },
+  { id:'spooler',  label:'Disable Print Spooler (CVE-2021-34527)'},
+  { id:'registry', label:'Disable Remote Registry'              },
+  { id:'audit',    label:'Enable Audit Logging (4624/4625)'     },
+  { id:'nla',      label:'Enable NLA for RDP'                   },
+  { id:'fw',       label:'Restrict RDP to campus VPN only'      },
 ];
 
-// Build checklist DOM
 var clEl = document.getElementById('checklist');
 checks.forEach(function(c){
   var d = document.createElement('div');
   d.className = 'check-item';
-  d.id = 'ci-'+c.id;
-  d.innerHTML = '<span class="ci-box" id="cib-'+c.id+'"> </span>' + c.label;
+  d.id = 'ci-' + c.id;
+  d.innerHTML = '<span class="ci-box" id="cib-' + c.id + '"> </span>' + c.label;
   clEl.appendChild(d);
 });
 
-// ── ATTACK SEQUENCES ─────────────────────────────────────────
-// Each entry: { delay, cls, text, threatDelta }
-// threatDelta accumulates; negative means attack blocked
+// ── SEQUENCES ────────────────────────────────────────────────
+// cls: CSS class(es)   text: displayed string
+// isCmd: true = bigger highlighted command line
+// threat: signed integer applied to running threat level
+// check: checklist id to tick when this line fires
+
 var atkSeq = [
-  // Phase 1 — recon
-  {d:400,  cls:'atk-probe', text:'[00:00] Nmap scan → 10.0.14.88:3389 OPEN'},
-  {d:900,  cls:'atk-probe', text:'[00:01] Nmap scan → 10.0.14.88:445 OPEN'},
-  {d:1400, cls:'atk-probe', text:'[00:02] Nmap scan → 10.0.14.88:135 OPEN'},
-  {d:1900, cls:'atk-found', text:'[00:03] ⚠  Service: Print Spooler detected'},
-  {d:2400, cls:'atk-found', text:'[00:04] ⚠  CVE-2021-34527 PrintNightmare — VULNERABLE'},
-  {d:2900, cls:'atk-cve',   text:'[00:05] Exploit module loaded: PrintNightmare RCE', threat:15},
-  // Phase 2 — brute force RDP
-  {d:3600, cls:'atk-brute', text:'[00:06] RDP brute force → user: Administrator'},
-  {d:4100, cls:'atk-brute', text:'[00:07] Attempt 1: Administrator / admin123 ✗'},
-  {d:4500, cls:'atk-brute', text:'[00:08] Attempt 2: Administrator / password ✗'},
-  {d:4900, cls:'atk-brute', text:'[00:09] Attempt 3: Administrator / ccp2026 ✗'},
-  {d:5300, cls:'atk-brute', text:'[00:10] Attempt 4: Administrator / Welcome1 ✗'},
-  {d:5700, cls:'atk-brute', text:'[00:11] Attempt 5: Administrator / P@ssw0rd ✗', threat:10},
-  // PrintNightmare attempt — gets blocked by disable
-  {d:6400, cls:'atk-cve',   text:'[00:12] Launching PrintNightmare → RCE attempt...'},
-  {d:7200, cls:'atk-block', text:'[00:13] ✗ BLOCKED — Print Spooler not running'},
-  {d:7700, cls:'atk-dead',  text:'[00:14] PrintNightmare exploit: FAILED', threat:-10},
-  // Phase 3 — registry / lateral
-  {d:8500, cls:'atk-probe', text:'[00:15] Trying Remote Registry access...'},
-  {d:9000, cls:'atk-block', text:'[00:16] ✗ BLOCKED — Remote Registry disabled'},
-  {d:9500, cls:'atk-dead',  text:'[00:17] Registry pivot: FAILED', threat:-5},
-  // Phase 4 — RDP with renamed account
-  {d:10300,cls:'atk-brute', text:'[00:18] Retrying RDP → user: Administrator...'},
-  {d:10900,cls:'atk-block', text:'[00:19] ✗ BLOCKED — Account not found'},
-  {d:11400,cls:'atk-dead',  text:'[00:20] Username unknown — rename worked', threat:-8},
-  // Phase 5 — NLA wall
-  {d:12100,cls:'atk-brute', text:'[00:21] Attempting pre-auth RDP connection...'},
-  {d:12700,cls:'atk-block', text:'[00:22] ✗ BLOCKED — NLA required before session'},
-  {d:13200,cls:'atk-dead',  text:'[00:23] Cannot reach login screen — NLA active', threat:-8},
-  // Phase 6 — firewall kill
-  {d:14000,cls:'atk-probe', text:'[00:24] Scanning from external IP 185.234.11.9...'},
-  {d:14600,cls:'atk-block', text:'[00:25] ✗ TIMEOUT — firewall rule: block external RDP'},
-  {d:15100,cls:'atk-dead',  text:'[00:26] All vectors exhausted. Disconnecting.', threat:-5},
-  {d:15800,cls:'atk-dead',  text:'[00:27] ── ATTACKER DISCONNECTED ──'},
+  // Recon
+  { d:500,  cls:'atk-probe', text:'[00:00] nmap 10.0.14.88 → port 3389 OPEN' },
+  { d:1100, cls:'atk-probe', text:'[00:01] nmap 10.0.14.88 → port 445  OPEN' },
+  { d:1700, cls:'atk-probe', text:'[00:02] nmap 10.0.14.88 → port 135  OPEN' },
+  { d:2300, cls:'atk-found', text:'[00:03] ⚠  Print Spooler service detected' },
+  { d:2900, cls:'atk-cve',   isCmd:true,
+    text:'[00:04] CVE-2021-34527 PrintNightmare → VULNERABLE', threat:18 },
+
+  // Brute force RDP
+  { d:3800, cls:'atk-brute', text:'[00:06] RDP brute force → user: Administrator' },
+  { d:4400, cls:'atk-brute', isCmd:true,
+    text:'[00:07] hydra -l Administrator -P rockyou.txt rdp://10.0.14.88' },
+  { d:5000, cls:'atk-brute', text:'[00:08] Attempt  1/5 — admin123     ✗' },
+  { d:5400, cls:'atk-brute', text:'[00:09] Attempt  2/5 — P@ssw0rd     ✗' },
+  { d:5800, cls:'atk-brute', text:'[00:10] Attempt  3/5 — Welcome1!    ✗', threat:10 },
+
+  // PrintNightmare blocked
+  { d:6700, cls:'atk-cve',   isCmd:true,
+    text:'[00:12] python3 CVE-2021-34527.py 10.0.14.88 → launching...' },
+  { d:7700, cls:'atk-block', text:'[00:13] ✗  BLOCKED — Print Spooler not running' },
+  { d:8200, cls:'atk-dead',  text:'[00:14] PrintNightmare RCE: FAILED', threat:-12 },
+
+  // Remote Registry blocked
+  { d:9100, cls:'atk-probe', isCmd:true,
+    text:'[00:15] reg connect \\\\10.0.14.88\\HKLM' },
+  { d:9900, cls:'atk-block', text:'[00:16] ✗  BLOCKED — Remote Registry disabled' },
+  { d:10400,cls:'atk-dead',  text:'[00:17] Registry pivot: FAILED', threat:-8 },
+
+  // Renamed account blocks brute force
+  { d:11200,cls:'atk-brute', isCmd:true,
+    text:'[00:18] hydra -l Administrator ... (retrying)' },
+  { d:12000,cls:'atk-block', text:'[00:19] ✗  BLOCKED — Account "Administrator" not found' },
+  { d:12500,cls:'atk-dead',  text:'[00:20] Username unknown — rename defeated attack', threat:-8 },
+
+  // NLA wall
+  { d:13300,cls:'atk-brute', isCmd:true,
+    text:'[00:21] mstsc /v:10.0.14.88 — pre-auth RDP probe' },
+  { d:14100,cls:'atk-block', text:'[00:22] ✗  BLOCKED — NLA required before session' },
+  { d:14600,cls:'atk-dead',  text:'[00:23] Cannot reach login screen', threat:-6 },
+
+  // Firewall kills external access
+  { d:15400,cls:'atk-probe', isCmd:true,
+    text:'[00:24] Scanning from 185.234.11.9 → port 3389...' },
+  { d:16200,cls:'atk-block', text:'[00:25] ✗  TIMEOUT — firewall blocks external RDP' },
+  { d:16700,cls:'atk-dead',  text:'[00:26] All vectors exhausted.', threat:-6 },
+  { d:17200,cls:'atk-dead',  text:'[00:27] ── ATTACKER DISCONNECTED ──' },
 ];
 
-// ── DEFENSE SEQUENCES ────────────────────────────────────────
 var defSeq = [
-  {d:500,  cls:'def-system', text:'[INIT] Windows Server 2025 — fresh install'},
-  {d:1000, cls:'def-warn',   text:'[WARN] Default config detected — hardening required'},
-  {d:1600, cls:'def-info',   text:'[INFO] Running: secpol.msc, services.msc, lusrmgr.msc'},
-  // Step 1: rename admin
-  {d:2600, cls:'def-action', text:'> Rename-LocalUser "Administrator" "sysadmin_ccp"', check:'rename'},
-  {d:3100, cls:'def-check',  text:'✅ Administrator renamed → sysadmin_ccp'},
-  {d:3300, cls:'def-info',   text:'   Decoy account "Administrator" created (no privs)'},
-  // Step 2: kill print spooler
-  {d:5800, cls:'def-action', text:'> Stop-Service Spooler; Set-Service Spooler -StartupType Disabled', check:'spooler'},
-  {d:6300, cls:'def-check',  text:'✅ Print Spooler — DISABLED (CVE-2021-34527 closed)'},
-  // Step 3: kill remote registry
-  {d:7900, cls:'def-action', text:'> Set-Service RemoteRegistry -StartupType Disabled', check:'registry'},
-  {d:8400, cls:'def-check',  text:'✅ Remote Registry — DISABLED'},
-  // Step 4: audit logging
-  {d:9200, cls:'def-action', text:'> auditpol /set /subcategory:"Logon" /success:enable /failure:enable'},
-  {d:9700, cls:'def-check',  text:'✅ Audit Logging — EventID 4624/4625/4672/4740 active', check:'audit'},
-  {d:9900, cls:'def-info',   text:'   Security event log now capturing all auth events'},
-  // Step 5: NLA
-  {d:11000,cls:'def-action', text:'> Set-ItemProperty ... UserAuthentication 1  # Enable NLA', check:'nla'},
-  {d:11500,cls:'def-check',  text:'✅ NLA for RDP — ENABLED (pre-auth required)'},
-  // Step 6: firewall
-  {d:12800,cls:'def-action', text:'> New-NetFirewallRule -RemoteAddress VPN_RANGE -LocalPort 3389'},
-  {d:13300,cls:'def-check',  text:'✅ RDP firewall — restricted to campus VPN only', check:'fw'},
-  {d:13600,cls:'def-info',   text:'   0.0.0.0/0 rule removed. External RDP blocked.'},
-  // Final
-  {d:15400,cls:'def-check',  text:'✅ All hardening steps complete'},
-  {d:15700,cls:'def-system', text:'── SERVER HARDENED — ATTACK SURFACE MINIMIZED ──'},
+  { d:600,  cls:'def-system', text:'[INIT] Windows Server 2025 — fresh install detected' },
+  { d:1200, cls:'def-warn',   text:'[WARN] Default config — 47 services running' },
+  { d:1800, cls:'def-info',   text:'[INFO] Opening: lusrmgr.msc  services.msc  secpol.msc' },
+
+  // Step 1 — rename admin
+  { d:2800, cls:'def-action', isCmd:true,
+    text:'> Rename-LocalUser "Administrator" "sysadmin_ccp"', check:'rename' },
+  { d:3500, cls:'def-check',  text:'✅ Administrator renamed → sysadmin_ccp' },
+  { d:3900, cls:'def-info',   text:'   Decoy "Administrator" created (zero privileges)' },
+
+  // Step 2 — kill print spooler
+  { d:5800, cls:'def-action', isCmd:true,
+    text:'> Stop-Service Spooler; Set-Service Spooler -Disabled', check:'spooler' },
+  { d:6500, cls:'def-check',  text:'✅ Print Spooler DISABLED — CVE-2021-34527 closed' },
+
+  // Step 3 — kill remote registry
+  { d:8000, cls:'def-action', isCmd:true,
+    text:'> Set-Service RemoteRegistry -StartupType Disabled', check:'registry' },
+  { d:8700, cls:'def-check',  text:'✅ Remote Registry DISABLED' },
+
+  // Step 4 — audit logging
+  { d:9800, cls:'def-action', isCmd:true,
+    text:'> auditpol /set /subcategory:"Logon" /success:enable /failure:enable',
+    check:'audit' },
+  { d:10600,cls:'def-check',  text:'✅ Audit Logging ON — EventID 4624 / 4625 / 4672' },
+
+  // Step 5 — NLA
+  { d:11600,cls:'def-action', isCmd:true,
+    text:'> Set-ItemProperty ... UserAuthentication 1  # NLA on', check:'nla' },
+  { d:12400,cls:'def-check',  text:'✅ NLA ENABLED — credentials required before session' },
+
+  // Step 6 — firewall
+  { d:13600,cls:'def-action', isCmd:true,
+    text:'> New-NetFirewallRule -RemoteAddress $VPN_RANGE -LocalPort 3389', check:'fw' },
+  { d:14400,cls:'def-check',  text:'✅ Firewall — RDP restricted to campus VPN only' },
+  { d:14800,cls:'def-info',   text:'   0.0.0.0/0 inbound rule removed' },
+
+  // Done
+  { d:16600,cls:'def-check',  text:'✅ All 6 hardening steps complete' },
+  { d:17000,cls:'def-system', text:'── ATTACK SURFACE MINIMIZED ──' },
 ];
 
-// ── STATE ────────────────────────────────────────────────────
-var threat = 0;
-var TOTAL_DURATION = 17000; // ms before restart
+// ── ENGINE ───────────────────────────────────────────────────
+var MAX_LINES = 8;   // max visible lines per panel — gives each room to breathe
+var threat    = 0;
+var TOTAL_DUR = 19500;
 
-function setThreat(val) {
+function setThreat(val){
   threat = Math.max(0, Math.min(100, val));
   var pct = Math.round(threat);
   document.getElementById('threat-pct').textContent = pct + '%';
@@ -322,64 +389,64 @@ function setThreat(val) {
   document.getElementById('threat-fill').style.background = col;
 }
 
-function addLog(panelId, cls, text) {
+function addLog(panelId, cls, text, isCmd){
   var area = document.getElementById(panelId);
   var line = document.createElement('div');
-  line.className = 'log-line ' + cls;
+  var classes = 'log-line ' + cls;
+  if(isCmd) classes += ' is-cmd';
+  line.className = classes;
   line.textContent = text;
   area.appendChild(line);
-  // keep max ~18 lines visible
-  while (area.children.length > 18) area.removeChild(area.firstChild);
+  while(area.children.length > MAX_LINES) area.removeChild(area.firstChild);
 }
 
-function tickCheck(id) {
-  var ci  = document.getElementById('ci-' + id);
+function tickCheck(id){
+  var ci  = document.getElementById('ci-'  + id);
   var cib = document.getElementById('cib-' + id);
-  if (ci)  ci.classList.add('done');
-  if (cib) { cib.textContent = '✓'; }
+  if(ci)  ci.classList.add('done');
+  if(cib){ cib.textContent = '✓'; }
 }
 
-function showVictory() {
+function showVictory(){
   document.getElementById('victory').classList.add('show');
   document.getElementById('tb-status').textContent = '● SERVER HARDENED';
   document.getElementById('tb-status').style.color = '#00ff88';
-  document.getElementById('sb-right').textContent  = '✅ HARDENED';
+  document.getElementById('sb-right').textContent  = '✅ HARDENED — ALL VECTORS CLOSED';
   document.getElementById('sb-right').style.color  = '#00ff88';
   document.getElementById('sb-right').classList.remove('blink');
   document.getElementById('atk-badge').textContent = 'DEFEATED';
   document.getElementById('def-badge').textContent = 'COMPLETE';
 }
 
-function clearAll() {
+function clearAll(){
   document.getElementById('atk-log').innerHTML = '';
   document.getElementById('def-log').innerHTML = '';
   document.getElementById('victory').classList.remove('show');
   document.getElementById('tb-status').textContent = '● ATTACK IN PROGRESS';
-  document.getElementById('tb-status').style.color = '#ff4444';
-  document.getElementById('sb-right').textContent = '⚠ UNPATCHED';
-  document.getElementById('sb-right').style.color = '#ff4444';
+  document.getElementById('tb-status').style.color = '#ff5533';
+  document.getElementById('sb-right').textContent  = '⚠ UNPATCHED — VULNERABLE';
+  document.getElementById('sb-right').style.color  = '#ff5533';
   document.getElementById('sb-right').classList.add('blink');
   document.getElementById('atk-badge').textContent = 'ACTIVE';
   document.getElementById('def-badge').textContent = 'HARDENING';
   checks.forEach(function(c){
-    var ci = document.getElementById('ci-'+c.id);
-    var cib = document.getElementById('cib-'+c.id);
-    if(ci) ci.classList.remove('done');
-    if(cib){ cib.textContent=' '; }
+    var ci  = document.getElementById('ci-'  + c.id);
+    var cib = document.getElementById('cib-' + c.id);
+    if(ci)  ci.classList.remove('done');
+    if(cib) cib.textContent = ' ';
   });
   threat = 0;
   setThreat(0);
 }
 
-function runSequence() {
+function runSequence(){
   var timers = [];
-
-  // Schedule attack lines
   var runningThreat = 0;
-  atkSeq.forEach(function(ev) {
-    var t = setTimeout(function() {
-      addLog('atk-log', ev.cls, ev.text);
-      if (ev.threat) {
+
+  atkSeq.forEach(function(ev){
+    var t = setTimeout(function(){
+      addLog('atk-log', ev.cls, ev.text, ev.isCmd);
+      if(ev.threat){
         runningThreat += ev.threat;
         setThreat(runningThreat);
       }
@@ -387,29 +454,23 @@ function runSequence() {
     timers.push(t);
   });
 
-  // Schedule defense lines
-  defSeq.forEach(function(ev) {
-    var t = setTimeout(function() {
-      addLog('def-log', ev.cls, ev.text);
-      if (ev.check) tickCheck(ev.check);
+  defSeq.forEach(function(ev){
+    var t = setTimeout(function(){
+      addLog('def-log', ev.cls, ev.text, ev.isCmd);
+      if(ev.check) tickCheck(ev.check);
     }, ev.d);
     timers.push(t);
   });
 
-  // Victory
-  var vt = setTimeout(showVictory, 15900);
-  timers.push(vt);
+  timers.push(setTimeout(showVictory, 17400));
 
-  // Restart after pause
-  var rt = setTimeout(function() {
+  timers.push(setTimeout(function(){
     timers.forEach(clearTimeout);
     clearAll();
-    setTimeout(runSequence, 600);
-  }, TOTAL_DURATION);
-  timers.push(rt);
+    setTimeout(runSequence, 800);
+  }, TOTAL_DUR));
 }
 
-// Kick off
-setTimeout(runSequence, 300);
+setTimeout(runSequence, 400);
 </script>
 </body></html>
