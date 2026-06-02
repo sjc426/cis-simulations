@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Week 8: The Agentic IT Manager</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+  :root{
+    --navy:#0D1B2A;--navy2:#0A1520;--navy3:#162236;
+    --accent:#2E86C1;--cyan:#5DADE2;--white:#F4F8FC;--gray:#8B9BB4;
+    --green:#27AE60;--red:#E74C3C;--amber:#E67E22;--purple:#8E44AD;
+    --border:rgba(46,134,193,0.25);--card-bg:rgba(22,34,54,0.95);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--navy2);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(46,134,193,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(46,134,193,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 20px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .badge-cis{background:var(--accent);color:#fff;}
+  .badge-w8{background:var(--navy3);color:var(--purple);border:1px solid rgba(142,68,173,0.3);}
+  .topbar-title{font-size:13px;color:var(--gray);}
+  .trust-display{display:none;align-items:center;gap:10px;}
+  .trust-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple);}
+  .trust-track{background:rgba(142,68,173,0.15);border:1px solid rgba(142,68,173,0.3);border-radius:4px;width:100px;height:8px;overflow:hidden;}
+  .trust-fill{height:100%;background:var(--purple);transition:width .5s ease;border-radius:4px;}
+  .trust-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple);}
+
+  .screen{display:none;}.screen.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  /* LANDING */
+  .hero{text-align:center;padding:44px 0 36px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--purple);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
+  .hero h1{font-size:clamp(26px,5vw,46px);font-weight:700;line-height:1.15;color:#fff;margin-bottom:12px;}
+  .hero h1 span{color:var(--cyan);}
+  .hero p{font-size:15px;color:var(--gray);max-width:580px;margin:0 auto 32px;line-height:1.7;}
+  .role-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px;}
+  @media(max-width:560px){.role-cards{grid-template-columns:1fr;}}
+  .role-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:20px;position:relative;overflow:hidden;}
+  .role-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--card-color);}
+  .role-icon{font-size:28px;margin-bottom:10px;}
+  .role-name{font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;}
+  .role-desc{font-size:12px;color:var(--gray);line-height:1.5;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+  .btn-purple{background:var(--purple);color:#fff;}
+  .btn-purple:hover{filter:brightness(1.15);transform:translateY(-1px);}
+  .btn-secondary{background:transparent;color:var(--cyan);border:1px solid var(--border);padding:10px 20px;font-size:13px;}
+  .btn-secondary:hover{border-color:var(--cyan);}
+
+  /* TICKET */
+  .ticket-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+  .ticket-meta{display:flex;flex-direction:column;gap:6px;}
+  .ticket-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;display:inline-block;}
+  .ticket-title{font-size:19px;font-weight:700;color:#fff;line-height:1.3;}
+  .ticket-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray);}
+
+  .ticket-body{background:rgba(10,21,32,0.9);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:20px;}
+  .ticket-from{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray);margin-bottom:10px;}
+  .ticket-msg{font-size:14px;color:var(--white);line-height:1.7;}
+  .ticket-context{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--gray);line-height:1.6;}
+
+  .decision-prompt{font-size:16px;font-weight:500;color:var(--white);line-height:1.6;margin-bottom:18px;}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+  @media(max-width:560px){.choices{grid-template-columns:1fr;}}
+  .choice{padding:16px 18px;background:var(--card-bg);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;text-align:center;}
+  .choice:hover:not(.locked){transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3);}
+  .choice.agent-choice:hover:not(.locked){border-color:var(--cyan);background:rgba(93,173,226,0.08);}
+  .choice.human-choice:hover:not(.locked){border-color:var(--amber);background:rgba(230,126,34,0.08);}
+  .choice.selected-agent{border-color:var(--cyan);background:rgba(93,173,226,0.1);}
+  .choice.selected-human{border-color:var(--amber);background:rgba(230,126,34,0.1);}
+  .choice.correct{border-color:var(--green);background:rgba(39,174,96,0.1);}
+  .choice.wrong{border-color:var(--red);background:rgba(231,76,60,0.1);}
+  .choice.locked{cursor:default;transform:none;}
+  .choice-icon{font-size:28px;margin-bottom:8px;}
+  .choice-label{font-size:14px;font-weight:700;margin-bottom:4px;}
+  .choice-sub{font-size:12px;color:var(--gray);line-height:1.4;}
+
+  .outcome-box{border-radius:10px;padding:18px 20px;margin-bottom:20px;border:1px solid;}
+  .outcome-box.good{background:rgba(39,174,96,0.08);border-color:var(--green);}
+  .outcome-box.bad{background:rgba(231,76,60,0.08);border-color:var(--red);}
+  .outcome-box.okay{background:rgba(230,126,34,0.08);border-color:var(--amber);}
+  .outcome-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .outcome-title{font-size:16px;font-weight:700;margin-bottom:8px;}
+  .outcome-text{font-size:14px;line-height:1.7;color:var(--white);opacity:.9;}
+  .outcome-principle{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;color:var(--cyan);font-style:italic;}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;}
+  .progress-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray);}
+  .trust-change{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:4px;}
+
+  /* RESULTS */
+  .results-hero{text-align:center;padding:36px 0 28px;}
+  .score-ring{width:130px;height:130px;margin:0 auto 20px;position:relative;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  .score-big{font-family:'JetBrains Mono',monospace;font-size:30px;font-weight:700;}
+  .score-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+  .results-title{font-size:22px;font-weight:700;margin-bottom:8px;}
+  .results-sub{font-size:14px;color:var(--gray);max-width:520px;margin:0 auto 28px;line-height:1.6;}
+  .split-breakdown{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:28px;}
+  @media(max-width:480px){.split-breakdown{grid-template-columns:1fr;}}
+  .sbd-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;}
+  .sbd-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;margin-bottom:4px;}
+  .sbd-lbl{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .review-list{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;text-align:left;}
+  .review-item{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;gap:12px;align-items:flex-start;}
+  .review-icon{font-size:16px;margin-top:1px;}
+  .review-q{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;}
+  .review-a{font-size:12px;color:var(--gray);}
+</style>
+</head><body>
+<div class="wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="badge badge-cis">CIS 252</span>
+      <span class="badge badge-w8">Week 8</span>
+      <span class="topbar-title">The Agentic IT Manager</span>
+    </div>
+    <div class="trust-display" id="trust-display">
+      <span class="trust-label">TRUST</span>
+      <div class="trust-track"><div class="trust-fill" id="trust-fill" style="width:50%"></div></div>
+      <span class="trust-num" id="trust-num">50</span>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="screen active" id="screen-landing">
+    <div class="hero">
+      <div class="eyebrow">🤖 Pre-Class Simulation · Week 8</div>
+      <h1>You are the <span>IT Manager</span>.<br>The Agent is Ready.</h1>
+      <p>Claude is connected to your domain controller with PowerShell MCP and Filesystem MCP. 10 tickets are waiting. For each one, decide: delegate to the agent, or keep it under human control. Every wrong call has consequences.</p>
+    </div>
+    <div class="role-cards">
+      <div class="role-card" style="--card-color:#5DADE2">
+        <div class="role-icon">🤖</div>
+        <div class="role-name">Delegate to Agent</div>
+        <div class="role-desc">Claude executes the task autonomously via PowerShell MCP. Fast, scalable, zero human effort. Best for repetitive, structured, reversible work.</div>
+      </div>
+      <div class="role-card" style="--card-color:#E67E22">
+        <div class="role-icon">👤</div>
+        <div class="role-name">Human Control Required</div>
+        <div class="role-desc">You execute this personally with review steps. Best for irreversible, ambiguous, security-critical, or high-stakes decisions.</div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn btn-purple" onclick="startGame()">🤖 Open Ticket Queue</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="screen-game">
+    <div class="ticket-header">
+      <div class="ticket-meta">
+        <span class="ticket-tag" id="t-tag">TICKET</span>
+        <div class="ticket-title" id="t-title">Loading…</div>
+        <div class="ticket-num" id="t-num">TKT-001</div>
+      </div>
+    </div>
+    <div class="ticket-body">
+      <div class="ticket-from" id="t-from">From: —</div>
+      <div class="ticket-msg" id="t-msg"></div>
+      <div class="ticket-context" id="t-context" style="display:none"></div>
+    </div>
+    <div class="decision-prompt" id="t-question"></div>
+    <div class="choices" id="t-choices">
+      <div class="choice agent-choice" id="choice-agent" onclick="selectChoice('agent')">
+        <div class="choice-icon">🤖</div>
+        <div class="choice-label" style="color:var(--cyan)">Delegate to Agent</div>
+        <div class="choice-sub" id="agent-sub">Claude executes via PowerShell MCP</div>
+      </div>
+      <div class="choice human-choice" id="choice-human" onclick="selectChoice('human')">
+        <div class="choice-icon">👤</div>
+        <div class="choice-label" style="color:var(--amber)">Human Control</div>
+        <div class="choice-sub" id="human-sub">You handle this personally</div>
+      </div>
+    </div>
+    <div class="outcome-box" id="t-outcome" style="display:none"></div>
+    <div class="nav-row">
+      <div>
+        <div class="progress-text" id="t-progress">1 / 10</div>
+        <div class="trust-change" id="trust-change" style="display:none"></div>
+      </div>
+      <button class="btn btn-purple" id="btn-next" style="display:none" onclick="nextTicket()">Next Ticket →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="results-hero">
+      <div class="score-ring">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(46,134,193,0.15)" stroke-width="10"/>
+          <circle cx="65" cy="65" r="56" fill="none" stroke-width="10" stroke-linecap="round" id="score-arc" style="stroke-dasharray:351.86;stroke-dashoffset:351.86;transition:stroke-dashoffset 1.2s ease;"/>
+        </svg>
+        <div class="score-num">
+          <div class="score-big" id="score-big">0/10</div>
+          <div class="score-sub">DECISIONS</div>
+        </div>
+      </div>
+      <div class="results-title" id="results-title">Simulation Complete</div>
+      <div class="results-sub" id="results-sub"></div>
+    </div>
+    <div class="split-breakdown" id="split-breakdown"></div>
+    <div class="review-list" id="review-list"></div>
+    <div style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-purple" onclick="restartGame()">↺ New Shift</button>
+      <a class="btn btn-secondary" href="https://ccp.instructure.com/courses/2103664/modules" target="_top">← Back to Canvas</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const tickets = [
+  {
+    tag:"ROUTINE · AD OPERATIONS", tagColor:"#5DADE2", tagBg:"rgba(93,173,226,0.15)",
+    title:"Onboard 47 New Students",
+    num:"TKT-001",
+    from:"From: Registrar Office <registrar@ccp.edu>",
+    msg:"Hi IT — we have 47 new students starting Monday. Attached is the CSV with their names and student IDs. Can you create their AD accounts by Friday? Same OU as last semester (Students > Fall 2026).",
+    context:"Task details: Create 47 user accounts in anthropic.ai domain, OU=Students/Fall2026, username format: first initial + last name + last 4 of student ID, temp password: CCP+StudentID, force password change on first login.",
+    question:"Should Claude (via PowerShell MCP) create these 47 AD accounts from the CSV?",
+    agentSub:"Read CSV, generate New-ADUser commands, create all 47 accounts in Students/Fall2026 OU.",
+    humanSub:"Manually create each account in ADUC — about 3-4 hours of clicking.",
+    correct:"agent",
+    outcome:{
+      result:"good",
+      title:"✅ Perfect Delegation",
+      text:"This is exactly what agents excel at: structured, repetitive, reversible work with clear inputs and outputs. Claude reads the CSV, generates 47 New-ADUser commands, executes them, and returns a confirmation table. What would take you 3-4 hours of ADUC clicking takes Claude 45 seconds. If an account was created incorrectly, you can delete and recreate it — the task is fully reversible.",
+      principle:"Agent wins: high volume + structured data + reversible = automate without hesitation."
+    },
+    trustChange: +10
+  },
+  {
+    tag:"CRITICAL · SECURITY", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Disable Compromised Domain Admin",
+    num:"TKT-002",
+    from:"From: Security Team <security@ccp.edu>",
+    msg:"URGENT: We believe Domain Admin account 'da_jsmith' may have been compromised. Attacker may have credentials. Please disable the account immediately and rotate all service accounts that used it.",
+    context:"Impact: Disabling a Domain Admin account is irreversible in practice — dependent services may break. 'da_jsmith' has admin rights to all 847 servers. Service accounts using its credentials are unknown. This action affects the entire domain.",
+    question:"Should Claude disable da_jsmith and rotate all service accounts?",
+    agentSub:"Disable-ADAccount da_jsmith, enumerate service accounts, rotate credentials automatically.",
+    humanSub:"Investigate scope first, confirm with security team, execute with change management, rollback plan ready.",
+    correct:"human",
+    outcome:{
+      result:"bad",
+      title:"⚠️ Human Control Required",
+      text:"This is exactly the wrong task to delegate without oversight. Disabling a Domain Admin account without understanding dependencies can break authentication for 847 servers simultaneously. What service accounts use those credentials? What applications break? Does the Security team have forensic evidence or is this a precautionary action? The agent can ASSIST — running Get-ADUser and Get-ADServiceAccount to map dependencies — but the actual disable must be a human decision with a rollback plan and change window.",
+      principle:"Human wins: irreversible + domain-wide impact + unknown dependencies = human judgment required."
+    },
+    trustChange: -15
+  },
+  {
+    tag:"REPORTING · AUDIT", tagColor:"#27AE60", tagBg:"rgba(39,174,96,0.15)",
+    title:"Generate Inactive Account Report",
+    num:"TKT-003",
+    from:"From: Compliance Officer <compliance@ccp.edu>",
+    msg:"Quarterly audit requirement: please provide a report of all AD accounts that have not logged in for 90+ days, along with their department and last logon timestamp. Due by end of week.",
+    context:"Query: Search-ADAccount -AccountInactive -TimeSpan 90 + Get-ADUser for department. Export to CSV. ~3,400 accounts in scope. Read-only operation.",
+    question:"Should Claude generate this inactive account report?",
+    agentSub:"Run Search-ADAccount, join with Get-ADUser, export CSV with name/department/lastLogon/enabled status.",
+    humanSub:"Manually query AD, build the report in Excel, format for compliance team.",
+    correct:"agent",
+    outcome:{
+      result:"good",
+      title:"✅ Perfect Delegation",
+      text:"Read-only reporting queries with structured output are the ideal agent task. No risk of data modification, fully reversible (the report is just a file), and the agent can join multiple AD attributes more accurately than manual ADUC browsing. Claude generates a clean CSV in seconds that would take a human 45+ minutes to produce manually.",
+      principle:"Agent wins: read-only + structured query + zero modification risk = automate completely."
+    },
+    trustChange: +10
+  },
+  {
+    tag:"SENSITIVE · HR", tagColor:"#E67E22", tagBg:"rgba(230,126,34,0.15)",
+    title:"Terminate Employee Access",
+    num:"TKT-004",
+    from:"From: HR Director <hr@ccp.edu>",
+    msg:"Effective today: Professor Marcus Webb (mwebb) has been terminated for cause. Please immediately revoke all system access including AD account, email, VPN, and shared drive permissions. This is confidential.",
+    context:"Termination for cause. IT must disable account, remove from all groups, revoke O365 license, log all changes for potential legal proceedings. HR has not provided details of the cause.",
+    question:"Should Claude execute the full termination checklist for Professor Webb?",
+    agentSub:"Disable-ADAccount mwebb, remove all group memberships, revoke O365 license, document changes.",
+    humanSub:"Execute termination with IT manager present, document every step, follow offboarding SOP with legal hold consideration.",
+    correct:"human",
+    outcome:{
+      result:"okay",
+      title:"⚠️ Human Should Execute — Agent Can Assist",
+      text:"This falls into a gray zone. The individual steps are technically simple — Disable-ADAccount, Remove-ADGroupMember — but the context matters. Termination for cause may involve legal proceedings, meaning you need documented, auditable chain of custody. An agent can prepare the commands and list all group memberships for review, but the actual execution should have an IT manager present to follow the offboarding SOP and ensure legal hold requirements are met. Agent assists; human executes and signs off.",
+      principle:"Human executes: legal implications + confidential HR matter + chain of custody required."
+    },
+    trustChange: -10
+  },
+  {
+    tag:"ROUTINE · MAINTENANCE", tagColor:"#5DADE2", tagBg:"rgba(93,173,226,0.15)",
+    title:"Rename 200 Computer Objects",
+    num:"TKT-005",
+    from:"From: Desktop Team <desktop@ccp.edu>",
+    msg:"We standardized the naming convention last month. There are 203 computer objects in AD still using the old format (PC-XXXXX) that need to be renamed to the new format (CCP-DEPT-XXXXX). I've attached the mapping spreadsheet.",
+    context:"Renaming computer objects in AD doesn't affect the actual machine — just the AD object name. Fully reversible. The mapping CSV has old_name → new_name for all 203 computers.",
+    question:"Should Claude rename all 203 computer objects from the mapping CSV?",
+    agentSub:"Read CSV, execute Rename-ADObject for each entry, generate completion report with any errors.",
+    humanSub:"Manually rename each computer object in ADUC — approximately 4-5 hours.",
+    correct:"agent",
+    outcome:{
+      result:"good",
+      title:"✅ Perfect Delegation",
+      text:"203 renames from a structured CSV with a direct 1:1 mapping is a textbook automation task. It's reversible (rename back if needed), has clear inputs, produces a clear output, and the agent can generate an error report for any that fail. This is exactly the 'Lab 8 Manual vs Agent' comparison from the lecture — but at 67x the scale. Agent does it in under 2 minutes vs your entire afternoon.",
+      principle:"Agent wins: bulk rename + structured mapping + reversible + zero judgment required."
+    },
+    trustChange: +10
+  },
+  {
+    tag:"SECURITY · GPO", tagColor:"#8E44AD", tagBg:"rgba(142,68,173,0.15)",
+    title:"Deploy New Password Policy GPO",
+    num:"TKT-006",
+    from:"From: CISO <ciso@ccp.edu>",
+    msg:"Per our new security policy: minimum password length is now 16 characters, complexity required, history 24 passwords, max age 365 days. Please deploy this as a new Fine-Grained Password Policy applied to all Domain Users.",
+    context:"Fine-Grained Password Policy deployment via PowerShell: New-ADFineGrainedPasswordPolicy + Add-ADFineGrainedPasswordPolicySubject. Affects all 4,200 domain user accounts. Users will be forced to change password at next logon if current password doesn't meet new policy.",
+    question:"Should Claude deploy this password policy GPO to all 4,200 users?",
+    agentSub:"Create FGPP with specified settings, apply to Domain Users group — effective immediately.",
+    humanSub:"Review policy parameters with CISO, test on pilot group first, schedule change window, communicate to users before deployment.",
+    correct:"human",
+    outcome:{
+      result:"bad",
+      title:"⚠️ Human Control Required",
+      text:"Even though the task is technically straightforward, the blast radius is enormous — 4,200 users immediately affected. A password policy change needs: (1) a pilot group test to catch unexpected behavior, (2) user communication so people aren't locked out in the middle of class, (3) help desk preparation for the password reset wave, (4) a CISO sign-off that these specific parameters were intended. The agent can prepare the commands for review, but deployment of domain-wide policy requires a human-orchestrated change window.",
+      principle:"Human controls: domain-wide policy + 4,200 users affected + requires change management and communication."
+    },
+    trustChange: -15
+  },
+  {
+    tag:"ROUTINE · HELPDESK", tagColor:"#27AE60", tagBg:"rgba(39,174,96,0.15)",
+    title:"Reset 12 Locked-Out Accounts",
+    num:"TKT-007",
+    from:"From: Help Desk <helpdesk@ccp.edu>",
+    msg:"End of finals week rush — we have 12 students who got locked out after too many failed attempts. All verified their identity with student ID. Accounts: jsmith23, klee91, mbrown47, apatel12, cwang88, rjones55, nkumar31, lgarcia77, otaylor19, hchen42, slee63, akim29.",
+    context:"Standard unlock procedure: Unlock-ADAccount for each, no password reset needed per student request. Identity verified by help desk staff already.",
+    question:"Should Claude unlock all 12 locked accounts?",
+    agentSub:"Run Unlock-ADAccount for all 12 usernames, confirm unlock status, return completion list.",
+    humanSub:"Process each unlock request individually through ADUC.",
+    correct:"agent",
+    outcome:{
+      result:"good",
+      title:"✅ Perfect Delegation",
+      text:"12 account unlocks where identity verification was already done by help desk staff is a clear automation win. Unlock-ADAccount is safe and reversible — if an account shouldn't have been unlocked, it can be locked again immediately. The agent handles 12 in the time it takes to open ADUC. This is routine IT work that shouldn't require human execution once the verification step is done by staff.",
+      principle:"Agent wins: routine + reversible + identity already verified + no judgment needed."
+    },
+    trustChange: +10
+  },
+  {
+    tag:"CRITICAL · INFRASTRUCTURE", tagColor:"#E74C3C", tagBg:"rgba(231,76,60,0.15)",
+    title:"Delete Deprecated OUs and Accounts",
+    num:"TKT-008",
+    from:"From: IT Director <itdirector@ccp.edu>",
+    msg:"Spring 2026 cleanup: please delete the Spring2026 student OU (contains ~800 graduated student accounts) and the old faculty group 'Fac-Legacy-2024'. These are no longer needed.",
+    context:"OU Spring2026 contains 812 user objects. Deleting an OU with 'Protect from accidental deletion' off removes all objects permanently — AD Recycle Bin retention is 180 days but requires domain functional level 2008R2+. 'Fac-Legacy-2024' group membership unknown.",
+    question:"Should Claude delete the Spring2026 OU (812 accounts) and Fac-Legacy-2024 group?",
+    agentSub:"Remove-ADOrganizationalUnit Spring2026 (recursive) + Remove-ADGroup Fac-Legacy-2024.",
+    humanSub:"Verify AD Recycle Bin is enabled, audit group memberships, get final confirmation from IT Director, document deletion in change log.",
+    correct:"human",
+    outcome:{
+      result:"bad",
+      title:"⚠️ Human Control Required — This Is Irreversible",
+      text:"Permanently deleting 812 user accounts is one of the highest-risk actions in AD administration. Before any deletion: verify AD Recycle Bin is enabled and retention period, confirm no service accounts or system accounts are in that OU, get explicit signed approval from IT Director (not just a ticket), document in the change log. The agent can audit and prepare the list, but executing the delete is a human decision with documented approval.",
+      principle:"Human controls: bulk permanent deletion + 812 objects + irreversible without AD Recycle Bin + needs documented approval."
+    },
+    trustChange: -15
+  },
+  {
+    tag:"ROUTINE · REPORTING", tagColor:"#5DADE2", tagBg:"rgba(93,173,226,0.15)",
+    title:"Weekly Security Dashboard",
+    num:"TKT-009",
+    from:"From: Security Team <security@ccp.edu>",
+    msg:"Automated weekly request: generate the Monday security report — failed logon count by account (last 7 days), accounts with 5+ failed attempts, and list of accounts that logged in outside business hours (before 7AM or after 10PM).",
+    context:"Sources: Security event log (EventID 4625 for failed logons, EventID 4624 for successful logons with timestamp). Read-only log query. Report goes to security team email.",
+    question:"Should Claude generate this weekly security report?",
+    agentSub:"Query Security event log for 7 days, aggregate by account, flag high-failure and after-hours accounts, format report.",
+    humanSub:"Manually export and analyze event logs, build report in Excel, email to security team.",
+    correct:"agent",
+    outcome:{
+      result:"good",
+      title:"✅ Perfect Delegation",
+      text:"Automated weekly reporting from event logs is one of the best agent use cases. It's read-only, structured, repeatable, and time-sensitive. The agent can correlate EventID 4625/4624 records, aggregate by account, flag anomalies, and generate a clean report — every Monday, consistently, without a human spending 2 hours manually parsing event logs. This is exactly the kind of task that makes agentic IT administration valuable.",
+      principle:"Agent wins: automated + read-only + structured data + repeatable = set it and forget it."
+    },
+    trustChange: +10
+  },
+  {
+    tag:"JUDGMENT CALL · AI POLICY", tagColor:"#8E44AD", tagBg:"rgba(142,68,173,0.15)",
+    title:"Draft the AI Usage Policy",
+    num:"TKT-010",
+    from:"From: President's Office <president@ccp.edu>",
+    msg:"The Board has requested CCP develop an institutional policy on AI tool usage for students and faculty. IT has been asked to contribute the technical section — specifically what AI tools are approved, how data is handled, and acceptable use guidelines. Draft something for legal review.",
+    context:"No existing policy. Affects all 8,000 students and 400 faculty. Will go to Legal, Academic Affairs, and Board of Trustees. Decisions made here will define CCP's AI posture for years.",
+    question:"Should Claude draft this institutional AI usage policy?",
+    agentSub:"Generate a comprehensive AI usage policy draft covering approved tools, data handling, and acceptable use.",
+    humanSub:"Convene a committee (IT, Legal, Academic Affairs, Faculty Senate), research peer institution policies, draft collaboratively with stakeholder input.",
+    correct:"human",
+    outcome:{
+      result:"bad",
+      title:"⚠️ Human Process Required",
+      text:"This is perhaps the clearest example of where human judgment is irreplaceable. An AI policy draft touches academic freedom, legal liability, student privacy (FERPA), faculty governance, and institutional values — none of which Claude can weigh appropriately without human context and stakeholder input. Ironically, using an AI to write your AI policy without human oversight would itself be a policy violation. Claude can research peer institution policies and prepare a framework for the committee, but the policy must emerge from a human deliberative process with appropriate stakeholders.",
+      principle:"Human process: policy affecting institutional values + legal liability + stakeholder governance = human deliberation required."
+    },
+    trustChange: -10
+  }
+];
+
+let current=0, score=0, trust=50, answered=[], selectedChoice=null;
+
+function startGame(){
+  document.getElementById('screen-landing').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('trust-display').style.display='flex';
+  answered=new Array(tickets.length).fill(null);
+  current=0; score=0; trust=50; selectedChoice=null;
+  updateTrust();
+  renderTicket();
+}
+
+function updateTrust(){
+  const clipped=Math.max(0,Math.min(100,trust));
+  document.getElementById('trust-fill').style.width=clipped+'%';
+  document.getElementById('trust-num').textContent=clipped;
+  document.getElementById('trust-fill').style.background=clipped>=70?'#27AE60':clipped>=40?'#8E44AD':'#E74C3C';
+}
+
+function renderTicket(){
+  const t=tickets[current];
+  document.getElementById('t-tag').textContent=t.tag;
+  document.getElementById('t-tag').style.background=t.tagBg;
+  document.getElementById('t-tag').style.color=t.tagColor;
+  document.getElementById('t-title').textContent=t.title;
+  document.getElementById('t-num').textContent=t.num;
+  document.getElementById('t-from').textContent=t.from;
+  document.getElementById('t-msg').textContent=t.msg;
+  const ctx=document.getElementById('t-context');
+  if(t.context){ctx.textContent=t.context;ctx.style.display='block';}else{ctx.style.display='none';}
+  document.getElementById('t-question').textContent=t.question;
+  document.getElementById('agent-sub').textContent=t.agentSub;
+  document.getElementById('human-sub').textContent=t.humanSub;
+  document.getElementById('t-outcome').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  document.getElementById('trust-change').style.display='none';
+  document.getElementById('t-progress').textContent=(current+1)+' / '+tickets.length;
+  const ca=document.getElementById('choice-agent');
+  const ch=document.getElementById('choice-human');
+  [ca,ch].forEach(c=>{c.classList.remove('selected-agent','selected-human','correct','wrong','locked');});
+  selectedChoice=null;
+}
+
+function selectChoice(choice){
+  if(document.getElementById('t-outcome').style.display!=='none') return;
+  const t=tickets[current];
+  const ca=document.getElementById('choice-agent');
+  const ch=document.getElementById('choice-human');
+  ca.classList.remove('selected-agent'); ch.classList.remove('selected-human');
+  if(choice==='agent') ca.classList.add('selected-agent');
+  else ch.classList.add('selected-human');
+  selectedChoice=choice;
+  submitChoice();
+}
+
+function submitChoice(){
+  if(!selectedChoice) return;
+  const t=tickets[current];
+  const ok=selectedChoice===t.correct;
+  const ca=document.getElementById('choice-agent');
+  const ch=document.getElementById('choice-human');
+  [ca,ch].forEach(c=>c.classList.add('locked'));
+  if(t.correct==='agent'){ca.classList.add('correct');if(!ok)ch.classList.add('wrong');}
+  else{ch.classList.add('correct');if(!ok)ca.classList.add('wrong');}
+  if(ok){score++;trust=Math.min(100,trust+Math.abs(t.trustChange));}
+  else{trust=Math.max(0,trust-Math.abs(t.trustChange));}
+  answered[current]=ok;
+  updateTrust();
+  const ob=document.getElementById('t-outcome');
+  ob.className='outcome-box '+t.outcome.result;
+  ob.innerHTML=`<div class="outcome-label">${ok?'✅ Correct Decision':'❌ Wrong Call'}</div><div class="outcome-title">${t.outcome.title}</div><div class="outcome-text">${t.outcome.text}</div><div class="outcome-principle">💡 ${t.outcome.principle}</div>`;
+  ob.style.display='block';
+  const tc=document.getElementById('trust-change');
+  const delta=ok?'+'+Math.abs(t.trustChange):'-'+Math.abs(t.trustChange);
+  tc.textContent='Trust: '+delta+' → '+Math.max(0,Math.min(100,trust));
+  tc.style.color=ok?'var(--green)':'var(--red)';
+  tc.style.display='block';
+  document.getElementById('btn-next').style.display='inline-flex';
+  document.getElementById('btn-next').textContent=current<tickets.length-1?'Next Ticket →':'View Results →';
+}
+
+function nextTicket(){
+  current++;
+  if(current>=tickets.length){showResults();return;}
+  renderTicket();
+}
+
+function showResults(){
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-results').classList.add('active');
+  const pct=Math.round(score/tickets.length*100);
+  const arc=document.getElementById('score-arc');
+  arc.style.stroke=pct>=80?'#27AE60':pct>=60?'#8E44AD':'#E74C3C';
+  setTimeout(()=>{arc.style.strokeDashoffset=351.86*(1-pct/100);},100);
+  document.getElementById('score-big').textContent=score+'/'+tickets.length;
+
+  const agentCorrect=tickets.filter((t,i)=>t.correct==='agent'&&answered[i]).length;
+  const humanCorrect=tickets.filter((t,i)=>t.correct==='human'&&answered[i]).length;
+  const agentTotal=tickets.filter(t=>t.correct==='agent').length;
+  const humanTotal=tickets.filter(t=>t.correct==='human').length;
+
+  const titles=['🔴 Micromanager or Reckless?','🟡 Getting the Balance','🔵 Strong Judgment','🤖 The Agentic IT Manager'];
+  const subs=['Major calibration issues. Either you\'re delegating irreversible/high-risk tasks to the agent (dangerous) or refusing to delegate safe repetitive work (inefficient). Review the feedback carefully.','You\'re developing the right instincts but some key distinctions tripped you up. Focus on: reversibility, blast radius, and whether judgment is required.','Solid judgment on most scenarios. You understand when the agent accelerates work vs. when human oversight protects the organization.','Outstanding calibration. You know exactly when to let the agent work and when to step in. This is the key skill for modern IT administration.'];
+  const ri=pct>=90?3:pct>=70?2:pct>=50?1:0;
+  document.getElementById('results-title').textContent=titles[ri];
+  document.getElementById('results-sub').textContent=subs[ri];
+
+  document.getElementById('split-breakdown').innerHTML=`
+    <div class="sbd-card"><div class="sbd-val" style="color:var(--cyan)">${agentCorrect}/${agentTotal}</div><div class="sbd-lbl">Delegate Calls</div></div>
+    <div class="sbd-card"><div class="sbd-val" style="color:var(--amber)">${humanCorrect}/${humanTotal}</div><div class="sbd-lbl">Human Calls</div></div>
+    <div class="sbd-card"><div class="sbd-val" style="color:${trust>=60?'var(--green)':trust>=40?'var(--purple)':'var(--red)'}">${Math.max(0,Math.min(100,trust))}</div><div class="sbd-lbl">Final Trust</div></div>`;
+
+  let reviewHTML='';
+  tickets.forEach((t,i)=>{
+    const ok=answered[i];
+    reviewHTML+=`<div class="review-item"><span class="review-icon">${ok?'✅':'❌'}</span><div><div class="review-q">${t.num}: ${t.title}</div><div class="review-a">${ok?'Correct — '+t.correct.charAt(0).toUpperCase()+t.correct.slice(1):'Should be: '+t.correct.charAt(0).toUpperCase()+t.correct.slice(1)+' — '+t.outcome.principle}</div></div></div>`;
+  });
+  document.getElementById('review-list').innerHTML=reviewHTML;
+}
+
+function restartGame(){
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-landing').classList.add('active');
+  document.getElementById('trust-display').style.display='none';
+  trust=50; score=0; current=0; answered=[]; selectedChoice=null;
+}
+</script>
+</body></html>
