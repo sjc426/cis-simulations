@@ -43,20 +43,20 @@ var TOPICS = [
   "Managing Network Servers — Foundations",
   "Virtualization, Cloud & Your First Server",
   "Active Directory — Installation & Administration",
-  "DNS & DHCP Configuration",
-  "File & Print Services",
-  "Group Policy Deep Dive",
-  "Remote Access & VPN",
-  "Midterm — Server Administration Review",
-  "Web & Application Servers",
-  "Monitoring & Performance",
-  "Backup & Disaster Recovery",
-  "Security Hardening",
-  "Automation & Scripting",
-  "Final Project — Server Infrastructure Design"
+  "Physical Assets & Network Security Concepts",
+  "Server Hardware & Server Hardening",
+  "Configuring Storage Management",
+  "Exam 1 — Midterm",
+  "Installing & Configuring an OS + The Pivot to Agentic",
+  "Troubleshooting OS, Application & Network Configurations",
+  "Managing Post-Installation Administration Tasks",
+  "Managing Data Security",
+  "Managing Service and Data Availability",
+  "Agent-to-Agent Security Operations",
+  "Decommissioning Servers (Project Submission)"
 ];
 
-var ICONS = ["","🖧","🖥️","🔐","🌐","🗂️","📋","🔒","📝","🌍","📊","💾","🛡️","⚙️","🏆"];
+var ICONS = ["","🖧","🖥️","🔐","🛡️","⚙️","🗄️","📝","🤖","🔧","📋","🔒","📡","🤝","🏆"];
 
 var SLUGS = [
   "",
@@ -64,16 +64,16 @@ var SLUGS = [
   "week-2-overview-summary",
   "week-3-overview-active-directory-installation-configuration-and-administration",
   "week-4-overview-physical-assets-and-network-security-concepts",
-  "week-5-overview",
-  "week-6-overview",
-  "week-7-overview",
-  "week-8-overview",
-  "week-9-overview",
-  "week-10-overview",
-  "week-11-overview",
-  "week-12-overview",
-  "week-13-overview",
-  "week-14-overview"
+  "week-5-overview-managing-server-hardware",
+  "week-6-overview-configuring-storage-management",
+  "week-7-overview-exam-1-midterm",
+  "week-8-overview-installing-and-configuring-an-os-+-the-pivot-to-agentic",
+  "week-9-overview-troubleshooting-os-application-and-network-configurations",
+  "week-10-overview-managing-post-installation-administration-tasks",
+  "week-11-overview-managing-data-security",
+  "week-12-overview-managing-service-and-data-availability",
+  "week-13-overview-agent-to-agent-security-operations",
+  "week-14-overview-decommissioning-servers-project-submission-week"
 ];
 
 var READ_SLUGS = [
@@ -81,17 +81,17 @@ var READ_SLUGS = [
   "week-1-reading-and-resources",
   "week-2-reading-and-resources",
   "week-3-reading-and-resources-2",
-  "week-4-overview-physical-assets-and-network-security-concepts",
+  "week-4-reading-and-resources",
   "week-5-reading-and-resources",
   "week-6-reading-and-resources-~45-min",
-  "week-7-reading-and-resources",
+  "week-7-overview-exam-1-midterm",
   "week-8-reading-and-resources",
-  "week-9-reading-and-resources",
-  "week-10-reading-and-resources",
-  "week-11-reading-and-resources",
-  "week-12-reading-and-resources",
-  "week-13-reading-and-resources",
-  "week-14-reading-and-resources"
+  "week-9-overview-troubleshooting-os-application-and-network-configurations",
+  "week-10-overview-managing-post-installation-administration-tasks",
+  "week-11-overview-managing-data-security",
+  "week-12-overview-managing-service-and-data-availability",
+  "week-13-overview-agent-to-agent-security-operations",
+  "week-14-overview-decommissioning-servers-project-submission-week"
 ];
 
 var DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -135,6 +135,7 @@ function render() {
   html += '<div class="btn-row">';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
+
   var LAB_URLS = {
     1:  'https://ccp.instructure.com/courses/2103664/assignments/19871789?module_item_id=45328023',
     2:  'https://ccp.instructure.com/courses/2103664/assignments/19871801?module_item_id=45328033',
@@ -142,10 +143,12 @@ function render() {
     4:  'https://ccp.instructure.com/courses/2103664/assignments/19871969?module_item_id=45737665',
     5:  'https://ccp.instructure.com/courses/2103664/assignments/20025805?module_item_id=45742571',
     6:  'https://ccp.instructure.com/courses/2103664/assignments/20027645?module_item_id=45750751',
-    7:  'https://ccp.instructure.com/courses/2103664/assignments/20029093?module_item_id=45755799'
+    7:  'https://ccp.instructure.com/courses/2103664/assignments/20029093?module_item_id=45755799',
+    8:  'https://ccp.instructure.com/courses/2103664/assignments/20054917?module_item_id=45826055'
   };
   var labURL = LAB_URLS[cur] || (base + '/assignments');
-  html += '<a class="btn primary" target="_top" href="' + labURL + '">🔬 Lab ' + cur + '</a>'
+  var labLabel = cur === 7 ? '📝 Midterm Exam' : '🔬 Lab ' + cur;
+  html += '<a class="btn primary" target="_top" href="' + labURL + '">' + labLabel + '</a>';
   html += '</div></div>';
 
   if (next > cur) {
