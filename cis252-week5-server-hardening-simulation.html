@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 252 — Week 5: Server Hardening Simulation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+  :root {
+    --navy:#0D1B2A; --navy2:#0A1520; --navy3:#162236;
+    --blue:#1B4F72; --accent:#2E86C1; --cyan:#5DADE2;
+    --white:#F4F8FC; --gray:#8B9BB4;
+    --green:#27AE60; --green2:#1E8449;
+    --red:#C0392B; --red2:#E74C3C;
+    --amber:#E67E22; --amber2:#F39C12;
+    --border:rgba(46,134,193,0.25); --card-bg:rgba(22,34,54,0.95);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--navy2);color:var(--white);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(46,134,193,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(46,134,193,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+  .wrapper{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 20px 60px;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:32px;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .badge-cis{background:var(--accent);color:#fff;}
+  .badge-w5{background:var(--navy3);color:var(--amber);border:1px solid rgba(230,126,34,0.3);}
+  .topbar-title{font-size:13px;color:var(--gray);}
+  .threat-meter{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--red2);display:none;}
+  .screen{display:none;} .screen.active{display:block;animation:fadeIn 0.35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+  /* LANDING */
+  .landing-hero{text-align:center;padding:48px 0 40px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;}
+  .landing-hero h1{font-size:clamp(26px,5vw,46px);font-weight:700;line-height:1.15;color:#fff;margin-bottom:12px;}
+  .landing-hero h1 span{color:var(--amber);}
+  .landing-hero p{font-size:15px;color:var(--gray);max-width:580px;margin:0 auto 36px;line-height:1.7;}
+  .phase-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:36px;}
+  @media(max-width:600px){.phase-cards{grid-template-columns:1fr;}}
+  .phase-card{background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:18px 16px;text-align:left;position:relative;overflow:hidden;}
+  .phase-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--card-color);}
+  .phase-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--card-color);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .phase-card h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:6px;}
+  .phase-card p{font-size:12px;color:var(--gray);line-height:1.5;}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;}
+  .btn-primary{background:var(--amber);color:#fff;}
+  .btn-primary:hover{background:var(--amber2);transform:translateY(-1px);}
+  .btn-secondary{background:transparent;color:var(--cyan);border:1px solid var(--border);padding:10px 20px;font-size:13px;}
+  .btn-secondary:hover{border-color:var(--cyan);background:rgba(93,173,226,0.08);}
+
+  /* SCENARIO CARD */
+  .scenario-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+  .scenario-meta{display:flex;flex-direction:column;gap:6px;}
+  .scenario-tag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;border-radius:3px;display:inline-block;}
+  .scenario-title{font-size:20px;font-weight:700;color:#fff;line-height:1.3;}
+  .threat-display{text-align:right;}
+  .threat-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+  .threat-bar-wrap{background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);border-radius:4px;width:140px;height:8px;overflow:hidden;}
+  .threat-bar{height:100%;background:var(--red2);transition:width .6s ease;border-radius:4px;}
+
+  .server-state{background:rgba(10,21,32,0.8);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:24px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);line-height:1.8;white-space:pre-wrap;}
+  .server-state .state-label{font-size:10px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-family:'Inter',sans-serif;}
+
+  .question-text{font-size:16px;font-weight:500;color:var(--white);line-height:1.6;margin-bottom:20px;}
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px;}
+  .option{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--card-bg);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .2s;}
+  .option:hover:not(.locked){border-color:var(--amber);background:rgba(230,126,34,0.06);}
+  .option.selected{border-color:var(--amber);background:rgba(230,126,34,0.1);}
+  .option.correct{border-color:var(--green);background:rgba(39,174,96,0.1);}
+  .option.wrong{border-color:var(--red2);background:rgba(231,76,60,0.1);}
+  .option.locked{cursor:default;}
+  .opt-key{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--amber);min-width:20px;margin-top:1px;}
+  .opt-text{font-size:14px;color:var(--white);line-height:1.5;}
+
+  .feedback-box{border-radius:8px;padding:16px 20px;margin-bottom:24px;border:1px solid;line-height:1.6;}
+  .feedback-box.correct{background:rgba(39,174,96,0.08);border-color:var(--green);color:#a8e6bc;}
+  .feedback-box.wrong{background:rgba(231,76,60,0.08);border-color:var(--red2);color:#f0a09a;}
+  .feedback-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .feedback-text{font-size:14px;line-height:1.7;}
+
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
+  .progress-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gray);}
+
+  /* RESULTS */
+  .results-hero{text-align:center;padding:40px 0 32px;}
+  .score-ring{width:130px;height:130px;margin:0 auto 24px;position:relative;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+  .score-big{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;}
+  .score-sub{font-size:11px;color:var(--gray);margin-top:2px;}
+  .results-title{font-size:24px;font-weight:700;margin-bottom:10px;}
+  .results-sub{font-size:14px;color:var(--gray);max-width:520px;margin:0 auto 32px;line-height:1.6;}
+  .breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;}
+  @media(max-width:560px){.breakdown{grid-template-columns:1fr;}}
+  .breakdown-card{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;}
+  .breakdown-val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;margin-bottom:4px;}
+  .breakdown-label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;}
+  .review-list{display:flex;flex-direction:column;gap:10px;margin-bottom:32px;text-align:left;}
+  .review-item{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 18px;display:flex;align-items:flex-start;gap:12px;}
+  .review-icon{font-size:16px;margin-top:2px;}
+  .review-q{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;}
+  .review-a{font-size:12px;color:var(--gray);}
+</style>
+</head><body>
+<div class="wrapper">
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="badge badge-cis">CIS 252</span>
+      <span class="badge badge-w5">Week 5</span>
+      <span class="topbar-title">Server Hardening Simulation</span>
+    </div>
+    <div class="threat-meter" id="threat-meter">⚠ THREAT LEVEL: <span id="threat-pct">0</span>%</div>
+  </div>
+
+  <!-- LANDING -->
+  <div class="screen active" id="screen-landing">
+    <div class="landing-hero">
+      <div class="eyebrow">🛡 Pre-Class Simulation · Week 5</div>
+      <h1>You Just Got <span>Root Access</span>.<br>Now Lock It Down.</h1>
+      <p>A Windows Server 2025 VM just came online at CCP's lab. Default install. No hardening. The clock is ticking — you have 3 hardening windows before an attacker finds the open doors. Make the right calls.</p>
+    </div>
+    <div class="phase-cards">
+      <div class="phase-card" style="--card-color:#E67E22">
+        <div class="phase-num">Phase 01</div>
+        <h3>Reduce Attack Surface</h3>
+        <p>Rename accounts, kill unnecessary services. Close the doors before they're found.</p>
+      </div>
+      <div class="phase-card" style="--card-color:#2E86C1">
+        <div class="phase-num">Phase 02</div>
+        <h3>Audit &amp; Logging</h3>
+        <p>Enable event logging so you can investigate what you can't see yet.</p>
+      </div>
+      <div class="phase-card" style="--card-color:#27AE60">
+        <div class="phase-num">Phase 03</div>
+        <h3>Remote Access Control</h3>
+        <p>Lock down RDP. Harden BIOS/UEFI. Secure out-of-band management.</p>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn btn-primary" onclick="startGame()">▶ Begin Hardening</button>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="screen" id="screen-game">
+    <div class="scenario-header">
+      <div class="scenario-meta">
+        <span class="scenario-tag" id="q-tag">PHASE 1</span>
+        <div class="scenario-title" id="q-title">Loading…</div>
+      </div>
+      <div class="threat-display">
+        <div class="threat-label">Threat Level</div>
+        <div class="threat-bar-wrap"><div class="threat-bar" id="threat-bar" style="width:0%"></div></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--red2);margin-top:4px;text-align:right;" id="threat-pct-bar">0%</div>
+      </div>
+    </div>
+    <div class="server-state" id="q-visual"><div class="state-label">SERVER STATE</div></div>
+    <div class="question-text" id="q-text"></div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback-box" id="q-feedback" style="display:none"></div>
+    <div class="nav-row">
+      <span class="progress-text" id="q-progress">1 / 10</span>
+      <button class="btn btn-primary" id="btn-next" style="display:none" onclick="nextQuestion()">Next →</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen" id="screen-results">
+    <div class="results-hero">
+      <div class="score-ring">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(46,134,193,0.15)" stroke-width="10"/>
+          <circle cx="65" cy="65" r="56" fill="none" stroke-width="10" stroke-linecap="round" id="score-arc" style="stroke-dasharray:351.86;stroke-dashoffset:351.86;transition:stroke-dashoffset 1.2s ease;"/>
+        </svg>
+        <div class="score-num">
+          <div class="score-big" id="score-big">0/10</div>
+          <div class="score-sub">SCORE</div>
+        </div>
+      </div>
+      <div class="results-title" id="results-title">Server Hardened</div>
+      <div class="results-sub" id="results-sub"></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="review-list" id="review-list"></div>
+    <div style="text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="restartGame()">↺ Try Again</button>
+      <a class="btn btn-secondary" href="https://ccp.instructure.com/courses/2103664/modules" target="_top">← Back to Canvas</a>
+    </div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ── PHASE 1: REDUCE ATTACK SURFACE ──────────────────────────
+  {
+    phase:"PHASE 1 · ATTACK SURFACE", phaseColor:"#E67E22", phaseBg:"rgba(230,126,34,0.15)",
+    title:"Scenario 1 — The Default Admin Account",
+    visual:`SERVER: CCP-LAB-SRV-01
+OS: Windows Server 2025 (fresh install)
+Local Accounts: Administrator, Guest
+Open Ports: 3389/RDP, 445/SMB, 135/RPC
+Services Running: 47 (default)
+Audit Logging: DISABLED
+Last Hardening: NEVER`,
+    question:"Automated brute-force bots are already scanning your IP on port 3389. Your first hardening step should be:",
+    options:[
+      {l:"A",t:"Rename the built-in 'Administrator' account to something non-obvious, then create a decoy account named 'Administrator' with no privileges."},
+      {l:"B",t:"Change the Administrator password to a 20-character random string and leave the account name as-is."},
+      {l:"C",t:"Disable RDP entirely — no remote access is the safest option for any production server."},
+      {l:"D",t:"Enable Windows Defender Firewall to block port 3389 from all external IPs first."}
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct. Renaming 'Administrator' forces attackers to guess BOTH the username AND password — doubling the attack difficulty. The decoy trick is gold: a fake 'Administrator' account with no privileges will light up your event log with failed login attempts, giving you early warning of active attacks.",
+      wrong:"Changing the password is important but incomplete — bots already know the username is 'Administrator'. The correct first step is to eliminate the known target by renaming it. Renaming + decoy account + strong password = the full hardening combo."
+    }
+  },
+  {
+    phase:"PHASE 1 · ATTACK SURFACE", phaseColor:"#E67E22", phaseBg:"rgba(230,126,34,0.15)",
+    title:"Scenario 2 — The Print Spooler Problem",
+    visual:`SERVER: CCP-LAB-SRV-01
+Role: Domain Controller (not a print server)
+Services Running (sample):
+  ✓ Active Directory Domain Services
+  ✓ DNS Server
+  ⚠ Print Spooler          [RUNNING]
+  ⚠ Remote Registry        [RUNNING]  
+  ⚠ SSDP Discovery         [RUNNING]
+CVE Alert: CVE-2021-34527 (PrintNightmare) — CRITICAL`,
+    question:"You run 'Get-Service' and find Print Spooler running on your Domain Controller. This server never prints anything. What do you do and why?",
+    options:[
+      {l:"A",t:"Leave it running — stopping services can cause AD replication issues and is not worth the risk."},
+      {l:"B",t:"Pause it temporarily during business hours, restart it at night when no users are active."},
+      {l:"C",t:"Disable it immediately. Print Spooler on a DC has no legitimate purpose and CVE-2021-34527 (PrintNightmare) allows remote code execution with SYSTEM privileges via this service."},
+      {l:"D",t:"Install the latest Windows patches to fix PrintNightmare, then leave the service running since patching resolves the CVE."}
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct. PrintNightmare (CVE-2021-34527) is a critical RCE vulnerability in the Print Spooler service — an attacker with any domain user account can escalate to SYSTEM on a DC. The patch helps, but if you don't need printing on a DC, the correct hardening answer is always: disable unused services entirely. No service = no attack surface, regardless of patches.",
+      wrong:"Patching is necessary but insufficient. The hardening principle is: if a service has no business purpose on this server, disable it. Even a patched Print Spooler is an unnecessary attack surface on a Domain Controller."
+    }
+  },
+  {
+    phase:"PHASE 1 · ATTACK SURFACE", phaseColor:"#E67E22", phaseBg:"rgba(230,126,34,0.15)",
+    title:"Scenario 3 — The Remote Registry",
+    visual:`SERVER: CCP-LAB-SRV-01
+Service: Remote Registry [RUNNING — Automatic]
+Description: Enables remote users to modify
+             registry settings on this computer.
+Current ACL: Administrators group (full access)
+             Remote Management Users (read)
+SK0-005 Obj 3.2: Server Hardening`,
+    question:"The Remote Registry service is running. An IT admin says 'we might need it someday for remote troubleshooting.' What's the correct hardening decision?",
+    options:[
+      {l:"A",t:"Keep it running but restrict the ACL to only the specific admin accounts that need it."},
+      {l:"B",t:"Disable it. Remote registry access is a major attack vector — if you need it for troubleshooting, enable it temporarily then disable it again. 'Might need it someday' is not a valid reason to leave it running."},
+      {l:"C",t:"Change it from Automatic to Manual startup — it won't start unless explicitly called."},
+      {l:"D",t:"Leave it running since it's restricted to Administrators group which is already a trusted group."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. 'We might need it someday' is one of the most dangerous phrases in IT security. Remote Registry allows an attacker with admin credentials to modify the registry of any machine remotely — persistence, privilege escalation, you name it. The correct posture: disable it. If a specific troubleshooting task requires it, enable temporarily, use it, disable again. That's hardening discipline.",
+      wrong:"The correct answer is B. Reducing ACLs helps but doesn't eliminate the attack surface. The hardening principle is: if it's not actively needed, disable it. Manual startup still means it can be triggered remotely. Disable = correct."
+    }
+  },
+  // ── PHASE 2: AUDIT & LOGGING ────────────────────────────────
+  {
+    phase:"PHASE 2 · AUDIT & LOGGING", phaseColor:"#2E86C1", phaseBg:"rgba(46,134,193,0.15)",
+    title:"Scenario 4 — The Silent Server",
+    visual:`SERVER: CCP-LAB-SRV-01
+Audit Policy (secpol.msc → Local Policies → Audit Policy):
+  Audit account logon events:    No auditing ❌
+  Audit logon events:            No auditing ❌
+  Audit privilege use:           No auditing ❌
+  Audit policy change:           No auditing ❌
+Security Event Log: EMPTY
+Last login attempt: UNKNOWN`,
+    question:"The server has been running for 3 weeks with no audit logging. An incident response team asks 'who logged in last Tuesday at 2AM?' What's the correct answer — and what must you configure immediately?",
+    options:[
+      {l:"A",t:"Check the IIS logs — web server logs capture all authentication events regardless of audit policy."},
+      {l:"B",t:"We cannot answer that question — 3 weeks of login history is gone forever. Enable audit logging immediately: secpol.msc → Audit account logon events + Audit logon events → Success and Failure."},
+      {l:"C",t:"Run 'Get-EventLog Security' in PowerShell — it reads logs from before the audit policy was enabled."},
+      {l:"D",t:"The data is in Active Directory — AD stores authentication history for 90 days by default."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. You cannot investigate what you did not record. Those 3 weeks of authentication history are permanently gone. Going forward, enable these four audit policies at minimum (Success AND Failure): Audit account logon events, Audit logon events, Audit privilege use, Audit policy change. Without these, your Security event log is useless for forensics.",
+      wrong:"None of those alternatives work. IIS logs are for web traffic only. PowerShell can only read what was logged — if logging was off, there's nothing to read. AD does not store authentication history. The correct answer: the data is gone, and you must enable audit policy now."
+    }
+  },
+  {
+    phase:"PHASE 2 · AUDIT & LOGGING", phaseColor:"#2E86C1", phaseBg:"rgba(46,134,193,0.15)",
+    title:"Scenario 5 — Reading the Event Log",
+    visual:`Security Event Log — PHILA-SRV-01
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[02:14:33] EventID 4625 — Source: 10.0.0.47
+[02:14:34] EventID 4625 — Source: 10.0.0.47
+[02:14:35] EventID 4625 — Source: 10.0.0.47
+... (847 more EventID 4625 in 4 minutes)
+[02:19:01] EventID 4624 — Source: 10.0.0.47
+             Account: svc_backup
+             Logon Type: 3 (Network)
+[02:19:04] EventID 4672 — svc_backup
+             Special privileges assigned`,
+    question:"You're reviewing the Security event log Monday morning. What does this sequence tell you, and what is the immediate response?",
+    options:[
+      {l:"A",t:"A backup job ran over the weekend and had minor authentication issues. This is normal behavior for service accounts — no action needed."},
+      {l:"B",t:"A brute-force attack from 10.0.0.47 succeeded (847 failed attempts → 1 success on 'svc_backup'). Immediately: isolate 10.0.0.47, disable svc_backup, reset its password, audit what it accessed after 02:19."},
+      {l:"C",t:"The svc_backup account had its password expire and locked itself out. Reset the password and re-run the backup job."},
+      {l:"D",t:"EventID 4672 indicates a normal privileged logon. Review the 4625 errors with the backup team to resolve the authentication issue."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. 847 failed logons (EventID 4625) followed immediately by a successful logon (EventID 4624) and privilege assignment (EventID 4672) is a textbook brute-force attack that succeeded. This is exactly why you enable Success AND Failure auditing — if you only logged successes, you'd see a normal-looking backup logon with no warning signs. The 4625 storm is the smoking gun.",
+      wrong:"847 failed attempts in 4 minutes is not a backup job authentication issue — it's a brute force attack. The subsequent successful login and privilege assignment means the attacker is now inside with service account privileges. Incident response, not ticket creation."
+    }
+  },
+  {
+    phase:"PHASE 2 · AUDIT & LOGGING", phaseColor:"#2E86C1", phaseBg:"rgba(46,134,193,0.15)",
+    title:"Scenario 6 — BIOS vs UEFI Decision",
+    visual:`SERVER: CCP-LAB-SRV-01 (new hardware)
+Firmware: UEFI (2024 server hardware)
+Current Boot Config:
+  Secure Boot: DISABLED
+  Boot Mode: Legacy BIOS compatibility
+  Boot Order: USB → Network → SSD
+  UEFI Admin Password: NOT SET
+Physical Access Policy: Server room, badge access`,
+    question:"You're configuring the UEFI firmware settings on a new server. Which combination of settings correctly reduces boot-level attack surface?",
+    options:[
+      {l:"A",t:"Enable Secure Boot, set UEFI to native mode (disable legacy BIOS compatibility), change boot order to SSD-only, set a UEFI admin password."},
+      {l:"B",t:"Leave Secure Boot disabled — it causes compatibility issues with some Linux distributions used in the lab."},
+      {l:"C",t:"Enable Secure Boot but keep USB first in boot order for emergency recovery access."},
+      {l:"D",t:"UEFI settings don't matter for security since the OS has its own boot protection through BitLocker."}
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct — all four changes together. Secure Boot prevents unsigned/malicious bootloaders (blocks rootkits). Native UEFI mode disables the legacy attack surface. SSD-only boot order prevents someone from booting a USB attack toolkit. UEFI admin password prevents someone from simply walking up and changing these settings back. These are the four UEFI hardening moves from the Week 5 slides.",
+      wrong:"Each of the other answers leaves a specific attack vector open. USB first in boot order = anyone with physical access can boot Kali Linux from a USB drive. Disabled Secure Boot = unsigned bootloaders/rootkits can load. No UEFI password = settings can be changed. BitLocker protects data at rest, not the boot process itself."
+    }
+  },
+  // ── PHASE 3: REMOTE ACCESS CONTROL ─────────────────────────
+  {
+    phase:"PHASE 3 · REMOTE ACCESS", phaseColor:"#27AE60", phaseBg:"rgba(39,174,96,0.15)",
+    title:"Scenario 7 — RDP Without NLA",
+    visual:`SERVER: CCP-LAB-SRV-01
+RDP Configuration:
+  Port: 3389 (default)
+  Network Level Authentication: DISABLED
+  Remote Desktop Users group: Domain Users (all 2,400 students)
+  Firewall: Port 3389 open to 0.0.0.0/0 (internet)
+Threat Intel: 3389 appears in Shodan results
+              First scan detected: 4 hours post-deployment`,
+    question:"RDP is exposed to the internet with NLA disabled and all Domain Users allowed. A student notices this and reports it. What are the THREE changes needed, in priority order?",
+    options:[
+      {l:"A",t:"1) Enable NLA 2) Restrict firewall to specific IP ranges (VPN/campus only) 3) Remove Domain Users from Remote Desktop Users group — add only specific admin accounts."},
+      {l:"B",t:"1) Change RDP port from 3389 to a random high port 2) Enable NLA 3) Add IP restrictions."},
+      {l:"C",t:"1) Disable RDP entirely since it shouldn't be on a server 2) Use only console access going forward."},
+      {l:"D",t:"1) Enable NLA 2) Install a VPN — RDP over VPN is secure enough without other changes."}
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct. NLA first — it requires credentials before the RDP session is established, stopping unauthenticated probes cold. Firewall restriction second — shrink the attack surface from 'entire internet' to 'our VPN/campus'. Remove Domain Users third — 2,400 students should not have RDP access to a server. These three changes together transform RDP from a critical vulnerability to an acceptable risk.",
+      wrong:"Port obscurity (changing 3389) is not a security control — Shodan already found it, and any scanner will find a new port too. Disabling RDP may not be operationally viable. VPN alone without restricting the allowed users group still leaves 2,400 accounts as potential attack vectors."
+    }
+  },
+  {
+    phase:"PHASE 3 · REMOTE ACCESS", phaseColor:"#27AE60", phaseBg:"rgba(39,174,96,0.15)",
+    title:"Scenario 8 — iDRAC Default Password",
+    visual:`SERVER: CCP-LAB-SRV-01 (Dell PowerEdge)
+iDRAC9 Out-of-Band Management:
+  IP Address: 192.168.1.100 (on main LAN)
+  Username: root
+  Password: calvin  ← Dell factory default
+  Network: Reachable from all VLANs
+  Last config change: NEVER (factory default)
+WARNING: iDRAC found in Shodan scan results`,
+    question:"The iDRAC management controller is on the main LAN with default credentials. This is the most critical issue on the server right now. Why — and what are the two immediate fixes?",
+    options:[
+      {l:"A",t:"iDRAC is low risk because it only controls hardware power, not OS-level access. Change the password as a best practice but it's not urgent."},
+      {l:"B",t:"iDRAC with default creds on the main LAN means an attacker can: reboot/power off the server, mount virtual media (boot from attacker ISO), access a full virtual console — all without touching the OS. Fix: 1) Change root/calvin immediately 2) Move iDRAC to a dedicated management VLAN unreachable from the main LAN."},
+      {l:"C",t:"Disable iDRAC — out-of-band management creates more risk than benefit in most environments."},
+      {l:"D",t:"Change the password to a strong password — that's the only change needed since the IP is internal."}
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. iDRAC (Dell) / iLO (HP) gives you console access to the server INDEPENDENT of the OS. With root/calvin, an attacker can mount a virtual USB, boot a malicious OS, and own the physical hardware — no OS credentials needed. The fix is always two things: change the default password AND isolate the management interface to a dedicated VLAN that's not accessible from the general network. Never leave OOB management on the main LAN.",
+      wrong:"iDRAC is the highest privilege access point on the server — it bypasses the OS entirely. An attacker with iDRAC access can do anything a physical person standing at the server can do, remotely, including reinstalling the OS. This is CRITICAL, not low risk."
+    }
+  },
+  {
+    phase:"PHASE 3 · REMOTE ACCESS", phaseColor:"#27AE60", phaseBg:"rgba(39,174,96,0.15)",
+    title:"Scenario 9 — ECC RAM Decision",
+    visual:`PROCUREMENT REQUEST — Server Hardware
+Purpose: Production database server (student records)
+Budget: $3,200
+Options Quoted:
+  Option A: 64GB DDR5 Non-ECC RAM — $180
+            (Faster clock speed, consumer-grade)
+  Option B: 64GB DDR5 ECC RDIMM   — $420
+            (Error-correcting, server-grade)
+Workload: 24/7, 500 concurrent users, 8TB database`,
+    question:"Finance wants to use Option A to save $240. As the sysadmin, how do you respond?",
+    options:[
+      {l:"A",t:"Approve Option A — the $240 savings is significant and modern CPUs have enough error correction that ECC RAM is unnecessary for most workloads."},
+      {l:"B",t:"Approve Option A only if the server has a UPS — power fluctuations are the main cause of memory errors, and a UPS eliminates that risk."},
+      {l:"C",t:"Reject Option A. For a 24/7 production database server, ECC RAM is mandatory. Non-ECC RAM on a server with 500 concurrent users risks silent data corruption — a single undetected bit flip can corrupt records or crash the OS. The $240 difference is irrelevant compared to data integrity risk."},
+      {l:"D",t:"Approve Option A and schedule weekly full backups to catch any data corruption caused by memory errors."}
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct. ECC RAM detects and corrects single-bit memory errors silently — without ECC, a cosmic ray or voltage spike can flip a bit in RAM, and the CPU will never know. On a database server with student records, that bit flip could silently corrupt data for days before anyone notices. The $240 premium for ECC is non-negotiable on any production server. Non-ECC RAM is fine for your gaming PC. Not for a database.",
+      wrong:"Backups catch the corruption after the fact, not prevent it. A UPS protects against power issues but not cosmic rays, heat-induced bit flips, or capacitor noise. ECC RAM is the only control that prevents silent memory corruption at the hardware level."
+    }
+  },
+  {
+    phase:"PHASE 3 · REMOTE ACCESS", phaseColor:"#27AE60", phaseBg:"rgba(39,174,96,0.15)",
+    title:"Scenario 10 — Final Hardening Check",
+    visual:`CCP-LAB-SRV-01 — HARDENING SCORECARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Administrator renamed → sysadmin_ccp
+✅ Print Spooler — DISABLED
+✅ Remote Registry — DISABLED
+✅ Audit logging — ENABLED (Success+Failure)
+✅ Secure Boot — ENABLED
+✅ NLA for RDP — ENABLED
+✅ RDP firewall — restricted to campus VPN
+✅ iDRAC — password changed, on MGMT VLAN
+⚠  BitLocker — NOT ENABLED on D:\\ (data drive)
+⚠  Windows Defender Firewall — default rules only`,
+    question:"The server is almost hardened. Which remaining gap is the HIGHEST priority to close first?",
+    options:[
+      {l:"A",t:"Enable BitLocker on D:\\ — if the drive is physically removed or the server is stolen, the student record database is immediately readable without any credentials."},
+      {l:"B",t:"Configure custom Windows Defender Firewall rules — the default rules are sufficient for most scenarios."},
+      {l:"C",t:"Both are equally important — address them at the same time in the same change window."},
+      {l:"D",t:"Neither — the server is sufficiently hardened with the existing controls. BitLocker adds complexity without meaningful security benefit in a physically secured data center."}
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct. BitLocker on the data drive is the priority. The Week 6 ShinyHunters breach showed exactly why: 75GB of unencrypted student records were exfiltrated and immediately readable. With BitLocker enabled, stolen drives are useless ciphertext. Physical security (badge access, locked rack) reduces risk but doesn't eliminate it — insider threats, lost drives during hardware swap, law enforcement requests all require encryption at rest as a second layer. Enable BitLocker first.",
+      wrong:"Custom firewall rules are important but the server already has NLA-restricted RDP and campus-only access. The BitLocker gap is more critical because it represents data that is completely unprotected if the physical drive leaves the building — with no encryption, there's nothing stopping an attacker who gets the hardware."
+    }
+  }
+];
+
+let current = 0;
+let score = 0;
+let threat = 0;
+let answered = [];
+let selectedOpt = null;
+
+function startGame(){
+  document.getElementById('screen-landing').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('threat-meter').style.display='block';
+  answered = new Array(questions.length).fill(null);
+  current = 0; score = 0; threat = 0;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = questions[current];
+  document.getElementById('q-tag').textContent = q.phase;
+  document.getElementById('q-tag').style.background = q.phaseBg;
+  document.getElementById('q-tag').style.color = q.phaseColor;
+  document.getElementById('q-title').textContent = q.title;
+  document.getElementById('q-visual').innerHTML = '<div class="state-label">SERVER STATE</div>' + q.visual;
+  document.getElementById('q-text').textContent = q.question;
+  document.getElementById('q-progress').textContent = (current+1) + ' / ' + questions.length;
+  document.getElementById('q-feedback').style.display='none';
+  document.getElementById('btn-next').style.display='none';
+  selectedOpt = null;
+
+  const optsEl = document.getElementById('q-options');
+  optsEl.innerHTML = '';
+  q.options.forEach((opt,i)=>{
+    const div = document.createElement('div');
+    div.className='option';
+    div.innerHTML=`<span class="opt-key">${opt.l}</span><span class="opt-text">${opt.t}</span>`;
+    div.onclick=()=>selectOption(i,div);
+    optsEl.appendChild(div);
+  });
+  updateThreatBar();
+}
+
+function selectOption(idx, el){
+  if(document.getElementById('q-feedback').style.display!=='none') return;
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedOpt = idx;
+  submitAnswer();
+}
+
+function submitAnswer(){
+  if(selectedOpt===null) return;
+  const q = questions[current];
+  const isCorrect = selectedOpt === q.correct;
+  const opts = document.querySelectorAll('.option');
+
+  opts.forEach((o,i)=>{
+    o.classList.add('locked');
+    if(i===q.correct) o.classList.add('correct');
+    else if(i===selectedOpt && !isCorrect) o.classList.add('wrong');
+  });
+
+  if(isCorrect){ score++; }
+  else { threat = Math.min(100, threat + 15); updateThreatBar(); }
+
+  answered[current] = isCorrect;
+  const fb = document.getElementById('q-feedback');
+  fb.className = 'feedback-box ' + (isCorrect?'correct':'wrong');
+  fb.innerHTML = `<div class="feedback-label">${isCorrect?'✅ Correct — Server Secured':'❌ Vulnerability Exploited'}</div><div class="feedback-text">${isCorrect?q.feedback.correct:q.feedback.wrong}</div>`;
+  fb.style.display='block';
+  document.getElementById('btn-next').style.display='inline-flex';
+  document.getElementById('btn-next').textContent = current < questions.length-1 ? 'Next →' : 'See Results →';
+}
+
+function updateThreatBar(){
+  document.getElementById('threat-bar').style.width = threat+'%';
+  document.getElementById('threat-pct-bar').textContent = threat+'%';
+  document.getElementById('threat-meter').querySelector('span').textContent = threat+'%';
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= questions.length){ showResults(); return; }
+  renderQuestion();
+}
+
+function showResults(){
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-results').classList.add('active');
+  const pct = Math.round(score/questions.length*100);
+  const arc = document.getElementById('score-arc');
+  const circumference = 351.86;
+  arc.style.stroke = pct>=80?'#27AE60':pct>=60?'#E67E22':'#E74C3C';
+  setTimeout(()=>{ arc.style.strokeDashoffset = circumference*(1-pct/100); },100);
+  document.getElementById('score-big').textContent = score+'/'+questions.length;
+
+  const titles = ['Server Still Vulnerable','Partially Hardened','Well Hardened','Fully Hardened — Attack Repelled'];
+  const subs = [
+    'Several critical vulnerabilities remain open. An attacker would likely own this server within hours. Review the Week 5 lecture slides and try again.',
+    'You closed some doors but left others open. A persistent attacker would find the gaps. Review the feedback on the questions you missed.',
+    'Solid hardening fundamentals. A few edge cases tripped you up but the server is in much better shape. Review the missed scenarios.',
+    'Outstanding. Every critical vulnerability was identified and closed correctly. This server would survive a real-world attack assessment.'
+  ];
+  const ti = pct>=90?3:pct>=70?2:pct>=50?1:0;
+  document.getElementById('results-title').textContent = titles[ti];
+  document.getElementById('results-sub').textContent = subs[ti];
+
+  const phases = ['Phase 1\nAttack Surface','Phase 2\nAudit & Logging','Phase 3\nRemote Access'];
+  const phaseCounts = [3,3,4]; let start=0;
+  let breakdownHTML='';
+  phases.forEach((ph,pi)=>{
+    const count = phaseCounts[pi];
+    const phScore = answered.slice(start,start+count).filter(Boolean).length;
+    start+=count;
+    breakdownHTML+=`<div class="breakdown-card"><div class="breakdown-val" style="color:${phScore===count?'#27AE60':phScore>=count/2?'#E67E22':'#E74C3C'}">${phScore}/${count}</div><div class="breakdown-label">${ph}</div></div>`;
+  });
+  document.getElementById('breakdown').innerHTML=breakdownHTML;
+
+  let reviewHTML='';
+  questions.forEach((q,i)=>{
+    const ok=answered[i];
+    reviewHTML+=`<div class="review-item"><span class="review-icon">${ok?'✅':'❌'}</span><div><div class="review-q">${q.title}</div><div class="review-a">${ok?'Correct':'Correct answer: '+q.options[q.correct].t.substring(0,80)+'…'}</div></div></div>`;
+  });
+  document.getElementById('review-list').innerHTML=reviewHTML;
+}
+
+function restartGame(){
+  document.getElementById('screen-results').classList.remove('active');
+  document.getElementById('screen-landing').classList.add('active');
+  document.getElementById('threat-meter').style.display='none';
+  threat=0; score=0; current=0; answered=[];
+}
+</script>
+</body></html>
