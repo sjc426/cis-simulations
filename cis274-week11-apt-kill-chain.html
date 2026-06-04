@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 274 — APT Kill Chain ⚔️ Full Attack Lifecycle Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  padding:0;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+.skip-link {
+  position:absolute;
+  top:-40px;
+  left:0;
+  background:var(--blue);
+  color:#fff;
+  padding:8px 16px;
+  text-decoration:none;
+  font-weight:600;
+  z-index:100;
+}
+.skip-link:focus {
+  top:0;
+}
+button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:16px;
+}
+.logo-area {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.dots {
+  display:flex;
+  gap:6px;
+}
+.dot {
+  width:12px;
+  height:12px;
+  border-radius:50%;
+}
+.dot.aws { background:var(--aws); }
+.dot.azure { background:var(--azure); }
+.dot.gcp { background:var(--gcp); }
+h1 {
+  font-size:1.3rem;
+  font-weight:600;
+  color:var(--text);
+}
+.header-stats {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.pill {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:6px 14px;
+  border-radius:20px;
+  font-family:var(--mono);
+  font-size:0.9rem;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.pill-label {
+  color:var(--text2);
+}
+.pill-value {
+  color:var(--text);
+  font-weight:600;
+}
+.progress-bar-container {
+  height:3px;
+  background:var(--surface2);
+  position:relative;
+  overflow:hidden;
+}
+.progress-bar {
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), var(--green));
+  width:0%;
+  transition:width 0.3s ease;
+}
+main {
+  max-width:900px;
+  margin:0 auto;
+  padding:40px 20px;
+}
+.round-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:32px;
+  margin-bottom:24px;
+}
+.scenario-label {
+  color:var(--text2);
+  font-family:var(--mono);
+  font-size:0.85rem;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:8px;
+}
+.scenario-title {
+  font-size:1.5rem;
+  font-weight:600;
+  margin-bottom:16px;
+  color:var(--text);
+}
+.scenario-body {
+  color:var(--text2);
+  margin-bottom:20px;
+  font-size:1.05rem;
+}
+.concept-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--blue-dim);
+  border:1px solid var(--blue);
+  padding:8px 16px;
+  border-radius:8px;
+  margin-bottom:24px;
+  font-size:0.95rem;
+}
+.concept-badge-text {
+  color:var(--blue);
+  font-weight:600;
+}
+.concept-sub {
+  color:var(--text3);
+  font-size:0.85rem;
+}
+.question {
+  font-size:1.1rem;
+  font-weight:600;
+  margin-bottom:20px;
+  color:var(--text);
+}
+.options {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:24px;
+}
+.option-btn {
+  background:var(--surface2);
+  border:2px solid var(--border);
+  color:var(--text);
+  padding:16px 20px;
+  border-radius:8px;
+  font-size:1rem;
+  font-family:var(--sans);
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.option-btn:hover {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+.option-btn:disabled {
+  cursor:not-allowed;
+  opacity:0.6;
+}
+.option-btn.selected {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+.option-btn.correct {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+.option-btn.wrong {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+.fb {
+  background:var(--surface2);
+  border-left:4px solid var(--border);
+  padding:20px;
+  border-radius:8px;
+  margin-bottom:20px;
+  display:none;
+}
+.fb.show {
+  display:block;
+}
+.fb.success {
+  border-left-color:var(--green);
+  background:var(--green-dim);
+}
+.fb.error {
+  border-left-color:var(--red);
+  background:var(--red-dim);
+}
+.fb-title {
+  font-weight:600;
+  font-size:1.1rem;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.fb-text {
+  color:var(--text2);
+  margin-bottom:16px;
+}
+.fb-breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.fb-row {
+  display:flex;
+  align-items:start;
+  gap:10px;
+  font-size:0.95rem;
+}
+.fb-icon {
+  flex-shrink:0;
+}
+.next-btn {
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  padding:12px 32px;
+  border-radius:8px;
+  font-size:1rem;
+  font-weight:600;
+  cursor:pointer;
+  font-family:var(--sans);
+  transition:all 0.2s;
+  display:none;
+}
+.next-btn.show {
+  display:inline-block;
+}
+.next-btn:hover {
+  background:var(--green);
+  transform:translateY(-2px);
+}
+.final-screen {
+  text-align:center;
+  display:none;
+}
+.final-screen.show {
+  display:block;
+}
+.final-score {
+  font-size:4rem;
+  font-weight:600;
+  color:var(--green);
+  margin-bottom:16px;
+  font-family:var(--mono);
+}
+.final-title {
+  font-size:2rem;
+  margin-bottom:32px;
+}
+.stat-boxes {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:16px;
+  margin-bottom:32px;
+}
+.stat-box {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:8px;
+}
+.stat-label {
+  color:var(--text2);
+  font-size:0.9rem;
+  margin-bottom:8px;
+}
+.stat-value {
+  font-size:1.8rem;
+  font-weight:600;
+  font-family:var(--mono);
+  color:var(--text);
+}
+.replay-btn {
+  background:var(--blue);
+  color:#fff;
+  border:none;
+  padding:14px 40px;
+  border-radius:8px;
+  font-size:1.1rem;
+  font-weight:600;
+  cursor:pointer;
+  font-family:var(--sans);
+  transition:all 0.2s;
+}
+.replay-btn:hover {
+  background:var(--green);
+  transform:translateY(-2px);
+}
+.streak-flash {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  background:var(--green);
+  color:#fff;
+  padding:20px 40px;
+  border-radius:12px;
+  font-size:1.5rem;
+  font-weight:600;
+  z-index:1000;
+  display:none;
+  animation:flashAnim 0.8s ease-out;
+}
+@keyframes flashAnim {
+  0% { opacity:0; transform:translate(-50%, -50%) scale(0.8); }
+  50% { opacity:1; transform:translate(-50%, -50%) scale(1.1); }
+  100% { opacity:0; transform:translate(-50%, -50%) scale(1); }
+}
+@media (max-width: 600px) {
+  h1 { font-size:1.1rem; }
+  .scenario-title { font-size:1.3rem; }
+  .final-score { font-size:3rem; }
+  .final-title { font-size:1.5rem; }
+  .round-card { padding:20px; }
+  header { padding:12px 16px; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-area">
+    <div class="dots">
+      <div class="dot aws"></div>
+      <div class="dot azure"></div>
+      <div class="dot gcp"></div>
+    </div>
+    <h1>APT Kill Chain ⚔️ Full Attack Lifecycle Simulator</h1>
+  </div>
+  <div class="header-stats">
+    <div class="pill">
+      <span class="pill-label">Score:</span>
+      <span class="pill-value" id="score-el" aria-live="polite" aria-atomic="true">0</span>
+    </div>
+    <div class="pill">
+      <span class="pill-label">Round:</span>
+      <span class="pill-value" id="round-el">1/7</span>
+    </div>
+    <div class="pill">
+      <span class="pill-label">Streak:</span>
+      <span class="pill-value" id="streak-el" aria-live="polite" aria-atomic="true">0</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar-container" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress">
+  <div class="progress-bar" id="progress-bar"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-container"></div>
+  <div id="final-container" class="final-screen"></div>
+</main>
+
+<div class="streak-flash" id="streak-flash" aria-live="assertive" aria-atomic="true"></div>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — Kill Chain Phase Identification",
+    title: "Suspicious Email Attachment Lands in Your Inbox",
+    body: "You're a security analyst at a healthcare provider. You notice an email with a PDF attachment titled 'Q4_Financial_Report.pdf' sent to 50 employees. The sender domain looks legitimate but the email headers show a foreign IP. Three employees already clicked it. Which kill chain phase is currently active?",
+    concept: "Kill Chain Phase Recognition",
+    conceptEmoji: "🎯",
+    conceptSub: "Identifying attack progression stages",
+    question: "What kill chain phase are you witnessing?",
+    options: [
+      "A. Reconnaissance — attackers are gathering employee data",
+      "B. Weaponization & Delivery — malicious payload delivered via phishing",
+      "C. Exploitation — the PDF is actively exploiting a vulnerability",
+      "D. Command & Control — attackers have established a backdoor"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! This is Weaponization (malicious PDF created) AND Delivery (phishing email sent). The attachment hasn't been opened yet by all targets, so it's the delivery phase.",
+      wrong: "The correct answer is B. This represents Weaponization & Delivery. The attacker created a weaponized PDF and delivered it via phishing email. Reconnaissance happened earlier. Exploitation only occurs when someone opens the PDF. C2 comes after successful exploitation.",
+      breakdown: [
+        {icon:"✅", text:"Delivery phase: malicious content arrives at target via phishing, watering hole, or drive-by download"},
+        {icon:"💡", text:"Weaponization precedes delivery: attacker packages exploit + payload into deliverable format"},
+        {icon:"⚠️", text:"Common mistake: confusing delivery (email arrives) with exploitation (user opens file and code executes)"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — APT vs Opportunistic Attack Recognition",
+    title: "Ransomware Hits Your Azure Environment",
+    body: "Your company's Azure VMs are suddenly encrypted. The ransom note appears within 2 hours of initial access. The attack used a known exploit (CVE-2024-1234) that was patched 6 months ago but your team hadn't applied it yet. Bitcoin payment demanded immediately. What type of attack is this?",
+    concept: "Attack Classification",
+    conceptEmoji: "🔍",
+    conceptSub: "APT vs opportunistic threat actors",
+    question: "How would you classify this attack?",
+    options: [
+      "A. Advanced Persistent Threat (APT) — state-sponsored lateral movement",
+      "B. Opportunistic ransomware — automated exploit scanning for unpatched systems",
+      "C. Insider threat — someone with Azure admin credentials",
+      "D. Supply chain attack — compromised third-party vendor"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! This is opportunistic ransomware. The speed (2 hours), use of known exploit, and immediate ransom demand indicate automated, profit-driven attackers scanning for unpatched systems — not a patient APT campaign.",
+      wrong: "The correct answer is B. This is opportunistic ransomware. APTs are patient, stealthy, and goal-oriented (espionage, data theft) — not demanding immediate Bitcoin payment. The 2-hour timeline and use of a 6-month-old public exploit indicate automated scanning, not targeted reconnaissance.",
+      breakdown: [
+        {icon:"✅", text:"Opportunistic: attackers scan internet for known vulnerabilities, exploit at scale, demand quick payment"},
+        {icon:"💡", text:"APT characteristics: long dwell time (months), custom malware, specific targets, nation-state goals"},
+        {icon:"⚠️", text:"Speed is a tell: APTs are patient (avg 200+ days before detection), ransomware gangs move fast (hours to days)"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — AI Tool Selection at Reconnaissance Phase",
+    title: "You're Starting a Pentest for Altoro Mutual",
+    body: "You have written authorization to pentest Altoro Mutual's public web applications. You need to gather subdomains, identify technologies, and map attack surface before active scanning. Your Kali VM has theHarvester, Shodan API access, and a local LLM (Mistral). Which AI-enhanced workflow is most effective for passive recon?",
+    concept: "AI Tool Selection — Recon Phase",
+    conceptEmoji: "🤖",
+    conceptSub: "Matching AI tools to kill chain phases",
+    question: "What's your AI-enhanced recon strategy?",
+    options: [
+      "A. Use Mistral to generate theHarvester commands, then ask it to analyze Shodan results for vulnerable services",
+      "B. Skip manual tools — let ChatGPT write Python to scrape altoro.testfire.net directly",
+      "C. Use theHarvester for subdomain enum, Shodan for service detection, Mistral to summarize findings into attack plan",
+      "D. Use Nmap with AI-generated NSE scripts to fingerprint all services"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Correct! This is proper tool integration. Use specialized tools (theHarvester, Shodan) for their purpose, then leverage AI to synthesize findings into actionable intelligence. AI assists human methodology — it doesn't replace it.",
+      wrong: "The correct answer is C. Human-selected tools + AI synthesis. Option A over-relies on AI for tool selection. Option B involves active scraping (not passive recon) and ChatGPT has no direct internet access. Option D is active scanning (Nmap), not passive recon.",
+      breakdown: [
+        {icon:"✅", text:"Passive recon: OSINT, DNS lookups, Shodan searches — no packets sent to target"},
+        {icon:"💡", text:"AI's role in recon: summarize large datasets, identify patterns, suggest hypotheses — not replace tools"},
+        {icon:"⚠️", text:"Don't confuse AI code generation with operational security — verify all AI-generated commands before execution"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — Vulnerability Prioritization Decision",
+    title: "Nessus Scan Returns 47 Vulnerabilities",
+    body: "You've scanned Altoro Mutual's AWS EC2 instance running their public website. Nessus found: 12 Critical (including EternalBlue SMBv1), 18 High (outdated Apache), 17 Medium/Low. Your pentest report is due in 3 days. The client wants exploits demonstrated, not just a vuln list. How do you prioritize?",
+    concept: "Risk-Based Exploitation",
+    conceptEmoji: "⚡",
+    conceptSub: "CVSS + exploitability + business impact",
+    question: "Which vulnerability should you attempt to exploit first?",
+    options: [
+      "A. EternalBlue (Critical CVSS 9.8) — proven Metasploit module available",
+      "B. Outdated Apache (High CVSS 7.5) — might allow directory traversal",
+      "C. SQL injection in login form (Medium CVSS 6.5) — you found manually during recon",
+      "D. Work through all Critical findings in CVSS order before touching High/Medium"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Correct! SQLi in a login form on a *public web app* is the highest *real* risk. EternalBlue on an AWS EC2 web server is likely a false positive (SMBv1 shouldn't be exposed). Context matters more than CVSS score alone.",
+      wrong: "The correct answer is C. SQLi in the login form represents actual exploitable attack surface on the public web app. EternalBlue (option A) is likely a scanner false positive — AWS security groups shouldn't expose SMB. CVSS is a starting point, not gospel. Always prioritize vulnerabilities you can verify and exploit in the actual attack surface.",
+      breakdown: [
+        {icon:"✅", text:"Prioritization factors: exploitability (can you demo it?), attack surface (internet-exposed?), business impact (what data is at risk?)"},
+        {icon:"💡", text:"Scanner false positives are common — verify Critical findings before wasting time on irrelevant exploits"},
+        {icon:"⚠️", text:"CVSS ≠ real-world risk. A 'Medium' SQLi on a login page beats a 'Critical' SMB vuln on an internal admin port"}
+      ]
+    }
+  },
+  {
+    id: 5,
+    label: "Scenario 5 — Ethical Boundary Decision Point",
+    title: "You've Gained Shell Access During Pentest",
+    body: "You successfully exploited SQLi on Altoro Mutual's staging server and got a reverse shell as www-data. While enumerating, you find a directory '/backup/customer_data/' with 50,000 credit card records in plaintext. Your scope of work says 'demonstrate access to sensitive data' but doesn't specify exfiltration. What do you do?",
+    concept: "Ethical Hacking Boundaries",
+    conceptEmoji: "⚖️",
+    conceptSub: "Rules of Engagement & legal limits",
+    question: "What's the ethical next step?",
+    options: [
+      "A. Download one file as proof, delete your copy after screenshot, document in report",
+      "B. Take a screenshot of 'ls -l' showing the files exist, DO NOT download, notify client immediately",
+      "C. Download all 50,000 records for forensic analysis — it's in scope as 'sensitive data'",
+      "D. Ignore it — credit cards aren't mentioned in SOW, focus on web app vulns only"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! Demonstrate access via non-invasive evidence (directory listing screenshot). Do not exfiltrate actual customer data — that exceeds authorization and violates PCI-DSS. Immediately notify the client so they can secure the data.",
+      wrong: "The correct answer is B. NEVER exfiltrate real customer data, even with a pentest agreement. Your authorization is to *test security*, not to *possess sensitive data*. Screenshot the directory listing as proof, stop there, and notify the client immediately. Downloading actual credit cards (options A & C) is illegal under PCI-DSS and could violate CFAA even with a pentest contract.",
+      breakdown: [
+        {icon:"✅", text:"Ethical pentest rule: demonstrate *access* to sensitive data, never exfiltrate actual records"},
+        {icon:"💡", text:"Screenshot of directory listing or 'SELECT COUNT(*)' query is sufficient proof — no need to download"},
+        {icon:"⚠️", text:"Scope creep leads to jail: your contract authorizes security testing, not data theft. When in doubt, STOP and ask client"}
+      ]
+    }
+  },
+  {
+    id: 6,
+    label: "Scenario 6 — Multi-Phase Methodology Application",
+    title: "Planning Post-Exploitation After Initial Shell",
+    body: "You have a Meterpreter shell on Altoro's Windows Server 2019 (192.168.56.30). Current user: 'webadmin' (local admin). You've completed Exploitation phase. Your goal: demonstrate full domain compromise. What's the logical next phase in the kill chain?",
+    concept: "Kill Chain Sequencing",
+    conceptEmoji: "🔗",
+    conceptSub: "Post-exploitation methodology",
+    question: "What comes after successful Exploitation?",
+    options: [
+      "A. Actions on Objectives — immediately exfiltrate all data you can find",
+      "B. Installation & Persistence — create a backdoor user and scheduled task",
+      "C. Lateral Movement — pivot to other hosts using current credentials",
+      "D. Privilege Escalation — attempt to gain SYSTEM or Domain Admin rights"
+    ],
+    correct: 3,
+    feedback: {
+      correct: "Correct! You already have local admin (webadmin), but domain compromise requires Domain Admin or SYSTEM. Privilege escalation comes before lateral movement or persistence. Escalate to SYSTEM, dump credentials (Mimikatz), then pivot.",
+      wrong: "The correct answer is D. Privilege Escalation is the next logical step. You have local admin but need higher privileges (SYSTEM or Domain Admin) to dump domain credentials and move laterally. Persistence (option B) comes after you've escalated and established foothold. Lateral movement (option C) requires domain credentials you don't have yet. Actions on Objectives (option A) is the final phase.",
+      breakdown: [
+        {icon:"✅", text:"Post-exploitation sequence: Privilege Escalation → Credential Dumping → Lateral Movement → Persistence → Actions on Objectives"},
+        {icon:"💡", text:"Local admin ≠ domain control. You need SYSTEM to run Mimikatz and dump LSASS (where domain creds live)"},
+        {icon:"⚠️", text:"Persistence too early = detection. Establish full access first, then create backdoors as final step"}
+      ]
+    }
+  },
+  {
+    id: 7,
+    label: "Scenario 7 — Tool Integration Strategy",
+    title: "Final Report — AI-Enhanced Documentation",
+    body: "You've completed Altoro Mutual pentest. You have: Nmap XML, Nessus CSV, Metasploit logs, Burp Suite findings, 50+ screenshots. You need a professional report with Executive Summary, Technical Findings, Risk Matrix, and Remediation Plan. How do you leverage AI without compromising quality?",
+    concept: "AI in Reporting Phase",
+    conceptEmoji: "📊",
+    conceptSub: "AI-assisted professional deliverables",
+    question: "What's the best AI-enhanced reporting workflow?",
+    options: [
+      "A. Upload all data to ChatGPT and ask it to write the entire report",
+      "B. Use Mistral to convert Nmap XML to Markdown tables, then manually write analysis and recommendations",
+      "C. Have AI write Executive Summary based on your outline, you write all technical sections manually",
+      "D. Use AI to parse tool output into structured data, you write narrative analysis, AI helps format final PDF"
+    ],
+    correct: 3,
+    feedback: {
+      correct: "Correct! AI handles data parsing and formatting (tedious but low-risk). You write the analysis, risk assessment, and recommendations (high-value, requires expertise). This is proper AI augmentation — leverage AI for efficiency, not expertise.",
+      wrong: "The correct answer is D. AI for structure, human for substance. Option A risks exposing client data to cloud AI and produces generic findings. Option B underutilizes AI (formatting help only). Option C reverses the roles — executive summary requires business context AI doesn't have. The best workflow: AI parses technical output, you analyze findings, AI assists with final formatting.",
+      breakdown: [
+        {icon:"✅", text:"AI-assisted reporting: let AI parse tool output (XML→tables), you provide context, risk ratings, and business impact"},
+        {icon:"💡", text:"Never upload client data to cloud AI (ChatGPT, Gemini) — use local LLMs (Mistral, Llama) for sensitive pentests"},
+        {icon:"⚠️", text:"A report written entirely by AI is obvious and worthless — clients pay for your expertise, not GPT-4's generic advice"}
+      ]
+    }
+  }
+];
+
+let currentScenario = 0;
+let score = 0;
+let streak = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let answered = false;
+
+const gameContainer = document.getElementById('game-container');
+const finalContainer = document.getElementById('final-container');
+const scoreEl = document.getElementById('score-el');
+const roundEl = document.getElementById('round-el');
+const streakEl = document.getElementById('streak-el');
+const progressBar = document.getElementById('progress-bar');
+const streakFlash = document.getElementById('streak-flash');
+
+function updateStats() {
+  scoreEl.textContent = score;
+  roundEl.textContent = `${currentScenario + 1}/${scenarios.length}`;
+  streakEl.textContent = streak;
+  const progress = ((currentScenario + 1) / scenarios.length) * 100;
+  progressBar.style.width = `${progress}%`;
+  progressBar.parentElement.setAttribute('aria-valuenow', progress);
+}
+
+function showStreakFlash() {
+  streakFlash.innerHTML = `🔥 ${streak} STREAK! +5 BONUS`;
+  streakFlash.style.display = 'block';
+  setTimeout(() => {
+    streakFlash.style.display = 'none';
+  }, 800);
+}
+
+function renderScenario() {
+  if (currentScenario >= scenarios.length) {
+    showFinalScreen();
+    return;
+  }
+  
+  answered = false;
+  const s = scenarios[currentScenario];
+  
+  gameContainer.innerHTML = `
+    <section class="round-card" aria-labelledby="scenario-title-${s.id}">
+      <div class="scenario-label">${s.label}</div>
+      <h2 class="scenario-title" id="scenario-title-${s.id}">${s.title}</h2>
+      <p class="scenario-body">${s.body}</p>
+      <div class="concept-badge">
+        <span role="img" aria-label="${s.concept}">${s.conceptEmoji}</span>
+        <div>
+          <div class="concept-badge-text">${s.concept}</div>
+          <div class="concept-sub">${s.conceptSub}</div>
+        </div>
+      </div>
+      <div class="
