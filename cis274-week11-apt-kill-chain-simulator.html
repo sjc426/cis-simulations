@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 274 — APT Kill Chain ⚔️ Master the Attack Lifecycle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.6;
+  min-height:100vh;
+  padding:0;
+}
+
+.skip-link {
+  position:absolute;
+  top:-40px;
+  left:0;
+  background:var(--blue);
+  color:#fff;
+  padding:8px 16px;
+  text-decoration:none;
+  font-weight:600;
+  z-index:100;
+}
+.skip-link:focus {
+  top:0;
+}
+
+header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.logo-section {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo {
+  display:flex;
+  gap:4px;
+}
+
+.dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+}
+
+.dot.aws { background:var(--aws); }
+.dot.azure { background:var(--azure); }
+.dot.gcp { background:var(--gcp); }
+
+h1 {
+  font-size:1.25rem;
+  font-weight:600;
+  color:var(--text);
+}
+
+.stats {
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.pill {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:6px 14px;
+  font-size:0.875rem;
+  font-family:var(--mono);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.pill-label {
+  color:var(--text2);
+}
+
+.pill-value {
+  color:var(--text);
+  font-weight:600;
+}
+
+.progress-bar {
+  height:3px;
+  background:var(--surface);
+  position:relative;
+  overflow:hidden;
+}
+
+.progress-fill {
+  height:100%;
+  background:linear-gradient(90deg, var(--blue), var(--green));
+  width:0%;
+  transition:width 0.3s ease;
+}
+
+main {
+  max-width:800px;
+  margin:0 auto;
+  padding:32px 20px;
+}
+
+.round-card {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:28px;
+  margin-bottom:24px;
+}
+
+.round-label {
+  color:var(--text2);
+  font-size:0.875rem;
+  font-family:var(--mono);
+  margin-bottom:8px;
+}
+
+h2 {
+  font-size:1.5rem;
+  margin-bottom:16px;
+  color:var(--text);
+}
+
+.concept-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--blue-dim);
+  border:1px solid var(--blue);
+  border-radius:6px;
+  padding:6px 12px;
+  font-size:0.875rem;
+  margin-bottom:20px;
+}
+
+.concept-emoji {
+  font-size:1.125rem;
+}
+
+.concept-text {
+  color:var(--blue);
+  font-weight:600;
+}
+
+.concept-sub {
+  color:var(--text2);
+  font-size:0.75rem;
+}
+
+.scenario-body {
+  color:var(--text2);
+  margin-bottom:20px;
+  font-size:1rem;
+  line-height:1.7;
+}
+
+.question {
+  color:var(--text);
+  font-weight:600;
+  margin-bottom:16px;
+  font-size:1.0625rem;
+}
+
+.options {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+button {
+  background:var(--surface2);
+  border:2px solid var(--border);
+  border-radius:8px;
+  padding:14px 18px;
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:1rem;
+  text-align:left;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  background:var(--surface);
+  border-color:var(--blue);
+}
+
+button:focus-visible {
+  outline:3px solid var(--blue);
+  outline-offset:2px;
+}
+
+button:disabled {
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
+button.selected {
+  border-color:var(--blue);
+  background:var(--blue-dim);
+}
+
+button.correct {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+
+button.wrong {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb {
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:20px;
+  display:none;
+}
+
+.fb.show {
+  display:block;
+}
+
+.fb.success {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+
+.fb.error {
+  border-color:var(--red);
+  background:var(--red-dim);
+}
+
+.fb-header {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  font-weight:600;
+  font-size:1.0625rem;
+}
+
+.fb-icon {
+  font-size:1.5rem;
+}
+
+.fb-body {
+  color:var(--text2);
+  margin-bottom:16px;
+  line-height:1.7;
+}
+
+.breakdown {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.breakdown-row {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.breakdown-icon {
+  font-size:1.125rem;
+  flex-shrink:0;
+}
+
+.breakdown-text {
+  color:var(--text2);
+  font-size:0.9375rem;
+}
+
+.next-btn {
+  background:var(--blue);
+  border:2px solid var(--blue);
+  color:#fff;
+  font-weight:600;
+  padding:12px 24px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:1rem;
+  transition:all 0.2s ease;
+  display:none;
+}
+
+.next-btn.show {
+  display:inline-block;
+}
+
+.next-btn:hover:not(:disabled) {
+  background:var(--surface);
+  color:var(--blue);
+}
+
+.final-screen {
+  text-align:center;
+  display:none;
+}
+
+.final-screen.show {
+  display:block;
+}
+
+.final-score {
+  font-size:4rem;
+  font-weight:600;
+  color:var(--green);
+  margin-bottom:12px;
+  font-family:var(--mono);
+}
+
+.final-label {
+  font-size:1.25rem;
+  color:var(--text2);
+  margin-bottom:32px;
+}
+
+.stat-boxes {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+  gap:16px;
+  margin-bottom:32px;
+}
+
+.stat-box {
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:20px;
+}
+
+.stat-value {
+  font-size:2rem;
+  font-weight:600;
+  color:var(--text);
+  font-family:var(--mono);
+}
+
+.stat-label {
+  color:var(--text2);
+  font-size:0.875rem;
+  margin-top:4px;
+}
+
+.replay-btn {
+  background:var(--blue);
+  border:2px solid var(--blue);
+  color:#fff;
+  font-weight:600;
+  padding:14px 32px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:1.0625rem;
+  transition:all 0.2s ease;
+}
+
+.replay-btn:hover {
+  background:var(--surface);
+  color:var(--blue);
+}
+
+.streak-flash {
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%) scale(0);
+  background:var(--yellow);
+  color:var(--bg);
+  font-size:3rem;
+  font-weight:600;
+  padding:32px 48px;
+  border-radius:16px;
+  z-index:1000;
+  animation:streakPop 0.6s ease;
+  pointer-events:none;
+  font-family:var(--mono);
+}
+
+@keyframes streakPop {
+  0% { transform:translate(-50%, -50%) scale(0); opacity:0; }
+  50% { transform:translate(-50%, -50%) scale(1.1); opacity:1; }
+  100% { transform:translate(-50%, -50%) scale(0); opacity:0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 { font-size:1.125rem; }
+  h2 { font-size:1.25rem; }
+  .final-score { font-size:3rem; }
+  .stat-value { font-size:1.5rem; }
+  header { padding:12px 16px; }
+  main { padding:20px 16px; }
+  .round-card { padding:20px; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-section">
+    <div class="logo" aria-hidden="true">
+      <div class="dot aws"></div>
+      <div class="dot azure"></div>
+      <div class="dot gcp"></div>
+    </div>
+    <h1>APT Kill Chain ⚔️ Master the Attack Lifecycle</h1>
+  </div>
+  <div class="stats">
+    <div class="pill">
+      <span class="pill-label">Score:</span>
+      <span class="pill-value" id="score-el" aria-live="polite" aria-atomic="true">0</span>
+    </div>
+    <div class="pill">
+      <span class="pill-label">Round:</span>
+      <span class="pill-value" id="round-el" aria-live="polite" aria-atomic="true">1/7</span>
+    </div>
+    <div class="pill">
+      <span class="pill-label">Streak:</span>
+      <span class="pill-value" id="streak-el" aria-live="polite" aria-atomic="true">0🔥</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-container">
+    <section class="round-card" id="scenario-card" aria-labelledby="scenario-title">
+      <div class="round-label" id="scenario-label">Scenario 1</div>
+      <h2 id="scenario-title">Loading...</h2>
+      <div class="concept-badge">
+        <span class="concept-emoji" role="img" id="concept-emoji" aria-label="concept icon">🎯</span>
+        <div>
+          <div class="concept-text" id="concept-text">Loading</div>
+          <div class="concept-sub" id="concept-sub">concept</div>
+        </div>
+      </div>
+      <div class="scenario-body" id="scenario-body">
+        Loading scenario...
+      </div>
+      <div class="question" id="question-text">Which action should you take?</div>
+      <div class="options" id="options-container" role="group" aria-label="Answer options">
+      </div>
+      <div class="fb" id="feedback" role="alert" aria-live="assertive">
+        <div class="fb-header">
+          <span class="fb-icon" id="fb-icon">✅</span>
+          <span id="fb-title">Correct!</span>
+        </div>
+        <div class="fb-body" id="fb-body">Great work!</div>
+        <div class="breakdown" id="breakdown"></div>
+      </div>
+      <button class="next-btn" id="next-btn">Next Scenario →</button>
+    </section>
+
+    <div class="final-screen" id="final-screen">
+      <div class="final-score" id="final-score-display">0</div>
+      <div class="final-label">Final Score</div>
+      <div class="stat-boxes">
+        <div class="stat-box">
+          <div class="stat-value" id="final-correct">0</div>
+          <div class="stat-label">Correct Answers</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="final-wrong">0</div>
+          <div class="stat-label">Wrong Answers</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="final-streak">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+      <button class="replay-btn" id="replay-btn">Replay Simulation</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — Kill Chain Phase Selection",
+    title: "Choosing Your Attack Phase",
+    body: "You've been hired to pentest a financial services company (Altoro Mutual). Your client wants to understand how an APT actor would approach their network. You've completed passive OSINT and now have employee names, email formats, and their public cloud infrastructure footprint on AWS. What's your next phase in the kill chain?",
+    concept: "Kill Chain Phases",
+    conceptEmoji: "🎯",
+    conceptSub: "Attack lifecycle methodology",
+    question: "Which kill chain phase should you execute next?",
+    options: [
+      "A. Weaponization — immediately craft a custom exploit payload",
+      "B. Delivery — send phishing emails to all identified employees",
+      "C. Reconnaissance — conduct active scanning against their AWS infrastructure",
+      "D. Installation — deploy a C2 beacon on their public web server"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Correct! Active reconnaissance is the natural next phase. You transition from passive OSINT to active scanning (Nmap, vulnerability scanning) to identify entry points before moving to weaponization and delivery.",
+      wrong: "The correct answer is C. After passive reconnaissance, you need active scanning to identify vulnerabilities before you can craft exploits (weaponization) or deliver them. The kill chain is sequential: Recon → Weaponization → Delivery → Exploitation → Installation → C2 → Actions on Objectives.",
+      breakdown: [
+        {icon:"✅", text:"Kill chain phases must be executed in order — you can't weaponize without knowing what to target"},
+        {icon:"💡", text:"Active recon (Nmap, Nessus) bridges passive intel and exploit development"},
+        {icon:"⚠️", text:"Skipping recon phases leads to noisy, ineffective attacks that trigger SOC alerts"}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — Reconnaissance Tool Selection",
+    title: "Selecting Reconnaissance Tools",
+    body: "During your Altoro Mutual engagement, you've identified their web application server at 192.168.56.20. You need to gather service versions, open ports, and potential vulnerabilities without triggering their IDS. The client confirmed they have Snort IDS monitoring unusual scan patterns. Which reconnaissance strategy is most appropriate?",
+    concept: "Reconnaissance Tools",
+    conceptEmoji: "🔍",
+    conceptSub: "OSINT and active scanning",
+    question: "Which reconnaissance approach balances stealth and effectiveness?",
+    options: [
+      "A. Run nmap -sS -p- --min-rate 10000 for fastest results",
+      "B. Use nmap -sS -T2 --top-ports 1000 with randomized timing",
+      "C. Deploy Metasploit's db_nmap for automatic exploitation",
+      "D. Run theHarvester and Shodan lookups only (passive intel)"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! The -T2 timing template slows the scan to avoid IDS signatures, and limiting to top 1000 ports balances coverage with stealth. This is textbook APT reconnaissance — methodical, not noisy.",
+      wrong: "The correct answer is B. Option A uses aggressive timing that triggers IDS. Option C is for exploitation, not recon. Option D misses active vulnerabilities. APT actors use slow, deliberate scans (-T2 or -T1) to blend with normal traffic while still identifying attack surface.",
+      breakdown: [
+        {icon:"✅", text:"Nmap timing templates: -T0/-T1 paranoid/sneaky, -T2 polite, -T3 normal, -T4/-T5 aggressive/insane"},
+        {icon:"💡", text:"Top 1000 ports covers 99% of services while reducing scan time and IDS alerts"},
+        {icon:"⚠️", text:"Passive intel alone misses zero-days and misconfigurations only active scanning reveals"}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — Exploitation Strategy",
+    title: "Crafting Your Exploitation Plan",
+    body: "Your Nmap scan of Altoro's server revealed port 21 (vsftpd 2.3.4), port 22 (OpenSSH 7.2), and port 80 (Apache 2.4.7). You've confirmed vsftpd 2.3.4 has the infamous backdoor vulnerability (CVE-2011-2523). The client wants to see how an attacker would leverage this. Which exploitation strategy demonstrates APT-level thinking?",
+    concept: "Exploitation Strategy",
+    conceptEmoji: "💥",
+    conceptSub: "Vulnerability to access",
+    question: "How should you approach exploitation of this target?",
+    options: [
+      "A. Exploit vsftpd immediately with exploit/unix/ftp/vsftpd_234_backdoor",
+      "B. Brute-force SSH with Hydra to get credentials first",
+      "C. Exploit vsftpd, then pivot to SSH for persistent access",
+      "D. Skip exploitation and wait for a zero-day to emerge"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Correct! APT actors chain exploits. The vsftpd backdoor gives you initial access (bind shell on port 6200), but it's fragile. Pivoting to SSH (stealing /etc/shadow, cracking passwords) gives you legitimate-looking persistent access. This is multi-stage exploitation.",
+      wrong: "The correct answer is C. While A gets you in, it doesn't establish persistence. B is noisy and slow. D wastes time. Real APT campaigns use initial exploits as a foothold, then escalate to more stable access methods (SSH keys, domain accounts) that blend with normal admin activity.",
+      breakdown: [
+        {icon:"✅", text:"Exploit chaining: fragile exploit → stable access → privilege escalation → persistence"},
+        {icon:"💡", text:"The vsftpd backdoor is loud (opens port 6200) — use it to steal SSH keys or passwords"},
+        {icon:"⚠️", text:"One-and-done exploits get you caught — APT actors think in campaigns, not single exploits"}
+      ]
+    }
+  },
+  {
+    id: 4,
+    label: "Scenario 4 — Persistence Mechanism",
+    title: "Establishing Persistent Access",
+    body: "You've successfully exploited the vsftpd vulnerability and now have root shell access on Altoro's Linux server. Your engagement simulates a 30-day APT campaign, so you need persistent access that survives reboots and doesn't get flagged by their weekly Nessus scans. Which persistence technique is most APT-realistic?",
+    concept: "Persistence Mechanisms",
+    conceptEmoji: "🔗",
+    conceptSub: "Maintaining long-term access",
+    question: "Which persistence method balances stealth and reliability?",
+    options: [
+      "A. Add a new user 'backup_admin' to /etc/passwd and /etc/shadow",
+      "B. Drop an SSH public key into /root/.ssh/authorized_keys",
+      "C. Install a cron job running a reverse shell to your C2 server",
+      "D. Modify /etc/rc.local to execute a backdoor on boot"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! SSH key-based persistence is stealthy (looks like legitimate admin access), survives reboots, and doesn't create obvious new accounts or processes. This is how APT28 (Fancy Bear) and APT29 (Cozy Bear) maintain access to compromised networks for months.",
+      wrong: "The correct answer is B. Option A creates a suspicious new account that shows up in user audits. Option C is fragile (cron jobs are easily detected). Option D modifies a commonly audited file. SSH keys blend with normal sysadmin activity and are rarely audited unless you're doing full filesystem integrity checks.",
+      breakdown: [
+        {icon:"✅", text:"SSH authorized_keys is the gold standard for Linux persistence — looks legitimate, rarely audited"},
+        {icon:"💡", text:"APT actors prefer 'living off the land' techniques that mimic normal admin behavior"},
+        {icon:"⚠️", text:"New user accounts, unusual cron jobs, and rc.local modifications are red flags for blue teams"}
+      ]
+    }
+  },
+  {
+    id: 5,
+    label: "Scenario 5 — Lateral Movement",
+    title: "Expanding Your Foothold",
+    body: "You've established persistence on Altoro's web server (192.168.56.20). During post-exploitation enumeration, you discovered it's connected to an internal Windows domain (ALTORO.LOCAL) and found credentials for a low-privilege user 'webservice@altoro.local' in a config file. The client wants to see if you can reach their 'crown jewels' — the Windows Domain Controller at 192.168.56.30. What's your next move?",
+    concept: "Lateral Movement",
+    conceptEmoji: "🚀",
+    conceptSub: "Network pivoting techniques",
+    question: "Which lateral movement technique should you employ?",
+    options: [
+      "A. Use Metasploit's autoroute to pivot through the web server and scan the Windows network",
+      "B. Upload Mimikatz to dump all passwords and crack them offline",
+      "C. Immediately attack the Domain Controller with EternalBlue (MS17-010)",
+      "D. Set up a VPN tunnel from your Kali machine directly to the DC"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Correct! Autoroute creates a pivot point, routing your Kali traffic through the compromised web server to reach internal Windows hosts. This lets you scan, enumerate, and exploit the domain without direct network access. This is textbook APT lateral movement — use your beachhead to explore deeper.",
+      wrong: "The correct answer is A. Option B assumes you already have access to dump passwords (you don't yet). Option C is reckless — you don't know if the DC is patched. Option D is impossible without VPN server access. APT actors pivot methodically: compromised host → network recon → targeted exploitation → domain takeover.",
+      breakdown: [
+        {icon:"✅", text:"Metasploit's autoroute/socks proxy turns compromised hosts into pivot points for internal network access"},
+        {icon:"💡", text:"Always enumerate before exploiting — scan internal networks through your pivot to map attack paths"},
+        {icon:"⚠️", text:"Lateral movement without recon is loud and risky — APT campaigns are methodical, not random"}
+      ]
+    }
+  },
+  {
+    id: 6,
+    label: "Scenario 6 — AI Tool Integration",
+    title: "Leveraging AI for Reconnaissance",
+    body: "You're analyzing a massive Nmap XML output from Altoro's internal network scan — 247 hosts, 1,893 open ports, mixed Windows and Linux systems. Manually reviewing this would take hours. You remember Professor Chang's Week 9 lecture on AI-assisted pentesting. You have Ollama + Mistral running on your Kali VM. How should you integrate AI into your workflow?",
+    concept: "AI Tool Integration",
+    conceptEmoji: "🤖",
+    conceptSub: "AI-augmented pentesting",
+    question: "Which AI integration strategy is most effective?",
+    options: [
+      "A. Feed the raw Nmap XML to Mistral and ask it to 'find all vulnerabilities'",
+      "B. Use AI to parse Nmap output, prioritize high-value targets (DCs, databases), then manually verify",
+      "C. Let AI generate Metasploit commands automatically and execute them blindly",
+      "D. Skip AI and manually review everything — AI makes too many mistakes"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "Correct! This is the 'AI as analyst assistant' workflow from Week 9. AI excels at pattern recognition and data triage, but YOU make the exploitation decisions. AI identifies hosts running MS-SQL, domain controllers, or outdated services. You verify and exploit. Human judgment + AI speed = effective pentesting.",
+      wrong: "The correct answer is B. Option A produces hallucinated vulnerabilities (AI doesn't have real CVE databases). Option C is dangerous — never blindly execute AI-generated commands. Option D wastes AI's strengths. The CIS 274 philosophy: AI analyzes, human decides. Use AI for reconnaissance triage, never for blind automation.",
+      breakdown: [
+        {icon:"✅", text:"AI excels at parsing large datasets (Nmap XML, log files) and identifying patterns humans miss"},
+        {icon:"💡", text:"Always verify AI output — LLMs hallucinate CVEs and confidently suggest nonexistent exploits"},
+        {icon:"⚠️", text:"Never blindly execute AI-generated exploit commands — you're legally responsible for every action"}
+      ]
+    }
+  },
+  {
+    id: 7,
+    label: "Scenario 7 — Defense Evasion",
+    title: "Evading Detection Systems",
+    body: "You've successfully compromised Altoro's Domain Controller and extracted NTLM hashes using Mimikatz. But the client's blue team is running Microsoft Defender for Endpoint and Sysmon logging on all Windows hosts. Your next step is to exfiltrate the 42MB password dump file (altoro_hashes.txt) to your Kali C2 server. Which exfiltration method is most likely to evade EDR detection?",
+    concept: "Defense Evasion",
+    conceptEmoji: "🥷",
+    conceptSub: "Bypassing security controls",
+    question: "How should you exfiltrate data without triggering EDR alerts?",
+    options: [
+      "A. Use certutil.exe to encode the file in Base64 and transfer via HTTP POST",
+      "B. Upload directly to your public Kali IP using FTP in plaintext",
+      "C. Encrypt with GPG, split into 1MB chunks, exfiltrate via DNS tunneling over time",
+      "D. Email the file to yourself from the compromised account"
+    ],
+    correct: 2,
+    feedback: {
+      correct: "Correct! This is advanced APT tradecraft. Encryption defeats DLP, chunking avoids file size alerts, and DNS tunneling (using tools like dnscat2 or iodine) bypasses traditional egress filtering since DNS is rarely blocked. Slow exfiltration over days blends with normal DNS traffic. This is how APT41 and Carbanak exfiltrated gigabytes undetected.",
+      wrong: "The correct answer is C. Option A uses a living-off-the-land binary (LOLBin), but certutil is heavily monitored by EDR. Option B is unencrypted and FTP is almost always blocked/logged. Option D leaves email logs and triggers DLP. APT exfiltration = encrypted + slow + covert channel (DNS, ICMP, HTTPS to legit CDNs).",
+      breakdown: [
+        {icon:"✅", text:"DNS tunneling is the APT exfiltration method of
