@@ -159,16 +159,39 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 .check-item a:hover{color:var(--green)}
 
 .report-box{border:1px solid var(--border2);background:rgba(0,255,65,0.02);padding:24px;display:flex;flex-direction:column}
-.report-preview{flex:1;border:1px solid var(--border2);background:#050505;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s}
-.report-preview:hover{border-color:var(--green-dim)}
-.report-preview::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1;transition:all 0.5s}
-.report-preview.revealed::before{background:rgba(0,0,0,0);backdrop-filter:blur(0)}
-.report-content{font-family:var(--font-mono);font-size:10px;color:#444;line-height:1.8}
-.report-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;gap:8px;transition:opacity 0.5s}
-.report-label.hidden{opacity:0;pointer-events:none}
-.stamp{font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--gold);border:3px solid var(--gold);padding:8px 16px;transform:rotate(-12deg);opacity:0.9;letter-spacing:0.1em}
-.declassify-btn{font-family:var(--font-mono);font-size:11px;color:var(--green);border:1px solid var(--green);padding:6px 14px;background:transparent;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s}
-.declassify-btn:hover{background:var(--green);color:#000}
+/* ── FOLDER DESIGN ── */
+.folder-wrap{flex:1;position:relative;cursor:pointer;min-height:260px;perspective:800px}
+.folder-tab{position:absolute;top:0;left:0;width:140px;height:22px;background:#b8860b;border-radius:6px 6px 0 0;z-index:1;display:flex;align-items:center;padding:0 10px;gap:6px}
+.folder-tab-text{font-family:var(--font-mono);font-size:9px;color:#000;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+.folder-body{position:relative;width:100%;min-height:240px;background:linear-gradient(160deg,#c8960a 0%,#a87208 40%,#8a5e06 100%);border:2px solid #7a5204;border-radius:0 6px 6px 6px;overflow:hidden;transition:transform 0.6s ease,box-shadow 0.4s ease;transform-origin:top center}
+.folder-body:hover{box-shadow:0 8px 30px rgba(198,146,20,0.35)}
+/* paper inside */
+.folder-paper{position:absolute;inset:12px;background:linear-gradient(180deg,#f5f0e0 0%,#ede8d5 100%);border:1px solid #ccc4a0;padding:14px;overflow:hidden}
+/* redacted lines */
+.redact-line{height:8px;margin:7px 0;border-radius:2px}
+.redact-black{background:#1a1a1a}
+.redact-partial{background:linear-gradient(90deg,#1a1a1a 70%,transparent 70%)}
+.redact-short{width:55%}
+.redact-med{width:75%}
+.redact-long{width:90%}
+.paper-header{font-family:var(--font-mono);font-size:8px;color:#333;margin-bottom:10px;line-height:1.6;border-bottom:1px solid #bbb;padding-bottom:6px}
+.paper-section{font-family:var(--font-mono);font-size:7px;color:#555;margin:8px 0 4px;font-weight:700;letter-spacing:0.1em}
+/* stamp overlay */
+.folder-stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);z-index:3;text-align:center;pointer-events:none;transition:opacity 0.5s ease}
+.stamp-text{font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:#cc0000;border:3px solid #cc0000;padding:8px 18px;letter-spacing:0.15em;opacity:0.92;text-shadow:1px 1px 0 rgba(0,0,0,0.3)}
+.folder-unlock-btn{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:4;font-family:var(--font-mono);font-size:11px;color:#000;background:#C69214;border:2px solid #8a5e06;padding:7px 18px;cursor:pointer;letter-spacing:0.1em;font-weight:700;transition:all 0.2s;white-space:nowrap}
+.folder-unlock-btn:hover{background:#e0a820;box-shadow:0 0 12px rgba(198,146,20,0.6)}
+/* revealed state */
+.folder-wrap.open .folder-stamp{opacity:0;pointer-events:none}
+.folder-wrap.open .folder-body{box-shadow:0 12px 40px rgba(198,146,20,0.4)}
+.folder-wrap.open .folder-unlock-btn{display:none}
+.paper-revealed{display:none;font-family:var(--font-mono);font-size:8px;line-height:1.9;color:#222}
+.folder-wrap.open .paper-revealed{display:block}
+.folder-wrap.open .paper-redacted{display:none}
+.pr-red{color:#cc0000;font-weight:700}
+.pr-grn{color:#006600;font-weight:700}
+.pr-blu{color:#000066;font-weight:700}
+.report-caption{font-family:var(--font-mono);font-size:11px;color:#666;margin-top:14px;line-height:1.7;text-align:center}
 
 /* ══════════════════════════════════════════
    SECTION 6 — PROFESSOR FOOTER
@@ -381,40 +404,69 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
       </div>
 
       <div class="report-box">
-        <div class="box-title">▶ Your Week 13 Deliverable</div>
-        <div class="report-preview" id="reportPreview" onclick="revealReport()">
-          <div class="report-content">
-ALTORO MUTUAL SECURITY ASSESSMENT<br>
-PENETRATION TEST REPORT — CONFIDENTIAL<br>
-Prepared by: [REDACTED]<br>
-Date: [REDACTED] 2026<br>
-Classification: CONFIDENTIAL<br>
-─────────────────────────────────────<br>
-EXECUTIVE SUMMARY<br>
-[REDACTED] conducted a comprehensive<br>
-black-box penetration test of Altoro<br>
-Mutual's external attack surface...<br>
-─────────────────────────────────────<br>
-FINDINGS SUMMARY<br>
-Critical:  [REDACTED]<br>
-High:      [REDACTED]<br>
-Medium:    [REDACTED]<br>
-Low:       [REDACTED]<br>
-─────────────────────────────────────<br>
-ATTACK CHAIN DIAGRAM<br>
-[REDACTED] → [REDACTED] → ROOT<br>
-─────────────────────────────────────<br>
-REMEDIATION ROADMAP<br>
-[REDACTED]<br>
-[REDACTED]<br>
-[REDACTED]<br>
+        <div class="box-title">▶ WEEK 13 DELIVERABLE: CAPSTONE</div>
+        <div class="folder-wrap" id="folderWrap" onclick="revealReport()">
+          <!-- Folder tab -->
+          <div class="folder-tab">
+            <span class="folder-tab-text">📁 CIS274 · FALL 2026</span>
           </div>
-          <div class="report-label" id="reportLabel">
-            <div class="stamp">CLASSIFIED</div>
-            <button class="declassify-btn">▶ DECLASSIFY</button>
+          <!-- Folder body -->
+          <div class="folder-body">
+            <div class="folder-paper">
+              <!-- Redacted view (before declassify) -->
+              <div class="paper-redacted">
+                <div class="paper-header">
+                  ALTORO MUTUAL SECURITY ASSESSMENT<br>
+                  PENETRATION TEST REPORT<br>
+                  Prepared by: ██████████ · Date: ██████ 2026
+                </div>
+                <div class="paper-section">EXECUTIVE SUMMARY</div>
+                <div class="redact-line redact-black redact-long"></div>
+                <div class="redact-line redact-black redact-med"></div>
+                <div class="redact-line redact-partial redact-long"></div>
+                <div class="paper-section">FINDINGS</div>
+                <div class="redact-line redact-black redact-short"></div>
+                <div class="redact-line redact-black redact-med"></div>
+                <div class="redact-line redact-black redact-long"></div>
+                <div class="redact-line redact-partial redact-med"></div>
+                <div class="paper-section">ATTACK CHAIN</div>
+                <div class="redact-line redact-black redact-long"></div>
+                <div class="redact-line redact-partial redact-short"></div>
+                <div class="paper-section">REMEDIATION</div>
+                <div class="redact-line redact-black redact-med"></div>
+                <div class="redact-line redact-black redact-short"></div>
+                <div class="redact-line redact-partial redact-long"></div>
+              </div>
+              <!-- Revealed view (after declassify) -->
+              <div class="paper-revealed">
+                <div class="paper-header">
+                  <span class="pr-red">ALTORO MUTUAL SECURITY ASSESSMENT</span><br>
+                  PENETRATION TEST REPORT — CONFIDENTIAL<br>
+                  Prepared by: CIS 274 Student · Fall 2026
+                </div>
+                <div class="paper-section">EXECUTIVE SUMMARY</div>
+                Conducted black-box pentest of Altoro Mutual.<br>
+                Multiple critical vulnerabilities discovered.<br>
+                <div class="paper-section">FINDINGS</div>
+                <span class="pr-red">Critical:</span> SQL Injection (auth bypass)<br>
+                <span class="pr-red">High:</span> Reflected XSS × 3<br>
+                <span class="pr-blu">Medium:</span> Exposed admin panel<br>
+                <span class="pr-grn">Low:</span> Verbose error messages<br>
+                <div class="paper-section">ATTACK CHAIN</div>
+                Recon → SQLi → Auth Bypass → Admin → ROOT<br>
+                <div class="paper-section">STATUS</div>
+                <span class="pr-grn">▶ YOU WILL BUILD THIS BY WEEK 13.</span>
+              </div>
+            </div>
+            <!-- Stamp overlay -->
+            <div class="folder-stamp" id="folderStamp">
+              <div class="stamp-text">TOP SECRET</div>
+            </div>
+            <!-- Unlock button -->
+            <button class="folder-unlock-btn" id="folderBtn">🔓 DECLASSIFY REPORT</button>
           </div>
         </div>
-        <p style="font-family:var(--font-mono);font-size:10px;color:#333;margin-top:12px;line-height:1.6">By Week 13 you will produce a professional penetration test report — a real artifact demonstrating your skills.</p>
+        <p class="report-caption">📋 By Week 13 you will produce a <strong>professional penetration test report</strong> — a real capstone artifact demonstrating your skills to employers.</p>
       </div>
     </div>
   </div>
@@ -895,35 +947,13 @@ function updateClock(){
 }
 updateClock();setInterval(updateClock,1000);
 
-// ── REPORT DECLASSIFY ────────────────────────────────────────────
+// ── REPORT / FOLDER DECLASSIFY ───────────────────────────────────
 function revealReport(){
-  const preview=document.getElementById('reportPreview');
-  const label=document.getElementById('reportLabel');
-  preview.classList.add('revealed');
-  label.classList.add('hidden');
-  // Update report content with unredacted version
-  preview.querySelector('.report-content').innerHTML=`<span style="color:#C69214;font-weight:bold">ALTORO MUTUAL SECURITY ASSESSMENT</span><br>
-PENETRATION TEST REPORT — CONFIDENTIAL<br>
-Prepared by: CIS 274 Student, Fall 2026<br>
-Date: December 10, 2026<br>
-─────────────────────────────────────<br>
-<span style="color:#fff">EXECUTIVE SUMMARY</span><br>
-Conducted black-box pentest of Altoro<br>
-Mutual external attack surface. Found<br>
-multiple critical vulnerabilities.<br>
-─────────────────────────────────────<br>
-<span style="color:#ff2040">FINDINGS SUMMARY</span><br>
-Critical:  SQL Injection (CVE-level)<br>
-High:      Reflected XSS × 3<br>
-Medium:    Exposed admin panel<br>
-Low:       Verbose error messages<br>
-─────────────────────────────────────<br>
-<span style="color:#00ff41">ATTACK CHAIN</span><br>
-Recon → SQLi → Auth Bypass → Admin<br>
-─────────────────────────────────────<br>
-<span style="color:#00e5ff">STATUS: YOU WILL BUILD THIS.</span>`;
+  const wrap = document.getElementById('folderWrap');
+  if(wrap && !wrap.classList.contains('open')){
+    wrap.classList.add('open');
+  }
 }
-
 // ── SCROLL ANIMATIONS ────────────────────────────────────────────
 const observer=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
@@ -965,6 +995,7 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
 
 
 
