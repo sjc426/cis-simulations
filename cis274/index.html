@@ -627,8 +627,32 @@ termInput.addEventListener('keydown',e=>{
 (function(){
   const c=document.getElementById('globe-canvas');
   const ctx=c.getContext('2d');
-  const W=380,H=380,R=140,cx=W/2,cy=H/2;
+  const W=380,H=380,R=150,cx=W/2,cy=H/2;
   let angle=0;
+
+  // ── CONTINENT POLYGONS (lat/lon pairs) ──
+  // Simplified but recognizable outlines
+  const continents = [
+    // North America
+    [[72,-140],[70,-130],[68,-100],[70,-85],[73,-80],[68,-75],[60,-65],[50,-55],[47,-53],[45,-60],[42,-70],[35,-75],[25,-80],[20,-87],[15,-85],[10,-83],[8,-77],[9,-79],[20,-105],[22,-110],[30,-115],[32,-117],[38,-122],[48,-124],[55,-130],[60,-135],[68,-140],[72,-140]],
+    // South America
+    [[-5,-80],[-2,-50],[0,-50],[5,-52],[10,-62],[12,-71],[10,-75],[-5,-81],[-18,-70],[-33,-71],[-40,-62],[-52,-68],[-55,-65],[-55,-68],[-40,-73],[-30,-71],[-22,-43],[-10,-37],[-5,-35],[0,-50],[-5,-80]],
+    // Europe
+    [[72,28],[70,25],[65,15],[62,5],[58,5],[52,3],[48,0],[44,0],[38,0],[36,5],[37,14],[42,18],[40,28],[42,40],[48,40],[55,35],[60,25],[64,26],[68,28],[72,28]],
+    // Africa
+    [[37,10],[30,32],[15,42],[12,44],[2,40],[-5,39],[-26,33],[-35,18],[-34,26],[-17,35],[-10,40],[0,42],[10,44],[20,38],[30,32],[37,10]],
+    [[37,10],[35,-5],[30,-13],[20,-17],[10,-16],[5,-5],[0,9],[0,10],[5,3],[10,-1],[20,15],[30,30],[37,10]],
+    // Asia
+    [[72,140],[65,141],[60,140],[55,135],[50,142],[45,135],[40,125],[35,120],[30,120],[25,120],[20,110],[15,108],[10,105],[5,100],[0,104],[5,80],[10,77],[20,73],[25,67],[30,60],[35,60],[40,52],[42,40],[48,40],[55,60],[60,55],[65,58],[70,68],[72,68],[75,100],[72,140]],
+    // Australia
+    [[-15,130],[-12,136],[-15,145],[-22,150],[-32,152],[-38,145],[-38,140],[-35,137],[-32,133],[-26,113],[-22,113],[-17,122],[-15,130]],
+    // Greenland
+    [[83,-45],[82,-20],[76,-18],[72,-22],[70,-52],[72,-60],[76,-68],[80,-65],[83,-45]],
+    // Japan
+    [[35,135],[36,136],[38,140],[43,141],[42,143],[38,141],[34,136],[33,131],[35,135]],
+    // UK
+    [[58,-3],[57,0],[53,0],[50,0],[51,-5],[55,-5],[58,-3]]
+  ];
 
   const cities=[
     {name:'Philadelphia',lat:40,lon:-75,color:'#00ff41',home:true},
@@ -639,7 +663,7 @@ termInput.addEventListener('keydown',e=>{
     {name:'Seoul',lat:37,lon:127,color:'#ff2040'},
     {name:'Tehran',lat:36,lon:51,color:'#ff2040'},
     {name:'Lagos',lat:7,lon:3,color:'#ffaa00'},
-    {name:'São Paulo',lat:-24,lon:-47,color:'#00e5ff'},
+    {name:'Sao Paulo',lat:-24,lon:-47,color:'#00e5ff'},
     {name:'Tokyo',lat:36,lon:140,color:'#00e5ff'},
     {name:'Sydney',lat:-34,lon:151,color:'#00e5ff'},
     {name:'Dubai',lat:25,lon:55,color:'#ffaa00'},
@@ -648,10 +672,39 @@ termInput.addEventListener('keydown',e=>{
   function latLonTo3D(lat,lon){
     const phi=(90-lat)*Math.PI/180;
     const theta=(lon+angle)*Math.PI/180;
-    return{x:R*Math.sin(phi)*Math.cos(theta),y:R*Math.cos(phi),z:R*Math.sin(phi)*Math.sin(theta)};
+    return{
+      x:R*Math.sin(phi)*Math.cos(theta),
+      y:R*Math.cos(phi),
+      z:R*Math.sin(phi)*Math.sin(theta)
+    };
   }
-
   function project(p){return{x:cx+p.x,y:cy-p.y,z:p.z}}
+
+  // Draw a continent polygon clipped to front hemisphere
+  function drawContinent(coords){
+    // Convert all points
+    const pts = coords.map(([lat,lon])=>{
+      const p3 = latLonTo3D(lat,lon);
+      return {proj:project(p3), z:p3.z};
+    });
+    // Only draw if majority of points are on front face
+    const frontCount = pts.filter(p=>p.z>=0).length;
+    if(frontCount < 2) return;
+    ctx.beginPath();
+    let started=false;
+    pts.forEach(p=>{
+      if(p.z>=0){
+        if(!started){ctx.moveTo(p.proj.x,p.proj.y);started=true;}
+        else ctx.lineTo(p.proj.x,p.proj.y);
+      } else { started=false; }
+    });
+    ctx.closePath();
+    ctx.fillStyle='rgba(0,180,60,0.22)';
+    ctx.fill();
+    ctx.strokeStyle='rgba(0,255,65,0.55)';
+    ctx.lineWidth=0.8;
+    ctx.stroke();
+  }
 
   const attacks=[];
   function spawnAttack(){
@@ -665,54 +718,67 @@ termInput.addEventListener('keydown',e=>{
 
   function drawGlobe(){
     ctx.clearRect(0,0,W,H);
-    // Globe base — visible sphere
+
+    // Atmosphere glow
     const atmGrad=ctx.createRadialGradient(cx,cy,R-10,cx,cy,R+22);
     atmGrad.addColorStop(0,'rgba(0,255,65,0.20)');
     atmGrad.addColorStop(0.5,'rgba(0,255,65,0.07)');
     atmGrad.addColorStop(1,'rgba(0,255,65,0)');
     ctx.beginPath();ctx.arc(cx,cy,R+22,0,Math.PI*2);
     ctx.fillStyle=atmGrad;ctx.fill();
+
+    // Globe sphere base
     ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
     const grad=ctx.createRadialGradient(cx-40,cy-40,R*0.1,cx+20,cy+20,R*1.1);
-    grad.addColorStop(0,'#0d2b0d');grad.addColorStop(0.5,'#071407');grad.addColorStop(1,'#020502');
+    grad.addColorStop(0,'#0a2010');
+    grad.addColorStop(0.5,'#041008');
+    grad.addColorStop(1,'#010301');
     ctx.fillStyle=grad;ctx.fill();
-    ctx.strokeStyle='rgba(0,255,65,0.6)';ctx.lineWidth=2;ctx.stroke();
+    ctx.strokeStyle='rgba(0,255,65,0.6)';ctx.lineWidth=1.5;ctx.stroke();
 
-    // Grid lines
+    // Clip to globe circle for all interior drawing
+    ctx.save();
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
+
+    // Grid lines (lat/lon)
     for(let lat=-60;lat<=60;lat+=30){
       ctx.beginPath();let first=true;
-      for(let lon=-180;lon<=180;lon+=5){
+      for(let lon=-180;lon<=180;lon+=4){
         const p=project(latLonTo3D(lat,lon));
-        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false}
+        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
         else first=true;
       }
-      ctx.strokeStyle='rgba(0,255,65,0.08)';ctx.lineWidth=0.5;ctx.stroke();
+      ctx.strokeStyle='rgba(0,255,65,0.07)';ctx.lineWidth=0.5;ctx.stroke();
     }
     for(let lon=-180;lon<=180;lon+=30){
       ctx.beginPath();let first=true;
-      for(let lat=-90;lat<=90;lat+=5){
+      for(let lat=-85;lat<=85;lat+=4){
         const p=project(latLonTo3D(lat,lon));
-        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false}
+        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
         else first=true;
       }
-      ctx.strokeStyle='rgba(0,255,65,0.08)';ctx.lineWidth=0.5;ctx.stroke();
+      ctx.strokeStyle='rgba(0,255,65,0.07)';ctx.lineWidth=0.5;ctx.stroke();
     }
+
+    // Continents
+    continents.forEach(drawContinent);
 
     // Attack arcs
     attacks.forEach((atk,i)=>{
       atk.progress+=atk.speed;
-      if(atk.progress>1){attacks.splice(i,1);return}
+      if(atk.progress>1){attacks.splice(i,1);return;}
       const s3=latLonTo3D(atk.src.lat,atk.src.lon);
       const d3=latLonTo3D(atk.dst.lat,atk.dst.lon);
       if(s3.z<0&&d3.z<0)return;
       const sp=project(s3),dp=project(d3);
-      const mx=(sp.x+dp.x)/2,my=(sp.y+dp.y)/2-60;
+      const mx=(sp.x+dp.x)/2,my=(sp.y+dp.y)/2-55;
       const t=atk.progress;
       const px=Math.pow(1-t,2)*sp.x+2*(1-t)*t*mx+Math.pow(t,2)*dp.x;
       const py=Math.pow(1-t,2)*sp.y+2*(1-t)*t*my+Math.pow(t,2)*dp.y;
       ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,32,64,0.9)';ctx.fill();
-      ctx.shadowColor='#ff2040';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='rgba(255,32,64,0.95)';
+      ctx.shadowColor='#ff2040';ctx.shadowBlur=10;
+      ctx.fill();ctx.shadowBlur=0;
     });
 
     // City dots
@@ -720,19 +786,30 @@ termInput.addEventListener('keydown',e=>{
       const p=project(latLonTo3D(city.lat,city.lon));
       if(p.z<0)return;
       ctx.beginPath();ctx.arc(p.x,p.y,city.home?5:3,0,Math.PI*2);
-      ctx.fillStyle=city.color;ctx.fill();
+      ctx.fillStyle=city.color;
+      ctx.shadowColor=city.color;ctx.shadowBlur=6;
+      ctx.fill();ctx.shadowBlur=0;
       if(city.home){
-        ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);
-        ctx.strokeStyle='rgba(0,255,65,0.4)';ctx.lineWidth=1;ctx.stroke();
+        ctx.beginPath();ctx.arc(p.x,p.y,9,0,Math.PI*2);
+        ctx.strokeStyle='rgba(0,255,65,0.5)';ctx.lineWidth=1;ctx.stroke();
       }
     });
 
-    angle+=0.15;
+    ctx.restore();
+
+    // Rim highlight (specular)
+    const rimGrad=ctx.createRadialGradient(cx-50,cy-50,R*0.6,cx,cy,R);
+    rimGrad.addColorStop(0,'rgba(0,255,65,0.0)');
+    rimGrad.addColorStop(0.85,'rgba(0,255,65,0.0)');
+    rimGrad.addColorStop(1,'rgba(0,255,65,0.15)');
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.fillStyle=rimGrad;ctx.fill();
+
+    angle+=0.12;
     requestAnimationFrame(drawGlobe);
   }
   drawGlobe();
 })();
-
 // ── THREAT FEED ─────────────────────────────────────────────────
 const threatData=[
   {src:'CN-Beijing',dst:'US-Philly',type:'SQLi'},
@@ -763,9 +840,9 @@ addThreat();setInterval(addThreat,2200);
 
 // ── SKILL TREE ───────────────────────────────────────────────────
 const skills=[
-  {week:1,icon:'🐉',name:'Kali Linux\nFundamentals',state:'unlocked'},
+  {week:1,icon:'🐉',name:'Kali Linux\nFundamentals',state:'current'},
   {week:2,icon:'🔐',name:'Linux II +\nPre-Engagement',state:'unlocked'},
-  {week:3,icon:'🔍',name:'Recon &\nManual OSINT',state:'current'},
+  {week:3,icon:'🔍',name:'Recon &\nManual OSINT',state:'locked'},
   {week:4,icon:'📡',name:'Scanning &\nVuln ID',state:'locked'},
   {week:5,icon:'💥',name:'Manual\nExploitation',state:'locked'},
   {week:6,icon:'🕸️',name:'Web-Based\nAttacks',state:'locked'},
@@ -887,4 +964,5 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
 
