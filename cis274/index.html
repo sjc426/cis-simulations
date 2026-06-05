@@ -125,7 +125,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 .skill-node.unlocked:hover{border-color:var(--green);background:rgba(0,255,65,0.06);transform:translateY(-3px)}
 .skill-node.current{opacity:1;border-color:var(--gold);background:rgba(198,146,20,0.08)}
 .skill-node.current::before{content:'▶ CURRENT';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-family:var(--font-mono);font-size:9px;padding:2px 6px;white-space:nowrap}
-.skill-node.locked{opacity:0.25;filter:grayscale(1)}
+.skill-node.locked{opacity:0.25;filter:grayscale(1);cursor:not-allowed}
 .skill-week{font-family:var(--font-mono);font-size:10px;color:var(--green-dim);display:block;margin-bottom:6px}
 .skill-icon{font-size:1.5rem;display:block;margin-bottom:6px}
 .skill-name{font-family:var(--font-body);font-size:0.8rem;font-weight:600;color:var(--white);line-height:1.3}
@@ -263,7 +263,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <div class="stat-box"><span class="stat-num">10</span><span class="stat-label">Quizzes</span></div>
     <div class="stat-box"><span class="stat-num">13</span><span class="stat-label">Labs</span></div>
     <div class="stat-box"><span class="stat-num">5</span><span class="stat-label">Discussions</span></div>
-    <div class="stat-box"><span class="stat-num">100<span style="font-size:1rem">%</span></span><span class="stat-label">Hands-On</span></div>
+    <div class="stat-box"><span class="stat-num">2</span><span class="stat-label">Exams</span></div>
   </div>
 </section>
 
@@ -665,12 +665,18 @@ termInput.addEventListener('keydown',e=>{
 
   function drawGlobe(){
     ctx.clearRect(0,0,W,H);
-    // Globe base
+    // Globe base — visible sphere
+    const atmGrad=ctx.createRadialGradient(cx,cy,R-10,cx,cy,R+22);
+    atmGrad.addColorStop(0,'rgba(0,255,65,0.20)');
+    atmGrad.addColorStop(0.5,'rgba(0,255,65,0.07)');
+    atmGrad.addColorStop(1,'rgba(0,255,65,0)');
+    ctx.beginPath();ctx.arc(cx,cy,R+22,0,Math.PI*2);
+    ctx.fillStyle=atmGrad;ctx.fill();
     ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
-    const grad=ctx.createRadialGradient(cx-30,cy-30,10,cx,cy,R);
-    grad.addColorStop(0,'#0a1a0a');grad.addColorStop(1,'#000500');
+    const grad=ctx.createRadialGradient(cx-40,cy-40,R*0.1,cx+20,cy+20,R*1.1);
+    grad.addColorStop(0,'#0d2b0d');grad.addColorStop(0.5,'#071407');grad.addColorStop(1,'#020502');
     ctx.fillStyle=grad;ctx.fill();
-    ctx.strokeStyle='rgba(0,255,65,0.15)';ctx.lineWidth=1;ctx.stroke();
+    ctx.strokeStyle='rgba(0,255,65,0.6)';ctx.lineWidth=2;ctx.stroke();
 
     // Grid lines
     for(let lat=-60;lat<=60;lat+=30){
@@ -776,6 +782,7 @@ const grid=document.getElementById('treeGrid');
 skills.forEach((s,i)=>{
   const div=document.createElement('div');
   div.className=`skill-node ${s.state}`;
+  div.style.cursor = (s.week===1) ? 'default' : (s.state==='locked' ? 'not-allowed' : 'pointer');
   div.title=`Week ${s.week}: ${s.name.replace('\n',' ')}`;
   div.innerHTML=`<span class="skill-week">WK ${String(s.week).padStart(2,'0')}</span><span class="skill-icon">${s.icon}</span><span class="skill-name">${s.name.replace('\n','<br>')}</span>`;
   if(i<skills.length-1){
@@ -880,3 +887,4 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
