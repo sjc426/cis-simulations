@@ -323,7 +323,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <h2 class="section-title">YOUR <span>SKILL TREE</span></h2>
   </div>
 
-  <div class="tree-grid" id="treeGrid"><div class="skill-node unlocked" title="Week 1: Kali Linux Fundamentals"><span class="skill-week">WK 01</span><span class="skill-icon">🐉</span><span class="skill-name">Kali Linux<br>Fundamentals</span><div class="skill-connector">›</div></div><div class="skill-node unlocked" title="Week 2: Linux II + Pre-Engagement"><span class="skill-week">WK 02</span><span class="skill-icon">🔐</span><span class="skill-name">Linux II +<br>Pre-Engagement</span><div class="skill-connector">›</div></div><div class="skill-node current" title="Week 3: Recon &amp; Manual OSINT"><span class="skill-week">WK 03</span><span class="skill-icon">🔍</span><span class="skill-name">Recon &amp;<br>Manual OSINT</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 4: Scanning &amp; Vuln ID"><span class="skill-week">WK 04</span><span class="skill-icon">📡</span><span class="skill-name">Scanning &amp;<br>Vuln ID</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 5: Manual Exploitation"><span class="skill-week">WK 05</span><span class="skill-icon">💥</span><span class="skill-name">Manual<br>Exploitation</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 6: Web-Based Attacks"><span class="skill-week">WK 06</span><span class="skill-icon">🕸️</span><span class="skill-name">Web-Based<br>Attacks</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 7: Post-Exploit + Evasion"><span class="skill-week">WK 07</span><span class="skill-icon">👻</span><span class="skill-name">Post-Exploit<br>+ Evasion</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 8: MIDTERM Parts A+B"><span class="skill-week">WK 08</span><span class="skill-icon">🎯</span><span class="skill-name">MIDTERM<br>Parts A+B</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 9: Automated Scanning+AI"><span class="skill-week">WK 09</span><span class="skill-icon">🤖</span><span class="skill-name">Automated<br>Scanning+AI</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 10: AI-Guided Exploitation"><span class="skill-week">WK 10</span><span class="skill-icon">🧠</span><span class="skill-name">AI-Guided<br>Exploitation</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 11: APT Sim + AI Kill Chain"><span class="skill-week">WK 11</span><span class="skill-icon">☠️</span><span class="skill-name">APT Sim +<br>AI Kill Chain</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 12: AI Social Engineering"><span class="skill-week">WK 12</span><span class="skill-icon">🎭</span><span class="skill-name">AI Social<br>Engineering</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 13: Capstone &amp; Synthesis"><span class="skill-week">WK 13</span><span class="skill-icon">📋</span><span class="skill-name">Capstone &amp;<br>Synthesis</span></div></div>
+  <div class="tree-grid" id="treeGrid"></div>
 
   <div class="tree-legend">
     <div class="legend-item"><div class="legend-dot" style="border-color:var(--green-dim);background:rgba(0,255,65,0.05)"></div><span style="font-size:11px;color:#555">Unlocked</span></div>
@@ -748,7 +748,7 @@ termInput.addEventListener('keydown',e=>{
         if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
         else first=true;
       }
-      ctx.strokeStyle='rgba(0,255,65,0.07)';ctx.lineWidth=0.5;ctx.stroke();
+      ctx.strokeStyle='rgba(0,255,65,0.30)';ctx.lineWidth=0.7;ctx.stroke();
     }
     for(let lon=-180;lon<=180;lon+=30){
       ctx.beginPath();let first=true;
@@ -757,7 +757,7 @@ termInput.addEventListener('keydown',e=>{
         if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
         else first=true;
       }
-      ctx.strokeStyle='rgba(0,255,65,0.07)';ctx.lineWidth=0.5;ctx.stroke();
+      ctx.strokeStyle='rgba(0,255,65,0.30)';ctx.lineWidth=0.7;ctx.stroke();
     }
 
     // Continents
@@ -856,6 +856,7 @@ const skills=[
 ];
 
 const grid=document.getElementById('treeGrid');
+grid.innerHTML='';
 skills.forEach((s,i)=>{
   const div=document.createElement('div');
   div.className=`skill-node ${s.state}`;
@@ -964,5 +965,7 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
+
 
 
