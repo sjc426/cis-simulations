@@ -1,1 +1,831 @@
-<html><body style="background:#000;color:#0f0;font-family:monospace"><h1>CIS 274 Landing Page — Deploying...</h1></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 274 — Ethical Hacking & Penetration Testing</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#00ff41;--green-dim:#00a829;--green-dark:#003d0e;
+  --gold:#C69214;--gold-dim:#8a6510;
+  --red:#ff2040;--cyan:#00e5ff;--white:#ffffff;
+  --bg:#000000;--bg2:#050505;--bg3:#0a0a0a;
+  --border:#1a1a1a;--border2:#252525;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-display:'Orbitron',monospace;
+  --font-body:'Rajdhani',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--font-body);overflow-x:hidden;cursor:crosshair}
+
+/* ── PARTICLE CANVAS ── */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* ── SCANLINE OVERLAY ── */
+body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.08) 2px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:999}
+
+/* ══════════════════════════════════════════
+   SECTION 1 — CINEMATIC BOOT SEQUENCE
+══════════════════════════════════════════ */
+#boot{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;border-bottom:1px solid var(--border)}
+
+.boot-frame{width:100%;max-width:900px;border:1px solid var(--green-dim);background:rgba(0,10,0,0.6);padding:40px;position:relative}
+.boot-frame::before{content:'CIS274.SYS';position:absolute;top:-11px;left:20px;background:var(--bg);padding:0 8px;font-family:var(--font-mono);font-size:11px;color:var(--green-dim)}
+.boot-frame::after{content:'SECURE SHELL v2.74';position:absolute;top:-11px;right:20px;background:var(--bg);padding:0 8px;font-family:var(--font-mono);font-size:11px;color:var(--green-dim)}
+
+.terminal-line{font-family:var(--font-mono);font-size:13px;color:var(--green-dim);margin:3px 0;opacity:0;white-space:nowrap}
+.terminal-line.active{animation:fadeInLine 0.1s forwards}
+.terminal-line.prompt{color:var(--green)}
+.terminal-line.warn{color:var(--gold)}
+.terminal-line.error{color:var(--red)}
+.terminal-line.info{color:var(--cyan)}
+
+@keyframes fadeInLine{to{opacity:1}}
+
+.hero-title{font-family:var(--font-display);font-size:clamp(2.2rem,6vw,5rem);font-weight:900;color:var(--white);text-align:center;margin:30px 0 10px;letter-spacing:0.05em;opacity:0;transform:translateY(20px);transition:all 0.8s ease;line-height:1.1}
+.hero-title.visible{opacity:1;transform:translateY(0)}
+.hero-title span{color:var(--green)}
+
+.hero-sub{font-family:var(--font-display);font-size:clamp(0.8rem,2vw,1.1rem);color:var(--gold);text-align:center;letter-spacing:0.2em;opacity:0;transition:all 0.8s ease 0.3s}
+.hero-sub.visible{opacity:1}
+
+.course-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--green-dim);padding:6px 16px;font-family:var(--font-mono);font-size:11px;color:var(--green-dim);margin:20px auto;opacity:0;transition:all 0.6s ease 0.6s}
+.course-badge.visible{opacity:1}
+.badge-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1s infinite}
+
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;max-width:900px;margin:30px 0 0;opacity:0;transform:translateY(20px);transition:all 0.8s ease 0.9s}
+.stat-row.visible{opacity:1;transform:translateY(0)}
+.stat-box{border:1px solid var(--border2);background:rgba(0,255,65,0.03);padding:14px 10px;text-align:center;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scan 3s infinite}
+.stat-box:nth-child(2)::before{animation-delay:0.4s}
+.stat-box:nth-child(3)::before{animation-delay:0.8s}
+.stat-box:nth-child(4)::before{animation-delay:1.2s}
+.stat-box:nth-child(5)::before{animation-delay:1.6s}
+@keyframes scan{to{left:200%}}
+.stat-num{font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--green);display:block}
+.stat-label{font-family:var(--font-mono);font-size:10px;color:var(--green-dim);margin-top:4px;display:block;text-transform:uppercase;letter-spacing:0.1em}
+
+/* ══════════════════════════════════════════
+   SECTION 2 — INTERACTIVE TERMINAL
+══════════════════════════════════════════ */
+#terminal-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.section-header{text-align:center;margin-bottom:40px}
+.section-tag{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-bottom:8px}
+.section-title{font-family:var(--font-display);font-size:clamp(1.4rem,3vw,2.2rem);font-weight:700;color:var(--white);letter-spacing:0.05em}
+.section-title span{color:var(--green)}
+
+.terminal-wrapper{max-width:800px;margin:0 auto;border:1px solid var(--green-dim);background:#000;font-family:var(--font-mono)}
+.terminal-titlebar{background:var(--green-dark);padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--green-dim)}
+.t-dot{width:10px;height:10px;border-radius:50%}
+.t-red{background:#ff5f57}.t-yellow{background:#febc2e}.t-green{background:#28c840}
+.t-title{font-size:11px;color:var(--green-dim);margin-left:8px;letter-spacing:0.1em}
+.terminal-body{padding:20px;min-height:320px;max-height:400px;overflow-y:auto}
+.t-output{font-size:13px;line-height:1.8;color:var(--green-dim)}
+.t-output .cmd{color:var(--green)}
+.t-output .res{color:var(--white)}
+.t-output .dim{color:#3a3a3a}
+.t-output .hi{color:var(--gold)}
+.t-output .err{color:var(--red)}
+.t-output .ok{color:var(--cyan)}
+.t-input-row{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--border2)}
+.t-prompt-label{font-size:13px;color:var(--green);white-space:nowrap}
+.t-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-mono);font-size:13px;color:var(--white);caret-color:var(--green);cursor:crosshair}
+.t-hint{text-align:center;margin-top:16px;font-family:var(--font-mono);font-size:11px;color:#2a2a2a}
+.t-hint span{color:var(--green-dim)}
+
+/* ══════════════════════════════════════════
+   SECTION 3 — THREAT GLOBE
+══════════════════════════════════════════ */
+#globe-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.globe-container{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+#globe-canvas{width:100%;aspect-ratio:1;max-width:380px;margin:0 auto;display:block}
+.globe-data{padding:10px}
+.threat-feed{margin-top:20px}
+.feed-title{font-family:var(--font-mono);font-size:11px;color:var(--red);letter-spacing:0.2em;margin-bottom:12px;text-transform:uppercase}
+.threat-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-family:var(--font-mono);font-size:11px;animation:slideIn 0.5s ease forwards;opacity:0}
+@keyframes slideIn{to{opacity:1}}
+.threat-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;animation:pulse-red 1s infinite}
+@keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(255,32,64,0.7)}70%{box-shadow:0 0 0 6px rgba(255,32,64,0)}}
+.threat-src{color:var(--red);width:80px}
+.threat-arrow{color:var(--green-dim)}
+.threat-dst{color:var(--white)}
+.threat-type{color:var(--gold);margin-left:auto}
+.globe-desc{font-family:var(--font-body);font-size:1rem;color:#888;line-height:1.7;margin-top:16px}
+.globe-desc strong{color:var(--white)}
+
+/* ══════════════════════════════════════════
+   SECTION 4 — SKILL TREE
+══════════════════════════════════════════ */
+#skilltree{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.tree-grid{max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:16px;margin-top:40px}
+.skill-node{border:1px solid var(--border2);background:rgba(0,255,65,0.02);padding:16px 10px;text-align:center;position:relative;cursor:pointer;transition:all 0.3s ease;opacity:0.4}
+.skill-node.unlocked{opacity:1;border-color:var(--green-dim)}
+.skill-node.unlocked:hover{border-color:var(--green);background:rgba(0,255,65,0.06);transform:translateY(-3px)}
+.skill-node.current{opacity:1;border-color:var(--gold);background:rgba(198,146,20,0.08)}
+.skill-node.current::before{content:'▶ CURRENT';position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-family:var(--font-mono);font-size:9px;padding:2px 6px;white-space:nowrap}
+.skill-node.locked{opacity:0.25;filter:grayscale(1)}
+.skill-week{font-family:var(--font-mono);font-size:10px;color:var(--green-dim);display:block;margin-bottom:6px}
+.skill-icon{font-size:1.5rem;display:block;margin-bottom:6px}
+.skill-name{font-family:var(--font-body);font-size:0.8rem;font-weight:600;color:var(--white);line-height:1.3}
+.skill-connector{position:absolute;right:-16px;top:50%;transform:translateY(-50%);color:var(--green-dim);font-size:10px;z-index:2;pointer-events:none}
+.tree-legend{display:flex;gap:24px;justify-content:center;margin-top:24px;font-family:var(--font-mono);font-size:11px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-dot{width:10px;height:10px;border:1px solid}
+
+/* ══════════════════════════════════════════
+   SECTION 5 — MISSION COUNTDOWN
+══════════════════════════════════════════ */
+#countdown-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.countdown-wrapper{max-width:900px;margin:0 auto}
+.clock-display{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:40px 0}
+.clock-unit{border:1px solid var(--green-dim);background:rgba(0,255,65,0.03);padding:24px 10px;text-align:center;position:relative}
+.clock-unit::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--green);transform:scaleX(0);transition:transform 0.5s ease}
+.clock-unit:hover::after{transform:scaleX(1)}
+.clock-num{font-family:var(--font-display);font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--green);display:block;line-height:1}
+.clock-label{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);margin-top:8px;display:block;letter-spacing:0.2em}
+.mission-date{text-align:center;font-family:var(--font-mono);font-size:13px;color:var(--gold);margin-bottom:40px;letter-spacing:0.1em}
+
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px}
+.checklist-box{border:1px solid var(--border2);background:rgba(0,255,65,0.02);padding:24px}
+.box-title{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);letter-spacing:0.2em;margin-bottom:16px;text-transform:uppercase}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-family:var(--font-body);font-size:0.95rem;color:#aaa;line-height:1.4}
+.check-item:last-child{border-bottom:none}
+.check-box{width:16px;height:16px;border:1px solid var(--green-dim);flex-shrink:0;margin-top:2px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green);transition:all 0.2s}
+.check-box:hover{border-color:var(--green);background:rgba(0,255,65,0.1)}
+.check-box.done{border-color:var(--green);background:var(--green);color:#000}
+.check-item a{color:var(--green-dim);text-decoration:none}
+.check-item a:hover{color:var(--green)}
+
+.report-box{border:1px solid var(--border2);background:rgba(0,255,65,0.02);padding:24px;display:flex;flex-direction:column}
+.report-preview{flex:1;border:1px solid var(--border2);background:#050505;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s}
+.report-preview:hover{border-color:var(--green-dim)}
+.report-preview::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:1;transition:all 0.5s}
+.report-preview.revealed::before{background:rgba(0,0,0,0);backdrop-filter:blur(0)}
+.report-content{font-family:var(--font-mono);font-size:10px;color:#444;line-height:1.8}
+.report-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;gap:8px;transition:opacity 0.5s}
+.report-label.hidden{opacity:0;pointer-events:none}
+.stamp{font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--gold);border:3px solid var(--gold);padding:8px 16px;transform:rotate(-12deg);opacity:0.9;letter-spacing:0.1em}
+.declassify-btn{font-family:var(--font-mono);font-size:11px;color:var(--green);border:1px solid var(--green);padding:6px 14px;background:transparent;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s}
+.declassify-btn:hover{background:var(--green);color:#000}
+
+/* ══════════════════════════════════════════
+   SECTION 6 — PROFESSOR FOOTER
+══════════════════════════════════════════ */
+#prof-section{position:relative;z-index:10;padding:60px 20px 40px}
+.prof-card{max-width:900px;margin:0 auto;border:1px solid var(--border2);background:rgba(0,255,65,0.02);padding:32px;display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center}
+.prof-avatar{width:80px;height:80px;border:2px solid var(--green-dim);border-radius:50%;background:var(--green-dark);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--green)}
+.prof-name{font-family:var(--font-display);font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:4px}
+.prof-title{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);letter-spacing:0.1em;margin-bottom:12px}
+.prof-meta{display:flex;gap:20px;flex-wrap:wrap}
+.prof-meta span{font-family:var(--font-mono);font-size:11px;color:#555}
+.prof-meta span strong{color:#888}
+.prof-actions{display:flex;flex-direction:column;gap:10px}
+.btn-primary{font-family:var(--font-mono);font-size:12px;background:var(--green);color:#000;border:none;padding:10px 20px;cursor:pointer;letter-spacing:0.1em;font-weight:700;transition:all 0.2s;text-decoration:none;display:block;text-align:center}
+.btn-primary:hover{background:var(--white)}
+.btn-ghost{font-family:var(--font-mono);font-size:12px;background:transparent;color:var(--green-dim);border:1px solid var(--green-dim);padding:9px 20px;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;text-decoration:none;display:block;text-align:center}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+
+.footer-bar{max-width:900px;margin:24px auto 0;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:gap}
+.footer-left{font-family:var(--font-mono);font-size:11px;color:#2a2a2a}
+.footer-right{font-family:var(--font-mono);font-size:11px;color:#2a2a2a}
+.footer-right span{color:var(--green-dim)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .tree-grid{grid-template-columns:repeat(3,1fr)}
+  .globe-container{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .clock-display{grid-template-columns:repeat(2,1fr)}
+  .prof-card{grid-template-columns:1fr;text-align:center}
+  .prof-avatar{margin:0 auto}
+  .prof-meta{justify-content:center}
+  .stat-row{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SECTION 1 — CINEMATIC BOOT SEQUENCE
+══════════════════════════════════════════ -->
+<section id="boot">
+  <div class="boot-frame" id="bootFrame">
+    <div id="termLines"></div>
+  </div>
+
+  <h1 class="hero-title" id="heroTitle">ETHICAL HACKING<br><span>&amp; PEN TESTING</span></h1>
+  <p class="hero-sub" id="heroSub">COMMUNITY COLLEGE OF PHILADELPHIA &nbsp;·&nbsp; CIS 274 &nbsp;·&nbsp; FALL 2026</p>
+
+  <div class="course-badge" id="courseBadge">
+    <span class="badge-dot"></span>
+    CIS 274 950 HYBAS 15A FA26
+    <span class="badge-dot" style="animation-delay:0.5s"></span>
+  </div>
+
+  <div class="stat-row" id="statRow">
+    <div class="stat-box"><span class="stat-num">15</span><span class="stat-label">Weeks</span></div>
+    <div class="stat-box"><span class="stat-num">10</span><span class="stat-label">Quizzes</span></div>
+    <div class="stat-box"><span class="stat-num">13</span><span class="stat-label">Labs</span></div>
+    <div class="stat-box"><span class="stat-num">5</span><span class="stat-label">Discussions</span></div>
+    <div class="stat-box"><span class="stat-num">100<span style="font-size:1rem">%</span></span><span class="stat-label">Hands-On</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 2 — INTERACTIVE TERMINAL
+══════════════════════════════════════════ -->
+<section id="terminal-section">
+  <div class="section-header">
+    <span class="section-tag">// section_02 :: interactive</span>
+    <h2 class="section-title">AGENT <span>TERMINAL</span></h2>
+  </div>
+
+  <div class="terminal-wrapper">
+    <div class="terminal-titlebar">
+      <span class="t-dot t-red"></span>
+      <span class="t-dot t-yellow"></span>
+      <span class="t-dot t-green"></span>
+      <span class="t-title">cis274@ccp:~$ — SECURE SHELL</span>
+    </div>
+    <div class="terminal-body" id="termBody">
+      <div class="t-output" id="termOutput"></div>
+    </div>
+    <div class="t-input-row">
+      <span class="t-prompt-label">cis274@ccp:~$&nbsp;</span>
+      <input class="t-input" id="termInput" type="text" placeholder="type a command... try: help" autocomplete="off" spellcheck="false">
+    </div>
+  </div>
+  <p class="t-hint">Try: <span>help</span> · <span>whoami</span> · <span>nmap</span> · <span>tools</span> · <span>syllabus</span> · <span>schedule</span> · <span>enroll</span></p>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 3 — THREAT GLOBE
+══════════════════════════════════════════ -->
+<section id="globe-section">
+  <div class="section-header">
+    <span class="section-tag">// section_03 :: live_threat_feed</span>
+    <h2 class="section-title">GLOBAL <span>THREAT MAP</span></h2>
+  </div>
+  <div class="globe-container">
+    <canvas id="globe-canvas" width="380" height="380"></canvas>
+    <div class="globe-data">
+      <p class="globe-desc">Every second, thousands of cyberattacks cross the globe. <strong>This is what you will learn to defend against — and simulate legally.</strong> CIS 274 trains you to think like the attacker.</p>
+      <div class="threat-feed">
+        <div class="feed-title">● LIVE ATTACK SIMULATION FEED</div>
+        <div id="threatFeed"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 4 — SKILL TREE
+══════════════════════════════════════════ -->
+<section id="skilltree">
+  <div class="section-header">
+    <span class="section-tag">// section_04 :: skill_progression</span>
+    <h2 class="section-title">YOUR <span>SKILL TREE</span></h2>
+  </div>
+
+  <div class="tree-grid" id="treeGrid"></div>
+
+  <div class="tree-legend">
+    <div class="legend-item"><div class="legend-dot" style="border-color:var(--green-dim);background:rgba(0,255,65,0.05)"></div><span style="font-size:11px;color:#555">Unlocked</span></div>
+    <div class="legend-item"><div class="legend-dot" style="border-color:var(--gold);background:rgba(198,146,20,0.08)"></div><span style="font-size:11px;color:#555">Current</span></div>
+    <div class="legend-item"><div class="legend-dot" style="border-color:#333;background:transparent"></div><span style="font-size:11px;color:#333">Locked</span></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 5 — MISSION COUNTDOWN
+══════════════════════════════════════════ -->
+<section id="countdown-section">
+  <div class="section-header">
+    <span class="section-tag">// section_05 :: mission_brief</span>
+    <h2 class="section-title">MISSION <span>COUNTDOWN</span></h2>
+  </div>
+
+  <div class="countdown-wrapper">
+    <p class="mission-date">▶ MISSION START DATE: SEPTEMBER 8, 2026 · 0800 HRS</p>
+    <div class="clock-display">
+      <div class="clock-unit"><span class="clock-num" id="cd-days">--</span><span class="clock-label">Days</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-hours">--</span><span class="clock-label">Hours</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-mins">--</span><span class="clock-label">Minutes</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-secs">--</span><span class="clock-label">Seconds</span></div>
+    </div>
+
+    <div class="two-col">
+      <div class="checklist-box">
+        <div class="box-title">▶ Pre-Mission Checklist</div>
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
+          </div>
+          <div>Install <strong>Kali Linux</strong> — VirtualBox or VMware Workstation</div>
+        </div>
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
+          </div>
+          <div>Create a <strong>GitHub account</strong> using your CCP email address</div>
+        </div>
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
+          </div>
+          <div>Watch: <a href="https://www.professormesser.com" target="_blank"><strong>What is Ethical Hacking?</strong></a> — Professor Messer (8 min)</div>
+        </div>
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
+          </div>
+          <div>Read the <strong>Course Expectations &amp; Code of Ethics</strong> in the START HERE module</div>
+        </div>
+        <div class="check-item">
+          <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
+          </div>
+          <div>Bookmark <a href="https://www.kali.org/docs/" target="_blank"><strong>kali.org/docs</strong></a> — your field manual for the semester</div>
+        </div>
+      </div>
+
+      <div class="report-box">
+        <div class="box-title">▶ Your Week 13 Deliverable</div>
+        <div class="report-preview" id="reportPreview" onclick="revealReport()">
+          <div class="report-content">
+ALTORO MUTUAL SECURITY ASSESSMENT<br>
+PENETRATION TEST REPORT — CONFIDENTIAL<br>
+Prepared by: [REDACTED]<br>
+Date: [REDACTED] 2026<br>
+Classification: CONFIDENTIAL<br>
+─────────────────────────────────────<br>
+EXECUTIVE SUMMARY<br>
+[REDACTED] conducted a comprehensive<br>
+black-box penetration test of Altoro<br>
+Mutual's external attack surface...<br>
+─────────────────────────────────────<br>
+FINDINGS SUMMARY<br>
+Critical:  [REDACTED]<br>
+High:      [REDACTED]<br>
+Medium:    [REDACTED]<br>
+Low:       [REDACTED]<br>
+─────────────────────────────────────<br>
+ATTACK CHAIN DIAGRAM<br>
+[REDACTED] → [REDACTED] → ROOT<br>
+─────────────────────────────────────<br>
+REMEDIATION ROADMAP<br>
+[REDACTED]<br>
+[REDACTED]<br>
+[REDACTED]<br>
+          </div>
+          <div class="report-label" id="reportLabel">
+            <div class="stamp">CLASSIFIED</div>
+            <button class="declassify-btn">▶ DECLASSIFY</button>
+          </div>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:10px;color:#333;margin-top:12px;line-height:1.6">By Week 13 you will produce a professional penetration test report — a real artifact demonstrating your skills.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SECTION 6 — PROFESSOR FOOTER
+══════════════════════════════════════════ -->
+<section id="prof-section">
+  <div class="prof-card">
+    <div class="prof-avatar">SC</div>
+    <div>
+      <div class="prof-name">Prof. Sonny J. Chang</div>
+      <div class="prof-title">INSTRUCTOR · CIS 274 · COMMUNITY COLLEGE OF PHILADELPHIA</div>
+      <div class="prof-meta">
+        <span><strong>Course:</strong> CIS 274 950 HYBAS 15A FA26</span>
+        <span><strong>Format:</strong> Hybrid / Online</span>
+        <span><strong>Start:</strong> Sep 8, 2026</span>
+        <span><strong>Office Hours:</strong> Canvas Msg or by appointment</span>
+      </div>
+    </div>
+    <div class="prof-actions">
+      <a class="btn-primary" href="https://ccp.instructure.com/courses/2129466/modules" target="_parent">▶ ENTER COURSE</a>
+      <a class="btn-ghost" href="https://ccp.instructure.com/conversations" target="_parent">✉ MESSAGE PROF. CHANG</a>
+    </div>
+  </div>
+  <div class="footer-bar">
+    <span class="footer-left">CIS 274 · Ethical Hacking &amp; Penetration Testing · Fall 2026</span>
+    <span class="footer-right">Built with <span>NEO Course Builder</span> · Prof. Sonny J. Chang</span>
+  </div>
+</section>
+
+<script>
+// ── PARTICLE BACKGROUND ─────────────────────────────────────────
+(function(){
+  const c=document.getElementById('particles'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<80;i++) pts.push({x:Math.random()*9999,y:Math.random()*9999,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);ctx.fillStyle='rgba(0,255,65,0.3)';ctx.fill()});
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+        ctx.strokeStyle=`rgba(0,255,65,${0.15*(1-d/120)})`;ctx.lineWidth=0.5;ctx.stroke()}}
+    requestAnimationFrame(draw)}
+  draw();
+})();
+
+// ── BOOT SEQUENCE ───────────────────────────────────────────────
+const bootLines=[
+  {t:'dim', text:'BIOS v2.74 ... OK'},
+  {t:'dim', text:'Loading kernel modules ... OK'},
+  {t:'dim', text:'Initializing network stack ... OK'},
+  {t:'warn',text:'WARNING: Unauthorized access is prohibited under 18 U.S.C. § 1030'},
+  {t:'dim', text:'Mounting encrypted volume ... OK'},
+  {t:'prompt',text:'> Establishing secure connection to CCP Canvas ...'},
+  {t:'info', text:'CONNECTION ESTABLISHED — TLS 1.3 — AES-256-GCM'},
+  {t:'prompt',text:'> Authenticating operator ...'},
+  {t:'info', text:'OPERATOR VERIFIED — CLEARANCE LEVEL: STUDENT'},
+  {t:'prompt',text:'> Loading mission parameters ...'},
+  {t:'info', text:'COURSE: CIS 274 — ETHICAL HACKING & PENETRATION TESTING'},
+  {t:'info', text:'SEMESTER: FALL 2026 | INSTITUTION: CCP'},
+  {t:'prompt',text:'> System ready.'},
+];
+
+(async function bootAnim(){
+  const el=document.getElementById('termLines');
+  for(let i=0;i<bootLines.length;i++){
+    await new Promise(r=>setTimeout(r,180+Math.random()*120));
+    const div=document.createElement('div');
+    div.className=`terminal-line ${bootLines[i].t} active`;
+    div.textContent=bootLines[i].text;
+    el.appendChild(div);
+  }
+  await new Promise(r=>setTimeout(r,400));
+  document.getElementById('heroTitle').classList.add('visible');
+  await new Promise(r=>setTimeout(r,300));
+  document.getElementById('heroSub').classList.add('visible');
+  document.getElementById('courseBadge').classList.add('visible');
+  await new Promise(r=>setTimeout(r,400));
+  document.getElementById('statRow').classList.add('visible');
+})();
+
+// ── INTERACTIVE TERMINAL ─────────────────────────────────────────
+const termOutput=document.getElementById('termOutput');
+const termInput=document.getElementById('termInput');
+const termBody=document.getElementById('termBody');
+
+const COMMANDS={
+  help:{fn:()=>`<span class="hi">Available commands:</span>
+  <span class="cmd">whoami</span>    — identify yourself
+  <span class="cmd">nmap</span>      — run a demo port scan
+  <span class="cmd">tools</span>     — list tools you will master
+  <span class="cmd">syllabus</span>  — view the course outline
+  <span class="cmd">schedule</span>  — key dates this semester
+  <span class="cmd">enroll</span>    — get your mission briefing
+  <span class="cmd">clear</span>     — clear the terminal`},
+  whoami:{fn:()=>`<span class="ok">student@cis274-ccp</span>
+Groups: hackers, defenders, builders
+Clearance: Level 1 — Student Operator
+Mission: Complete CIS 274 · Fall 2026
+Status: <span class="ok">ACTIVE AGENT</span>`},
+  nmap:{fn:()=>`Starting Nmap 7.94 ( https://nmap.org )
+Nmap scan report for <span class="hi">demo.testfire.net</span>
+Host is up (0.021s latency).
+
+PORT     STATE  SERVICE    VERSION
+<span class="ok">80/tcp   open   http</span>       Apache httpd 2.4.18
+<span class="ok">443/tcp  open   ssl/https</span>  Apache httpd 2.4.18
+<span class="err">8080/tcp open   http-proxy</span> Vulnerable to XSS
+<span class="err">3306/tcp open   mysql</span>      MySQL 5.7.32 — CVE-2021-2022
+
+<span class="hi">4 ports open — 2 potential vulnerabilities identified</span>
+<span class="dim">This is Altoro Mutual — your Week 13 target. Study it.</span>`},
+  tools:{fn:()=>`<span class="hi">Tools you will master in CIS 274:</span>
+
+<span class="ok">RECON:</span>      Nmap · Shodan · theHarvester · Maltego · OSINT Framework
+<span class="ok">SCAN:</span>       Nessus · OpenVAS · Nikto · Nuclei · ZAP
+<span class="ok">EXPLOIT:</span>    Metasploit · Burp Suite · SQLmap · BeEF
+<span class="ok">POST-EXPL:</span>  Mimikatz · BloodHound · PowerSploit · Impacket
+<span class="ok">AI LAYER:</span>   MITRE ATLAS · LLM-assisted recon · GPT-4 OSINT pipelines
+<span class="ok">REPORTING:</span>  Dradis · Pentest.WS · AI-drafted executive reports
+
+<span class="dim">All tools run in Kali Linux. Install it before Day 1.</span>`},
+  syllabus:{fn:()=>`<span class="hi">CIS 274 — Course Outline (15 Weeks)</span>
+
+Wk 01  Your Brand + Kali Linux Fundamentals I
+Wk 02  Linux II + Pre-Engagement & ROE
+Wk 03  Recon & Manual OSINT
+Wk 04  Scanning & Vulnerability Identification
+Wk 05  Manual Exploitation
+Wk 06  Web-Based Attacks
+Wk 07  Post-Exploitation + Evasion
+Wk 08  <span class="err">MIDTERM — Parts A + B</span>
+Wk 09  Automated Scanning + AI Triage
+Wk 10  AI-Guided Exploitation + MITRE ATLAS <span class="dim">(Async)</span>
+Wk 11  APT Simulation + Full AI Kill Chain
+Wk 12  AI-Powered Social Engineering
+Wk 13  Capstone & Course Synthesis
+Wk 14  No Class
+Wk 15  Final Review
+
+<span class="dim">Full syllabus in the START HERE module on Canvas.</span>`},
+  schedule:{fn:()=>`<span class="hi">Key Dates — CIS 274 Fall 2026</span>
+
+<span class="ok">Sep 08</span>  First Class — Your Brand + Kali Setup
+<span class="ok">Sep 14</span>  Lab 1 + Discussion 1 Due
+<span class="ok">Sep 21</span>  Lab 2 + Quiz 1 Due
+<span class="ok">Sep 28</span>  Lab 3 + Discussion 2 + Quiz 2 Due
+<span class="err">Oct 28</span>  MIDTERM EXAM — Parts A & B (in class)
+<span class="ok">Nov 09</span>  Lab 9 Due
+<span class="ok">Nov 11</span>  No Class — Veterans Day (Async Week 10)
+<span class="ok">Dec 07</span>  Quiz 13 Due
+<span class="ok">Dec 10</span>  CAPSTONE REPORT DUE — Altoro Mutual Pentest
+<span class="dim">All deadlines are Sunday 11:59pm ET unless noted.</span>`},
+  enroll:{fn:()=>`<span class="hi">╔══════════════════════════════════════╗</span>
+<span class="hi">║   MISSION ACCEPTED — AGENT BRIEFING  ║</span>
+<span class="hi">╚══════════════════════════════════════╝</span>
+
+Your mission: Learn to think like an attacker.
+Defend systems. Break them ethically. Report findings.
+
+<span class="ok">BEFORE DAY 1:</span>
+  ☐ Install Kali Linux (VirtualBox or VMware)
+  ☐ Create GitHub account with CCP email
+  ☐ Watch Professor Messer: What is Ethical Hacking?
+  ☐ Read Course Expectations in START HERE module
+  ☐ Bookmark kali.org/docs
+
+<span class="warn">REMEMBER: All hacking in this course is on</span>
+<span class="warn">authorized systems only. Real attacks = real crimes.</span>
+
+<span class="ok">Welcome to CIS 274. See you September 8th.</span>
+                              — Prof. S. Chang`},
+  clear:{fn:()=>{termOutput.innerHTML='';return null}},
+};
+
+function addLine(html){
+  const d=document.createElement('div');
+  d.innerHTML=html;
+  termOutput.appendChild(d);
+  termBody.scrollTop=termBody.scrollHeight;
+}
+
+// Welcome message
+addLine(`<span class="dim">CIS 274 Agent Terminal v2.74 — Community College of Philadelphia</span>`);
+addLine(`<span class="dim">Type <span class="cmd">help</span> to see available commands.</span>`);
+addLine(``);
+
+termInput.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const cmd=termInput.value.trim().toLowerCase();
+  if(!cmd)return;
+  addLine(`<span class="cmd">cis274@ccp:~$</span> ${termInput.value.trim()}`);
+  termInput.value='';
+  if(cmd in COMMANDS){
+    const res=COMMANDS[cmd].fn();
+    if(res!==null){setTimeout(()=>{addLine(res);addLine('')},60)}
+  } else {
+    addLine(`<span class="err">command not found: ${cmd}</span> — type <span class="cmd">help</span> for options`);
+    addLine('');
+  }
+});
+
+// ── THREAT GLOBE ────────────────────────────────────────────────
+(function(){
+  const c=document.getElementById('globe-canvas');
+  const ctx=c.getContext('2d');
+  const W=380,H=380,R=140,cx=W/2,cy=H/2;
+  let angle=0;
+
+  const cities=[
+    {name:'Philadelphia',lat:40,lon:-75,color:'#00ff41',home:true},
+    {name:'New York',lat:41,lon:-74,color:'#00ff41'},
+    {name:'London',lat:51,lon:-0,color:'#00e5ff'},
+    {name:'Moscow',lat:56,lon:37,color:'#ff2040'},
+    {name:'Beijing',lat:40,lon:116,color:'#ff2040'},
+    {name:'Seoul',lat:37,lon:127,color:'#ff2040'},
+    {name:'Tehran',lat:36,lon:51,color:'#ff2040'},
+    {name:'Lagos',lat:7,lon:3,color:'#ffaa00'},
+    {name:'São Paulo',lat:-24,lon:-47,color:'#00e5ff'},
+    {name:'Tokyo',lat:36,lon:140,color:'#00e5ff'},
+    {name:'Sydney',lat:-34,lon:151,color:'#00e5ff'},
+    {name:'Dubai',lat:25,lon:55,color:'#ffaa00'},
+  ];
+
+  function latLonTo3D(lat,lon){
+    const phi=(90-lat)*Math.PI/180;
+    const theta=(lon+angle)*Math.PI/180;
+    return{x:R*Math.sin(phi)*Math.cos(theta),y:R*Math.cos(phi),z:R*Math.sin(phi)*Math.sin(theta)};
+  }
+
+  function project(p){return{x:cx+p.x,y:cy-p.y,z:p.z}}
+
+  const attacks=[];
+  function spawnAttack(){
+    const attackers=cities.filter(c=>['Moscow','Beijing','Seoul','Tehran'].includes(c.name));
+    const defenders=cities.filter(c=>['Philadelphia','New York','London'].includes(c.name));
+    const src=attackers[Math.floor(Math.random()*attackers.length)];
+    const dst=defenders[Math.floor(Math.random()*defenders.length)];
+    attacks.push({src,dst,progress:0,speed:0.004+Math.random()*0.003});
+  }
+  setInterval(spawnAttack,1800);spawnAttack();
+
+  function drawGlobe(){
+    ctx.clearRect(0,0,W,H);
+    // Globe base
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+    const grad=ctx.createRadialGradient(cx-30,cy-30,10,cx,cy,R);
+    grad.addColorStop(0,'#0a1a0a');grad.addColorStop(1,'#000500');
+    ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle='rgba(0,255,65,0.15)';ctx.lineWidth=1;ctx.stroke();
+
+    // Grid lines
+    for(let lat=-60;lat<=60;lat+=30){
+      ctx.beginPath();let first=true;
+      for(let lon=-180;lon<=180;lon+=5){
+        const p=project(latLonTo3D(lat,lon));
+        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false}
+        else first=true;
+      }
+      ctx.strokeStyle='rgba(0,255,65,0.08)';ctx.lineWidth=0.5;ctx.stroke();
+    }
+    for(let lon=-180;lon<=180;lon+=30){
+      ctx.beginPath();let first=true;
+      for(let lat=-90;lat<=90;lat+=5){
+        const p=project(latLonTo3D(lat,lon));
+        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false}
+        else first=true;
+      }
+      ctx.strokeStyle='rgba(0,255,65,0.08)';ctx.lineWidth=0.5;ctx.stroke();
+    }
+
+    // Attack arcs
+    attacks.forEach((atk,i)=>{
+      atk.progress+=atk.speed;
+      if(atk.progress>1){attacks.splice(i,1);return}
+      const s3=latLonTo3D(atk.src.lat,atk.src.lon);
+      const d3=latLonTo3D(atk.dst.lat,atk.dst.lon);
+      if(s3.z<0&&d3.z<0)return;
+      const sp=project(s3),dp=project(d3);
+      const mx=(sp.x+dp.x)/2,my=(sp.y+dp.y)/2-60;
+      const t=atk.progress;
+      const px=Math.pow(1-t,2)*sp.x+2*(1-t)*t*mx+Math.pow(t,2)*dp.x;
+      const py=Math.pow(1-t,2)*sp.y+2*(1-t)*t*my+Math.pow(t,2)*dp.y;
+      ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,32,64,0.9)';ctx.fill();
+      ctx.shadowColor='#ff2040';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+    });
+
+    // City dots
+    cities.forEach(city=>{
+      const p=project(latLonTo3D(city.lat,city.lon));
+      if(p.z<0)return;
+      ctx.beginPath();ctx.arc(p.x,p.y,city.home?5:3,0,Math.PI*2);
+      ctx.fillStyle=city.color;ctx.fill();
+      if(city.home){
+        ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);
+        ctx.strokeStyle='rgba(0,255,65,0.4)';ctx.lineWidth=1;ctx.stroke();
+      }
+    });
+
+    angle+=0.15;
+    requestAnimationFrame(drawGlobe);
+  }
+  drawGlobe();
+})();
+
+// ── THREAT FEED ─────────────────────────────────────────────────
+const threatData=[
+  {src:'CN-Beijing',dst:'US-Philly',type:'SQLi'},
+  {src:'RU-Moscow',dst:'US-NYC',type:'RCE'},
+  {src:'KP-Pyongyang',dst:'UK-London',type:'Phishing'},
+  {src:'IR-Tehran',dst:'US-DC',type:'DDoS'},
+  {src:'CN-Shanghai',dst:'AU-Sydney',type:'MITM'},
+  {src:'RU-SPb',dst:'DE-Berlin',type:'Ransomware'},
+  {src:'NG-Lagos',dst:'US-Chicago',type:'BEC'},
+  {src:'BR-SaoPaulo',dst:'US-Miami',type:'Carding'},
+  {src:'CN-Chengdu',dst:'JP-Tokyo',type:'APT'},
+  {src:'RU-Volgograd',dst:'FR-Paris',type:'C2'},
+];
+let threatIdx=0;
+function addThreat(){
+  const feed=document.getElementById('threatFeed');
+  if(feed.children.length>6)feed.removeChild(feed.firstChild);
+  const t=threatData[threatIdx%threatData.length];threatIdx++;
+  const now=new Date();
+  const time=`${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  const div=document.createElement('div');
+  div.className='threat-item';
+  div.style.animationDelay='0s';
+  div.innerHTML=`<span class="threat-dot"></span><span class="threat-src">${t.src}</span><span class="threat-arrow">→</span><span class="threat-dst">${t.dst}</span><span class="threat-type">${t.type}</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">${time}</span>`;
+  feed.appendChild(div);
+}
+addThreat();setInterval(addThreat,2200);
+
+// ── SKILL TREE ───────────────────────────────────────────────────
+const skills=[
+  {week:1,icon:'🐉',name:'Kali Linux\nFundamentals',state:'unlocked'},
+  {week:2,icon:'🔐',name:'Linux II +\nPre-Engagement',state:'unlocked'},
+  {week:3,icon:'🔍',name:'Recon &\nManual OSINT',state:'current'},
+  {week:4,icon:'📡',name:'Scanning &\nVuln ID',state:'locked'},
+  {week:5,icon:'💥',name:'Manual\nExploitation',state:'locked'},
+  {week:6,icon:'🕸️',name:'Web-Based\nAttacks',state:'locked'},
+  {week:7,icon:'👻',name:'Post-Exploit\n+ Evasion',state:'locked'},
+  {week:8,icon:'🎯',name:'MIDTERM\nParts A+B',state:'locked'},
+  {week:9,icon:'🤖',name:'Automated\nScanning+AI',state:'locked'},
+  {week:10,icon:'🧠',name:'AI-Guided\nExploitation',state:'locked'},
+  {week:11,icon:'☠️',name:'APT Sim +\nAI Kill Chain',state:'locked'},
+  {week:12,icon:'🎭',name:'AI Social\nEngineering',state:'locked'},
+  {week:13,icon:'📋',name:'Capstone &\nSynthesis',state:'locked'},
+];
+
+const grid=document.getElementById('treeGrid');
+skills.forEach((s,i)=>{
+  const div=document.createElement('div');
+  div.className=`skill-node ${s.state}`;
+  div.title=`Week ${s.week}: ${s.name.replace('\n',' ')}`;
+  div.innerHTML=`<span class="skill-week">WK ${String(s.week).padStart(2,'0')}</span><span class="skill-icon">${s.icon}</span><span class="skill-name">${s.name.replace('\n','<br>')}</span>`;
+  if(i<skills.length-1){
+    const conn=document.createElement('div');
+    conn.className='skill-connector';
+    conn.textContent='›';
+    div.appendChild(conn);
+  }
+  grid.appendChild(div);
+});
+
+// ── COUNTDOWN CLOCK ──────────────────────────────────────────────
+function updateClock(){
+  const target=new Date('2026-09-08T08:00:00');
+  const now=new Date();
+  const diff=target-now;
+  if(diff<=0){
+    document.getElementById('cd-days').textContent='00';
+    document.getElementById('cd-hours').textContent='00';
+    document.getElementById('cd-mins').textContent='00';
+    document.getElementById('cd-secs').textContent='00';
+    return;
+  }
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  document.getElementById('cd-days').textContent=String(d).padStart(2,'0');
+  document.getElementById('cd-hours').textContent=String(h).padStart(2,'0');
+  document.getElementById('cd-mins').textContent=String(m).padStart(2,'0');
+  document.getElementById('cd-secs').textContent=String(s).padStart(2,'0');
+}
+updateClock();setInterval(updateClock,1000);
+
+// ── REPORT DECLASSIFY ────────────────────────────────────────────
+function revealReport(){
+  const preview=document.getElementById('reportPreview');
+  const label=document.getElementById('reportLabel');
+  preview.classList.add('revealed');
+  label.classList.add('hidden');
+  // Update report content with unredacted version
+  preview.querySelector('.report-content').innerHTML=`<span style="color:#C69214;font-weight:bold">ALTORO MUTUAL SECURITY ASSESSMENT</span><br>
+PENETRATION TEST REPORT — CONFIDENTIAL<br>
+Prepared by: CIS 274 Student, Fall 2026<br>
+Date: December 10, 2026<br>
+─────────────────────────────────────<br>
+<span style="color:#fff">EXECUTIVE SUMMARY</span><br>
+Conducted black-box pentest of Altoro<br>
+Mutual external attack surface. Found<br>
+multiple critical vulnerabilities.<br>
+─────────────────────────────────────<br>
+<span style="color:#ff2040">FINDINGS SUMMARY</span><br>
+Critical:  SQL Injection (CVE-level)<br>
+High:      Reflected XSS × 3<br>
+Medium:    Exposed admin panel<br>
+Low:       Verbose error messages<br>
+─────────────────────────────────────<br>
+<span style="color:#00ff41">ATTACK CHAIN</span><br>
+Recon → SQLi → Auth Bypass → Admin<br>
+─────────────────────────────────────<br>
+<span style="color:#00e5ff">STATUS: YOU WILL BUILD THIS.</span>`;
+}
+
+// ── SCROLL ANIMATIONS ────────────────────────────────────────────
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.style.opacity='1';
+      e.target.style.transform='translateY(0)';
+    }
+  });
+},{threshold:0.1});
+
+document.querySelectorAll('section').forEach(s=>{
+  s.style.opacity='0';
+  s.style.transform='translateY(30px)';
+  s.style.transition='opacity 0.8s ease, transform 0.8s ease';
+  observer.observe(s);
+});
+// Boot section visible immediately
+document.getElementById('boot').style.opacity='1';
+document.getElementById('boot').style.transform='translateY(0)';
+</script>
+</body>
+</html>
