@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIS 274 — Ethical Hacking & Penetration Testing</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>CIS 274 — Ethical Hacking &amp; Penetration Testing</title>
+<link href="CIS%20274%20%E2%80%94%20Ethical%20Hacking%20&amp;%20Penetration%20Testing%20v1.%20ADA_files/css2.css" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --green:#00ff41;--green-dim:#00a829;--green-dark:#003d0e;
+  --green:#00ff41;--green-dim:#00cc44;--green-dark:#003d0e;
   --gold:#C69214;--gold-dim:#8a6510;
   --red:#ff2040;--cyan:#00e5ff;--white:#ffffff;
   --bg:#000000;--bg2:#050505;--bg3:#0a0a0a;
@@ -203,30 +203,62 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
   .prof-meta{justify-content:center}
   .stat-row{grid-template-columns:repeat(3,1fr)}
 }
-</style>
+
+/* ── STICKY NAV ── */
+#skipnav{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+#skipnav:focus{position:fixed;top:0;left:0;width:100%;z-index:9999;background:var(--green);color:#000;font-family:var(--font-mono);font-size:13px;padding:10px 20px;text-align:center;text-decoration:none}
+#sitenav{position:fixed;top:0;left:0;width:100%;z-index:1000;background:rgba(0,0,0,0.92);border-bottom:1px solid #00cc44;backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:44px}
+#sitenav .nav-brand{font-family:var(--font-display);font-size:0.75rem;font-weight:700;color:#00cc44;letter-spacing:0.15em;white-space:nowrap}
+#sitenav nav{display:flex;gap:4px}
+#sitenav nav a{font-family:var(--font-mono);font-size:11px;color:#555;text-decoration:none;padding:6px 10px;border:1px solid transparent;letter-spacing:0.08em;transition:all 0.2s;white-space:nowrap}
+#sitenav nav a:hover,#sitenav nav a:focus{color:#00cc44;border-color:#00cc44;outline:none}
+#sitenav nav a.active{color:#00cc44;border-color:#1a1a1a}
+body{padding-top:44px}
+#boot{min-height:calc(100vh - 44px)}
+/* ── ADA: focus styles ── */
+:focus-visible{outline:2px solid #00cc44;outline-offset:3px}
+button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #00cc44;outline-offset:3px}
+/* ── ADA: reduced motion ── */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
+  #particles{display:none}
+}
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
 </head>
 <body>
 
-<canvas id="particles"></canvas>
+<a href="#boot" id="skipnav">Skip to main content</a>
+<header id="sitenav" role="banner">
+  <span class="nav-brand" aria-label="CIS 274 Navigation">CIS&nbsp;274</span>
+  <nav aria-label="Course sections">
+    <a href="#boot" aria-label="Go to course introduction" class="active">Intro</a>
+    <a href="#terminal-section" aria-label="Go to interactive terminal">Terminal</a>
+    <a href="#globe-section" aria-label="Go to threat map">Threats</a>
+    <a href="#skilltree" aria-label="Go to skill tree">Skills</a>
+    <a href="#countdown-section" aria-label="Go to mission countdown">Countdown</a>
+    <a href="#prof-section" aria-label="Go to instructor information">Prof. Chang</a>
+  </nav>
+</header>
+<canvas id="particles" role="presentation" aria-hidden="true" width="1536" height="703"></canvas>
 
 <!-- ══════════════════════════════════════════
      SECTION 1 — CINEMATIC BOOT SEQUENCE
 ══════════════════════════════════════════ -->
-<section id="boot">
+<main id="main-content"><section id="boot" style="opacity: 1; transform: translateY(0px); transition: opacity 0.8s, transform 0.8s;">
   <div class="boot-frame" id="bootFrame">
-    <div id="termLines"></div>
+    <div id="termLines"><div class="terminal-line dim active">BIOS v2.74 ... OK</div><div class="terminal-line dim active">Loading kernel modules ... OK</div><div class="terminal-line dim active">Initializing network stack ... OK</div><div class="terminal-line warn active">WARNING: Unauthorized access is prohibited under 18 U.S.C. § 1030</div><div class="terminal-line dim active">Mounting encrypted volume ... OK</div><div class="terminal-line prompt active">&gt; Establishing secure connection to CCP Canvas ...</div><div class="terminal-line info active">CONNECTION ESTABLISHED — TLS 1.3 — AES-256-GCM</div><div class="terminal-line prompt active">&gt; Authenticating operator ...</div><div class="terminal-line info active">OPERATOR VERIFIED — CLEARANCE LEVEL: STUDENT</div><div class="terminal-line prompt active">&gt; Loading mission parameters ...</div><div class="terminal-line info active">COURSE: CIS 274 — ETHICAL HACKING &amp; PENETRATION TESTING</div><div class="terminal-line info active">SEMESTER: FALL 2026 | INSTITUTION: CCP</div><div class="terminal-line prompt active">&gt; System ready.</div></div>
   </div>
 
-  <h1 class="hero-title" id="heroTitle">ETHICAL HACKING<br><span>&amp; PEN TESTING</span></h1>
-  <p class="hero-sub" id="heroSub">COMMUNITY COLLEGE OF PHILADELPHIA &nbsp;·&nbsp; CIS 274 &nbsp;·&nbsp; FALL 2026</p>
+  <h1 class="hero-title visible" id="heroTitle">ETHICAL HACKING<br><span>&amp; PEN TESTING</span></h1>
+  <p class="hero-sub visible" id="heroSub">COMMUNITY COLLEGE OF PHILADELPHIA &nbsp;·&nbsp; CIS 274 &nbsp;·&nbsp; FALL 2026</p>
 
-  <div class="course-badge" id="courseBadge">
+  <div class="course-badge visible" id="courseBadge">
     <span class="badge-dot"></span>
     CIS 274 950 HYBAS 15A FA26
     <span class="badge-dot" style="animation-delay:0.5s"></span>
   </div>
 
-  <div class="stat-row" id="statRow">
+  <div class="stat-row visible" id="statRow">
     <div class="stat-box"><span class="stat-num">15</span><span class="stat-label">Weeks</span></div>
     <div class="stat-box"><span class="stat-num">10</span><span class="stat-label">Quizzes</span></div>
     <div class="stat-box"><span class="stat-num">13</span><span class="stat-label">Labs</span></div>
@@ -238,7 +270,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 <!-- ══════════════════════════════════════════
      SECTION 2 — INTERACTIVE TERMINAL
 ══════════════════════════════════════════ -->
-<section id="terminal-section">
+<section id="terminal-section" style="opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s;">
   <div class="section-header">
     <span class="section-tag">// section_02 :: interactive</span>
     <h2 class="section-title">AGENT <span>TERMINAL</span></h2>
@@ -252,7 +284,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
       <span class="t-title">cis274@ccp:~$ — SECURE SHELL</span>
     </div>
     <div class="terminal-body" id="termBody">
-      <div class="t-output" id="termOutput"></div>
+      <div class="t-output" id="termOutput"><div><span class="dim">CIS 274 Agent Terminal v2.74 — Community College of Philadelphia</span></div><div><span class="dim">Type <span class="cmd">help</span> to see available commands.</span></div><div></div></div>
     </div>
     <div class="t-input-row">
       <span class="t-prompt-label">cis274@ccp:~$&nbsp;</span>
@@ -265,7 +297,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 <!-- ══════════════════════════════════════════
      SECTION 3 — THREAT GLOBE
 ══════════════════════════════════════════ -->
-<section id="globe-section">
+<section id="globe-section" style="opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s;">
   <div class="section-header">
     <span class="section-tag">// section_03 :: live_threat_feed</span>
     <h2 class="section-title">GLOBAL <span>THREAT MAP</span></h2>
@@ -276,7 +308,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
       <p class="globe-desc">Every second, thousands of cyberattacks cross the globe. <strong>This is what you will learn to defend against — and simulate legally.</strong> CIS 274 trains you to think like the attacker.</p>
       <div class="threat-feed">
         <div class="feed-title">● LIVE ATTACK SIMULATION FEED</div>
-        <div id="threatFeed"></div>
+        <div id="threatFeed"><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">KP-Pyongyang</span><span class="threat-arrow">→</span><span class="threat-dst">UK-London</span><span class="threat-type">Phishing</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:34</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">IR-Tehran</span><span class="threat-arrow">→</span><span class="threat-dst">US-DC</span><span class="threat-type">DDoS</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:36</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">CN-Shanghai</span><span class="threat-arrow">→</span><span class="threat-dst">AU-Sydney</span><span class="threat-type">MITM</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:38</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">RU-SPb</span><span class="threat-arrow">→</span><span class="threat-dst">DE-Berlin</span><span class="threat-type">Ransomware</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:41</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">NG-Lagos</span><span class="threat-arrow">→</span><span class="threat-dst">US-Chicago</span><span class="threat-type">BEC</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:43</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">BR-SaoPaulo</span><span class="threat-arrow">→</span><span class="threat-dst">US-Miami</span><span class="threat-type">Carding</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:45</span></div><div class="threat-item" style="animation-delay: 0s;"><span class="threat-dot"></span><span class="threat-src">CN-Chengdu</span><span class="threat-arrow">→</span><span class="threat-dst">JP-Tokyo</span><span class="threat-type">APT</span><span style="font-family:var(--font-mono);font-size:10px;color:#2a2a2a;margin-left:8px">11:14:47</span></div></div>
       </div>
     </div>
   </div>
@@ -285,13 +317,13 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 <!-- ══════════════════════════════════════════
      SECTION 4 — SKILL TREE
 ══════════════════════════════════════════ -->
-<section id="skilltree">
+<section id="skilltree" style="opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s;">
   <div class="section-header">
     <span class="section-tag">// section_04 :: skill_progression</span>
     <h2 class="section-title">YOUR <span>SKILL TREE</span></h2>
   </div>
 
-  <div class="tree-grid" id="treeGrid"></div>
+  <div class="tree-grid" id="treeGrid"><div class="skill-node unlocked" title="Week 1: Kali Linux Fundamentals"><span class="skill-week">WK 01</span><span class="skill-icon">🐉</span><span class="skill-name">Kali Linux<br>Fundamentals</span><div class="skill-connector">›</div></div><div class="skill-node unlocked" title="Week 2: Linux II + Pre-Engagement"><span class="skill-week">WK 02</span><span class="skill-icon">🔐</span><span class="skill-name">Linux II +<br>Pre-Engagement</span><div class="skill-connector">›</div></div><div class="skill-node current" title="Week 3: Recon &amp; Manual OSINT"><span class="skill-week">WK 03</span><span class="skill-icon">🔍</span><span class="skill-name">Recon &amp;<br>Manual OSINT</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 4: Scanning &amp; Vuln ID"><span class="skill-week">WK 04</span><span class="skill-icon">📡</span><span class="skill-name">Scanning &amp;<br>Vuln ID</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 5: Manual Exploitation"><span class="skill-week">WK 05</span><span class="skill-icon">💥</span><span class="skill-name">Manual<br>Exploitation</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 6: Web-Based Attacks"><span class="skill-week">WK 06</span><span class="skill-icon">🕸️</span><span class="skill-name">Web-Based<br>Attacks</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 7: Post-Exploit + Evasion"><span class="skill-week">WK 07</span><span class="skill-icon">👻</span><span class="skill-name">Post-Exploit<br>+ Evasion</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 8: MIDTERM Parts A+B"><span class="skill-week">WK 08</span><span class="skill-icon">🎯</span><span class="skill-name">MIDTERM<br>Parts A+B</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 9: Automated Scanning+AI"><span class="skill-week">WK 09</span><span class="skill-icon">🤖</span><span class="skill-name">Automated<br>Scanning+AI</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 10: AI-Guided Exploitation"><span class="skill-week">WK 10</span><span class="skill-icon">🧠</span><span class="skill-name">AI-Guided<br>Exploitation</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 11: APT Sim + AI Kill Chain"><span class="skill-week">WK 11</span><span class="skill-icon">☠️</span><span class="skill-name">APT Sim +<br>AI Kill Chain</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 12: AI Social Engineering"><span class="skill-week">WK 12</span><span class="skill-icon">🎭</span><span class="skill-name">AI Social<br>Engineering</span><div class="skill-connector">›</div></div><div class="skill-node locked" title="Week 13: Capstone &amp; Synthesis"><span class="skill-week">WK 13</span><span class="skill-icon">📋</span><span class="skill-name">Capstone &amp;<br>Synthesis</span></div></div>
 
   <div class="tree-legend">
     <div class="legend-item"><div class="legend-dot" style="border-color:var(--green-dim);background:rgba(0,255,65,0.05)"></div><span style="font-size:11px;color:#555">Unlocked</span></div>
@@ -303,7 +335,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 <!-- ══════════════════════════════════════════
      SECTION 5 — MISSION COUNTDOWN
 ══════════════════════════════════════════ -->
-<section id="countdown-section">
+<section id="countdown-section" style="opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s;">
   <div class="section-header">
     <span class="section-tag">// section_05 :: mission_brief</span>
     <h2 class="section-title">MISSION <span>COUNTDOWN</span></h2>
@@ -312,10 +344,10 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
   <div class="countdown-wrapper">
     <p class="mission-date">▶ MISSION START DATE: SEPTEMBER 8, 2026 · 0800 HRS</p>
     <div class="clock-display">
-      <div class="clock-unit"><span class="clock-num" id="cd-days">--</span><span class="clock-label">Days</span></div>
-      <div class="clock-unit"><span class="clock-num" id="cd-hours">--</span><span class="clock-label">Hours</span></div>
-      <div class="clock-unit"><span class="clock-num" id="cd-mins">--</span><span class="clock-label">Minutes</span></div>
-      <div class="clock-unit"><span class="clock-num" id="cd-secs">--</span><span class="clock-label">Seconds</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-days">94</span><span class="clock-label">Days</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-hours">20</span><span class="clock-label">Hours</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-mins">45</span><span class="clock-label">Minutes</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cd-secs">10</span><span class="clock-label">Seconds</span></div>
     </div>
 
     <div class="two-col">
@@ -334,7 +366,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
         <div class="check-item">
           <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
           </div>
-          <div>Watch: <a href="https://www.professormesser.com" target="_blank"><strong>What is Ethical Hacking?</strong></a> — Professor Messer (8 min)</div>
+          <div>Watch: <a href="https://www.professormesser.com/" target="_blank"><strong>What is Ethical Hacking?</strong></a> — Professor Messer (8 min)</div>
         </div>
         <div class="check-item">
           <div class="check-box" onclick="this.classList.toggle('done');this.textContent=this.classList.contains('done')?'✓':''">
@@ -391,7 +423,7 @@ REMEDIATION ROADMAP<br>
 <!-- ══════════════════════════════════════════
      SECTION 6 — PROFESSOR FOOTER
 ══════════════════════════════════════════ -->
-<section id="prof-section">
+<section id="prof-section" style="opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s;">
   <div class="prof-card">
     <div class="prof-avatar">SC</div>
     <div>
@@ -826,6 +858,25 @@ document.querySelectorAll('section').forEach(s=>{
 // Boot section visible immediately
 document.getElementById('boot').style.opacity='1';
 document.getElementById('boot').style.transform='translateY(0)';
+
+// STICKY NAV — highlight active section on scroll
+(function(){
+  const sections = ['boot','terminal-section','globe-section','skilltree','countdown-section','prof-section'];
+  const links = document.querySelectorAll('#sitenav nav a');
+  function updateNav(){
+    let current = sections[0];
+    sections.forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && window.scrollY >= el.offsetTop - 60) current = id;
+    });
+    links.forEach(a=>{
+      a.classList.toggle('active', a.getAttribute('href') === '#'+current);
+    });
+  }
+  window.addEventListener('scroll', updateNav, {passive:true});
+  updateNav();
+})();
 </script>
-</body>
-</html>
+</main>
+
+</body></html>
