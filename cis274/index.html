@@ -76,7 +76,11 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 .section-title{font-family:var(--font-display);font-size:clamp(1.4rem,3vw,2.2rem);font-weight:700;color:var(--white);letter-spacing:0.05em}
 .section-title span{color:var(--green)}
 
-.terminal-wrapper{max-width:800px;margin:0 auto;border:1px solid var(--green-dim);background:#000;font-family:var(--font-mono)}
+.terminal-wrapper{max-width:800px;margin:0 auto;border:1px solid var(--green-dim);background:#000;font-family:var(--font-mono);position:relative}
+.term-activate{position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(2px);z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;transition:all 0.3s}
+.term-activate:hover{background:rgba(0,15,0,0.5)}
+.term-activate-text{font-family:var(--font-mono);font-size:13px;color:var(--green);letter-spacing:0.15em;border:1px solid var(--green-dim);padding:8px 22px;animation:blink 1.2s infinite}
+.term-activate-sub{font-family:var(--font-mono);font-size:10px;color:var(--green-dim)}
 .terminal-titlebar{background:var(--green-dark);padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--green-dim)}
 .t-dot{width:10px;height:10px;border-radius:50%}
 .t-red{background:#ff5f57}.t-yellow{background:#febc2e}.t-green{background:#28c840}
@@ -559,6 +563,26 @@ const termOutput=document.getElementById('termOutput');
 const termInput=document.getElementById('termInput');
 const termBody=document.getElementById('termBody');
 
+function activateTerminal(){
+  const overlay=document.getElementById('termActivate');
+  if(overlay){overlay.style.display='none';}
+  termInput.focus();
+  let ghost='help';let i=0;
+  termInput.value='';
+  const typer=setInterval(()=>{
+    if(i<ghost.length){termInput.value+=ghost[i];i++;}
+    else{
+      clearInterval(typer);
+      setTimeout(()=>{
+        addLine('<span class="cmd">cis274@ccp:~$</span> help');
+        termInput.value='';
+        const res=COMMANDS['help'].fn();
+        if(res!==null){setTimeout(()=>{addLine(res);addLine('');},60);}
+      },400);
+    }
+  },80);
+}
+
 const COMMANDS={
   help:{fn:()=>`<span class="hi">Available commands:</span>
   <span class="cmd">whoami</span>    — identify yourself
@@ -995,6 +1019,7 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
 
 
 
