@@ -303,7 +303,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <h2 class="section-title">AGENT <span>TERMINAL</span></h2>
   </div>
 
-  <div class="terminal-wrapper" id="termWrapper" style="position:relative;cursor:text;"><div id="termActivate" onclick="focusTerminal()" style="position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,8,0,0.78);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;transition:opacity 0.35s ease;"><span style="font-size:2.2rem;line-height:1;">&#x2328;&#xFE0F;</span><span style="font-family:monospace;font-size:14px;color:#00ff41;letter-spacing:0.12em;padding:10px 26px;border:1px solid #00cc44;background:rgba(0,25,0,0.95);">&#9654; CLICK TO ACTIVATE TERMINAL</span><span style="font-family:monospace;font-size:11px;color:#00cc44;opacity:0.75;">try: help &amp;nbsp;&middot;&amp;nbsp; whoami &amp;nbsp;&middot;&amp;nbsp; nmap &amp;nbsp;&middot;&amp;nbsp; tools</span></div>
+  <div class="terminal-wrapper" id="termWrapper" style="position:relative;cursor:text;min-height:420px;"><div id="termActivate" onclick="focusTerminal()" style="position:absolute;top:42px;left:0;right:0;bottom:0;background:rgba(0,8,0,0.78);z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;cursor:pointer;transition:opacity 0.35s ease;"><span style="font-size:2.2rem;line-height:1;">&#x2328;&#xFE0F;</span><span style="font-family:monospace;font-size:14px;color:#00ff41;letter-spacing:0.12em;padding:10px 26px;border:1px solid #00cc44;background:rgba(0,25,0,0.95);">&#9654; CLICK TO ACTIVATE TERMINAL</span><span style="font-family:monospace;font-size:11px;color:#00cc44;opacity:0.75;">try: &nbsp; help &nbsp;·&nbsp; whoami &nbsp;·&nbsp; nmap &nbsp;·&nbsp; tools</span></div>
     <div class="terminal-titlebar">
       <span class="t-dot t-red"></span>
       <span class="t-dot t-yellow"></span>
@@ -1033,6 +1033,7 @@ function focusTerminal(){
 </main>
 
 </body></html>
+
 
 
 
