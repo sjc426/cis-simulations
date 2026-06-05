@@ -563,26 +563,6 @@ const termOutput=document.getElementById('termOutput');
 const termInput=document.getElementById('termInput');
 const termBody=document.getElementById('termBody');
 
-function activateTerminal(){
-  const overlay=document.getElementById('termActivate');
-  if(overlay){overlay.style.display='none';}
-  termInput.focus();
-  let ghost='help';let i=0;
-  termInput.value='';
-  const typer=setInterval(()=>{
-    if(i<ghost.length){termInput.value+=ghost[i];i++;}
-    else{
-      clearInterval(typer);
-      setTimeout(()=>{
-        addLine('<span class="cmd">cis274@ccp:~$</span> help');
-        termInput.value='';
-        const res=COMMANDS['help'].fn();
-        if(res!==null){setTimeout(()=>{addLine(res);addLine('');},60);}
-      },400);
-    }
-  },80);
-}
-
 const COMMANDS={
   help:{fn:()=>`<span class="hi">Available commands:</span>
   <span class="cmd">whoami</span>    — identify yourself
@@ -699,6 +679,27 @@ termInput.addEventListener('keydown',e=>{
   }
 });
 
+
+// ── ACTIVATE TERMINAL (must be after COMMANDS) ───────────────────
+function activateTerminal(){
+  const overlay=document.getElementById('termActivate');
+  if(overlay){overlay.style.display='none';}
+  termInput.focus();
+  let ghost='help';let i=0;
+  termInput.value='';
+  const typer=setInterval(()=>{
+    if(i<ghost.length){termInput.value+=ghost[i];i++;}
+    else{
+      clearInterval(typer);
+      setTimeout(()=>{
+        addLine('<span class="cmd">cis274@ccp:~$</span> help');
+        termInput.value='';
+        const res=COMMANDS['help'].fn();
+        if(res!==null){setTimeout(()=>{addLine(res);addLine('');},60);}
+      },400);
+    }
+  },80);
+}
 // ── THREAT GLOBE ────────────────────────────────────────────────
 (function(){
   const c=document.getElementById('globe-canvas');
@@ -1019,6 +1020,7 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
 
 
 
