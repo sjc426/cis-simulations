@@ -29,7 +29,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 /* ══════════════════════════════════════════
    SECTION 1 — CINEMATIC BOOT SEQUENCE
 ══════════════════════════════════════════ */
-#boot{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;border-bottom:1px solid var(--border)}
+#boot{position:relative;z-index:10;min-height:auto;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;border-bottom:1px solid var(--border)}
 
 .boot-frame{width:100%;max-width:900px;border:1px solid var(--green-dim);background:rgba(0,10,0,0.6);padding:40px;position:relative}
 .boot-frame::before{content:'CIS274.SYS';position:absolute;top:-11px;left:20px;background:var(--bg);padding:0 8px;font-family:var(--font-mono);font-size:11px;color:var(--green-dim)}
@@ -95,7 +95,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 .t-output .ok{color:var(--cyan)}
 .t-input-row{display:flex;align-items:center;gap:8px;padding:10px 20px;border-top:1px solid var(--border2)}
 .t-prompt-label{font-size:13px;color:var(--green);white-space:nowrap}
-.t-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-mono);font-size:13px;color:var(--white);caret-color:var(--green);cursor:crosshair}
+.t-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font-mono);font-size:13px;color:var(--white);caret-color:var(--green);cursor:text}
 .t-hint{text-align:center;margin-top:16px;font-family:var(--font-mono);font-size:11px;color:#2a2a2a}
 .t-hint span{color:var(--green-dim)}
 
@@ -241,7 +241,7 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
 #sitenav nav a:hover,#sitenav nav a:focus{color:#00cc44;border-color:#00cc44;outline:none}
 #sitenav nav a.active{color:#00cc44;border-color:#1a1a1a}
 body{padding-top:44px}
-#boot{min-height:calc(100vh - 44px)}
+#boot{min-height:auto}
 /* ── ADA: focus styles ── */
 :focus-visible{outline:2px solid #00cc44;outline-offset:3px}
 button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #00cc44;outline-offset:3px}
@@ -990,14 +990,16 @@ const observer=new IntersectionObserver(entries=>{
 },{threshold:0.1});
 
 document.querySelectorAll('section').forEach(s=>{
-  s.style.opacity='0';
-  s.style.transform='translateY(30px)';
-  s.style.transition='opacity 0.8s ease, transform 0.8s ease';
+  if(s.id !== 'boot'){
+    s.style.opacity='0';
+    s.style.transform='translateY(30px)';
+    s.style.transition='opacity 0.8s ease, transform 0.8s ease';
+  } else {
+    s.style.opacity='1';
+    s.style.transform='translateY(0)';
+  }
   observer.observe(s);
 });
-// Boot section visible immediately
-document.getElementById('boot').style.opacity='1';
-document.getElementById('boot').style.transform='translateY(0)';
 
 // STICKY NAV — highlight active section on scroll
 (function(){
@@ -1020,6 +1022,7 @@ document.getElementById('boot').style.transform='translateY(0)';
 </main>
 
 </body></html>
+
 
 
 
