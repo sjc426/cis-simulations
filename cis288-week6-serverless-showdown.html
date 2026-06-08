@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 288 — Serverless Showdown: Deploy Without a Server</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #080c10;
+  --surface:    #0e1419;
+  --surface2:   #141c24;
+  --surface3:   #1a2535;
+  --border:     #1e2d3d;
+  --border2:    #2a3d52;
+  --text:       #cdd9e5;
+  --text2:      #768390;
+  --text3:      #3d4f61;
+  --lambda:     #FF9900;
+  --lambda-dim: #2a1800;
+  --az:         #0078D4;
+  --az-dim:     #001830;
+  --gcp:        #4285F4;
+  --gcp-dim:    #001030;
+  --green:      #3fb950;
+  --green-dim:  #0d2216;
+  --red:        #f85149;
+  --red-dim:    #2a0d0d;
+  --yellow:     #e3b341;
+  --yellow-dim: #1f1800;
+  --cyan:       #39c5cf;
+  --cyan-dim:   #012428;
+  --purple:     #bc8cff;
+  --purple-dim: #1a0d2e;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Space Grotesk', sans-serif;
+  --r: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCANLINE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.07) 2px, rgba(0,0,0,.07) 4px);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: .4;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,12,16,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+}
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.badge {
+  background: var(--az-dim);
+  border: 1px solid var(--az);
+  color: var(--az);
+  padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .1em;
+}
+.topbar-pill {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 2px 10px; border-radius: 20px;
+  font-size: 10px; color: var(--text2);
+  display: none;
+}
+.topbar-pill.show { display: block; }
+
+/* ── CONTAINER ── */
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 20px 100px;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; animation: rise .4s ease; }
+.screen.on { display: block; }
+@keyframes rise { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+
+/* ═══════════════════════════════════
+   LOGIN
+═══════════════════════════════════ */
+.hero {
+  text-align: center;
+  padding: 56px 0 48px;
+  position: relative;
+}
+
+/* Animated grid background */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: .3;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 40%, transparent 100%);
+}
+
+.hero-icon {
+  font-size: 72px;
+  display: block;
+  margin-bottom: 20px;
+  position: relative;
+  filter: drop-shadow(0 0 30px rgba(255,153,0,.5)) drop-shadow(0 0 60px rgba(0,120,212,.3));
+  animation: pulse-icon 3s ease-in-out infinite;
+}
+@keyframes pulse-icon {
+  0%,100% { filter: drop-shadow(0 0 30px rgba(255,153,0,.5)) drop-shadow(0 0 60px rgba(0,120,212,.3)); }
+  50% { filter: drop-shadow(0 0 50px rgba(255,153,0,.8)) drop-shadow(0 0 80px rgba(66,133,244,.5)); }
+}
+
+.hero h1 {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  margin-bottom: 10px;
+  position: relative;
+  background: linear-gradient(135deg, var(--lambda) 0%, var(--cyan) 50%, var(--az) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .sub {
+  color: var(--text2);
+  font-size: 15px;
+  margin-bottom: 36px;
+  position: relative;
+  font-weight: 400;
+}
+
+/* Provider trio */
+.trio {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 40px;
+  position: relative;
+}
+.trio-chip {
+  padding: 8px 18px;
+  border-radius: 30px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid;
+  letter-spacing: .06em;
+}
+.trio-chip.l  { background: var(--lambda-dim); border-color: var(--lambda); color: var(--lambda); }
+.trio-chip.az { background: var(--az-dim);     border-color: var(--az);     color: var(--az); }
+.trio-chip.g  { background: var(--gcp-dim);    border-color: var(--gcp);    color: var(--gcp); }
+
+/* Login card */
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  max-width: 460px;
+  margin: 0 auto;
+}
+.login-card h2 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.rule-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.rule-box p {
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.65;
+  margin-bottom: 5px;
+}
+.rule-box p:last-child { margin: 0; }
+.rule-box strong { color: var(--text); }
+
+.field { margin-bottom: 18px; }
+.field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 11px 14px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s;
+}
+.field input:focus { border-color: var(--az); }
+.field input::placeholder { color: var(--text3); }
+.field-hint { font-size: 11px; color: var(--text3); font-family: var(--mono); margin-top: 5px; }
+
+.btn-start {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: var(--r);
+  background: linear-gradient(135deg, var(--lambda), #e07a00);
+  color: #000;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .01em;
+}
+.btn-start:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,153,0,.35); }
+.btn-start:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ═══════════════════════════════════
+   GAME SCREEN
+═══════════════════════════════════ */
+.game-toprow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.game-title {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  color: var(--text2);
+}
+.pill-score  { border-color: var(--lambda); color: var(--lambda); background: var(--lambda-dim); }
+.pill-round  { border-color: var(--border2); }
+.pill-streak { border-color: var(--yellow); color: var(--yellow); background: var(--yellow-dim); }
+
+/* Progress */
+.prog-track { height: 2px; background: var(--surface3); border-radius: 2px; margin-bottom: 28px; overflow: hidden; }
+.prog-fill {
+  height: 2px;
+  background: linear-gradient(90deg, var(--lambda), var(--cyan), var(--az));
+  border-radius: 2px;
+  width: 0%;
+  transition: width .6s ease;
+  position: relative;
+}
+.prog-fill::after {
+  content: '';
+  position: absolute;
+  right: 0; top: -2px;
+  width: 6px; height: 6px;
+  background: var(--cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+/* ── QUESTION CARD ── */
+.q-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.q-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lambda), var(--cyan));
+}
+.q-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.q-scenario {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+.q-ask {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.q-badge {
+  display: inline-block;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--yellow);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 4px;
+  margin-top: 14px;
+  letter-spacing: .08em;
+}
+
+/* LIVE TERMINAL — cinematic element */
+.terminal {
+  background: #0a0f0a;
+  border: 1px solid #1a3320;
+  border-radius: var(--r);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 2;
+  overflow: hidden;
+}
+.terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1a3320;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #ff5f56; }
+.dot-y { background: #ffbd2e; }
+.dot-g { background: #27c93f; }
+.terminal-title { font-size: 10px; color: #3d5a3e; letter-spacing: .1em; text-transform: uppercase; }
+.t-line { white-space: pre; }
+.t-green { color: #27c93f; }
+.t-lambda { color: var(--lambda); }
+.t-cyan   { color: var(--cyan); }
+.t-gray   { color: #3d5a3e; }
+.t-red    { color: var(--red); }
+.t-yellow { color: var(--yellow); }
+.cursor { display: inline-block; width: 8px; height: 14px; background: #27c93f; animation: blink .9s step-end infinite; vertical-align: text-bottom; margin-left: 2px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* COLD START METER */
+.cold-meter {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.cold-icon { font-size: 20px; flex-shrink: 0; }
+.cold-label { font-family: var(--mono); font-size: 11px; color: var(--text2); flex: 1; }
+.cold-label strong { color: var(--text); display: block; margin-bottom: 3px; }
+.cold-track { height: 4px; background: var(--surface3); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.cold-fill { height: 4px; border-radius: 2px; transition: width 1s ease; }
+.cold-fill.warm  { background: var(--green); }
+.cold-fill.cool  { background: var(--yellow); }
+.cold-fill.cold  { background: var(--red); }
+
+/* COST TICKER */
+.cost-ticker {
+  background: var(--lambda-dim);
+  border: 1px solid var(--lambda);
+  border-radius: var(--r);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--lambda);
+}
+.cost-ticker .cost-val { font-size: 18px; font-weight: 700; }
+
+/* CHOICES */
+.choices-wrap { margin-bottom: 18px; }
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.choices { display: flex; flex-direction: column; gap: 8px; }
+.choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media(max-width:540px){ .choices-grid { grid-template-columns: 1fr; } }
+
+.choice {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 13px 16px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all .15s;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.choice:hover:not(:disabled) {
+  border-color: var(--az);
+  background: var(--az-dim);
+  transform: translateX(4px);
+}
+.choice:disabled { cursor: default; }
+.choice .c-main { font-weight: 600; }
+.choice .c-sub  { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+.choice.lambda-style { border-left: 3px solid var(--lambda); }
+.choice.az-style     { border-left: 3px solid var(--az); }
+.choice.gcp-style    { border-left: 3px solid var(--gcp); }
+.choice.any-style    { border-left: 3px solid var(--text3); }
+
+.choice.correct { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+.choice.wrong   { border-color: var(--red);   background: var(--red-dim);   color: var(--red); }
+.choice.reveal  { border-color: var(--green); background: var(--green-dim); color: var(--green); opacity: .6; }
+
+/* FEEDBACK */
+.feedback {
+  border-radius: var(--r);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  display: none;
+  animation: rise .25s ease;
+}
+.feedback.on { display: block; }
+.feedback.ok   { background: var(--green-dim);  border: 1px solid var(--green); }
+.feedback.fail { background: var(--red-dim);    border: 1px solid var(--red); }
+.fb-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+.feedback.ok .fb-title   { color: var(--green); }
+.feedback.fail .fb-title { color: var(--red); }
+.fb-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+.fb-code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--cyan);
+  margin-top: 10px;
+  line-height: 1.8;
+}
+
+.btn-next {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  background: var(--surface2);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  display: none;
+}
+.btn-next:hover { border-color: var(--cyan); color: var(--cyan); }
+
+/* SPIKE EVENT */
+.spike-banner {
+  background: linear-gradient(135deg, #2a0800, #1a0020);
+  border: 1px solid var(--red);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  display: none;
+}
+.spike-banner.on { display: block; animation: shake .4s ease; }
+@keyframes shake {
+  0%,100% { transform: none; }
+  20%,60% { transform: translateX(-4px); }
+  40%,80% { transform: translateX(4px); }
+}
+.spike-banner::before {
+  content: '⚡';
+  position: absolute;
+  right: 20px; top: 20px;
+  font-size: 48px;
+  opacity: .15;
+}
+.spike-title { font-size: 18px; font-weight: 700; color: var(--red); margin-bottom: 6px; }
+.spike-body  { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* ═══════════════════════════════════
+   RESULTS
+═══════════════════════════════════ */
+.results-hero { text-align: center; padding: 48px 0 36px; }
+
+.score-ring {
+  width: 150px; height: 150px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  position: relative;
+}
+.score-ring::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 1px solid;
+  border-color: inherit;
+  opacity: .2;
+  animation: ring-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ring-pulse { 0%,100%{transform:scale(1);opacity:.2} 50%{transform:scale(1.06);opacity:.08} }
+.score-ring.perfect { border-color: var(--green);  background: var(--green-dim);  box-shadow: 0 0 50px rgba(63,185,80,.3); }
+.score-ring.great   { border-color: var(--cyan);   background: var(--cyan-dim);   box-shadow: 0 0 50px rgba(57,197,207,.3); }
+.score-ring.ok      { border-color: var(--yellow); background: var(--yellow-dim); box-shadow: 0 0 50px rgba(227,179,65,.3); }
+.score-ring.low     { border-color: var(--red);    background: var(--red-dim);    box-shadow: 0 0 50px rgba(248,81,73,.3); }
+.score-num  { font-size: 48px; font-weight: 700; line-height: 1; }
+.score-den  { font-family: var(--mono); font-size: 12px; color: var(--text2); margin-top: 2px; }
+.score-ring.perfect .score-num { color: var(--green); }
+.score-ring.great   .score-num { color: var(--cyan); }
+.score-ring.ok      .score-num { color: var(--yellow); }
+.score-ring.low     .score-num { color: var(--red); }
+
+.results-hero h2 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+.results-hero p  { font-size: 14px; color: var(--text2); }
+.results-user { font-family: var(--mono); font-size: 12px; color: var(--text3); margin-top: 8px; }
+
+/* Deployment summary */
+.deploy-summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.deploy-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 70px;
+  padding: 12px 20px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  gap: 12px;
+}
+.deploy-row:last-child { border-bottom: none; }
+.deploy-row.hdr {
+  background: var(--surface2);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text3);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.deploy-topic { font-weight: 500; }
+.deploy-res { font-family: var(--mono); font-size: 11px; }
+.deploy-pts { font-family: var(--mono); font-size: 12px; font-weight: 700; text-align: right; }
+.deploy-pts.got  { color: var(--green); }
+.deploy-pts.miss { color: var(--red); }
+
+/* Submit section */
+.submit-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.submit-box h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.submit-box p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.checklist {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 2.2;
+}
+.shortcut-tip {
+  background: var(--lambda-dim);
+  border: 1px solid var(--lambda);
+  border-radius: var(--r);
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--lambda);
+}
+
+.btn-replay {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn-replay:hover { border-color: var(--text2); color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="badge">CIS 288</span>
+    <span>Week 6 — Serverless Showdown</span>
+  </div>
+  <div class="topbar-pill" id="topbar-pill">⚡ <span id="topbar-name"></span></div>
+</div>
+
+<div class="wrap">
+
+<!-- ════════════════ SCREEN: LOGIN ════════════════ -->
+<div class="screen on" id="s-login">
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <span class="hero-icon">⚡</span>
+    <h1>Serverless Showdown</h1>
+    <p class="sub">Deploy Without a Server — CIS 288 Week 6</p>
+    <div class="trio">
+      <div class="trio-chip l">⚡ AWS Lambda</div>
+      <div class="trio-chip az">💙 Azure Functions</div>
+      <div class="trio-chip g">🔵 GCP Cloud Functions</div>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <h2>// Mission Briefing</h2>
+    <div class="rule-box">
+      <p><strong>You are the CTO of a startup. Your team needs to deploy backend logic — fast, cheap, with zero servers to manage.</strong></p>
+      <p>10 real-world serverless scenarios · 1 point each · Watch the cold-start meter · Don't blow the budget.</p>
+      <p>Your architecture decisions are graded. Choose wisely.</p>
+    </div>
+
+    <div class="field">
+      <label>GitHub Username</label>
+      <input type="text" id="gh-in" placeholder="e.g. cvarg15" autocomplete="off" spellcheck="false">
+      <p class="field-hint">The username you submitted for Lab 00. No @ symbol.</p>
+    </div>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="name-in" placeholder="e.g. Cierra Vargas" autocomplete="off">
+      <p class="field-hint">As it appears on Canvas.</p>
+    </div>
+    <button class="btn-start" id="btn-start" onclick="boot()">Deploy the Simulation ⚡</button>
+  </div>
+</div>
+
+<!-- ════════════════ SCREEN: GAME ════════════════ -->
+<div class="screen" id="s-game">
+  <div class="game-toprow">
+    <div class="game-title">// Serverless Showdown</div>
+    <div class="pills">
+      <span class="pill pill-score" id="pill-score">Score: 0 / 10</span>
+      <span class="pill pill-round" id="pill-round">Round 1 of 10</span>
+      <span class="pill pill-streak" id="pill-streak" style="display:none">🔥 ×0</span>
+    </div>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="prog"></div></div>
+
+  <!-- SPIKE EVENT BANNER (shows on round 6) -->
+  <div class="spike-banner" id="spike-banner">
+    <div class="spike-title">🚨 TRAFFIC SPIKE INCOMING</div>
+    <div class="spike-body">Your app just got featured on Product Hunt. Requests are flooding in at <strong style="color:var(--red)">10,000 req/sec</strong>. The next decision is critical — your architecture will be tested.</div>
+  </div>
+
+  <div id="game-area"></div>
+</div>
+
+<!-- ════════════════ SCREEN: RESULTS ════════════════ -->
+<div class="screen" id="s-results">
+  <div class="results-hero">
+    <div class="score-ring" id="score-ring">
+      <div class="score-num" id="final-num">0</div>
+      <div class="score-den">/ 10 pts</div>
+    </div>
+    <h2 id="r-headline">Nice work!</h2>
+    <p id="r-sub"></p>
+    <p class="results-user" id="r-user"></p>
+  </div>
+
+  <div class="deploy-summary" id="deploy-summary"></div>
+
+  <div class="submit-box">
+    <h3>// How to Submit</h3>
+    <p>Take a <strong>screenshot of this results page</strong> showing your name, GitHub username, score, and the deployment summary — then upload it to the <strong>Canvas Week 6 assignment</strong>.</p>
+    <div class="checklist">
+      ✅ &nbsp;Your <strong>Full Name</strong> and <strong>GitHub Username</strong> visible<br>
+      ✅ &nbsp;<strong>Score ring</strong> showing X / 10<br>
+      ✅ &nbsp;<strong>Deployment Summary</strong> table fully visible<br>
+      ✅ &nbsp;Upload to <strong>Canvas → Week 6 → Lab 06 Simulation</strong>
+    </div>
+    <div class="shortcut-tip">💡 &nbsp;Windows: <strong>Win + Shift + S</strong> &nbsp;·&nbsp; Mac: <strong>Cmd + Shift + 4</strong></div>
+  </div>
+
+  <button class="btn-replay" onclick="replay()">↩ Play Again (score won't resubmit)</button>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ════════════════════════════════════════════════
+//  ROUNDS DATA
+// ════════════════════════════════════════════════
+const ROUNDS = [
+  {
+    id: 1,
+    label: "Mission 01 — The Photo Resizer",
+    scenario: "Every time a user uploads a photo to your app, it needs to be resized to three dimensions and saved. You don't want to run a server 24/7 just for this rare event.",
+    ask: "Which serverless architecture pattern is the perfect fit here?",
+    terminal: [
+      "$ aws s3 cp avatar.jpg s3://uploads/",
+      "→ S3 PutObject event fired",
+      "→ Invoking function: resize-handler...",
+      "✓ resize-sm.jpg   128×128   saved",
+      "✓ resize-md.jpg   512×512   saved",
+      "✓ resize-lg.jpg  1024×1024  saved",
+      "→ Duration: 847ms  Billed: 900ms"
+    ],
+    coldStart: { pct: 85, level: "warm", label: "Warm — container reused" },
+    type: "concept",
+    correct: "event-trigger",
+    choices: [
+      { id: "event-trigger", main: "Event-driven trigger on S3 upload", sub: "Function fires only when a new file lands — zero idle cost" },
+      { id: "polling",       main: "A polling loop checks S3 every 5 seconds", sub: "Continuously running — defeats the purpose of serverless" },
+      { id: "cron",          main: "A cron job runs every hour", sub: "Resize happens up to 1 hour late — terrible UX" },
+      { id: "ec2",           main: "EC2 instance with a daemon watching S3", sub: "Always-on server — we said no servers!" },
+    ],
+    explain: "Event-driven triggers are serverless 101. When a file lands in S3, it fires a Lambda event → your function runs → it terminates. You pay for ~900ms of compute, not 24/7 uptime. This is the exact pattern used by Netflix, Airbnb, and every modern photo app.",
+    code: "// Lambda triggered by S3 PutObject\nexports.handler = async (event) => {\n  const key = event.Records[0].s3.object.key;\n  await resize(key, [128, 512, 1024]);\n};"
+  },
+  {
+    id: 2,
+    label: "Mission 02 — Cold Start Crisis",
+    scenario: "Your Lambda function handles payment processing. A customer complains their first checkout of the day took 4 seconds instead of 200ms. Your team calls it a 'cold start'. What exactly happened?",
+    ask: "What is a serverless cold start, and what caused the 4-second delay?",
+    terminal: [
+      "$ [First invocation of the day]",
+      "→ No warm container available",
+      "→ Provisioning execution environment...",
+      "→ Loading runtime: Node.js 20.x",
+      "→ Downloading deployment package: 48MB",
+      "→ Initializing dependencies...",
+      "✓ Function ready  (cold start: 3,847ms)",
+      "→ Handler executed: 156ms"
+    ],
+    coldStart: { pct: 8, level: "cold", label: "Cold — new container spinning up" },
+    type: "concept",
+    correct: "no-container",
+    choices: [
+      { id: "no-container", main: "No warm container existed — the platform had to provision, download, and initialize from scratch", sub: "The classic cold start: happens after idle periods or first deployments" },
+      { id: "network",      main: "A network timeout between the function and the payment API", sub: "Network latency ≠ cold start — different problem entirely" },
+      { id: "bug",          main: "A bug in the payment code causing an infinite loop", sub: "That would timeout, not slow down only the first call" },
+      { id: "throttle",     main: "AWS throttled the function due to too many concurrent calls", sub: "Throttling causes errors, not slow first-call latency" },
+    ],
+    explain: "A cold start happens when the serverless platform has no warm (pre-running) container for your function. It must: allocate compute, download your code package, start the runtime (Node/Python/Java), run your initialization code. Java and .NET cold starts can hit 10+ seconds. Solutions: Provisioned Concurrency (Lambda), Warm-up pings, or keeping packages small.",
+    code: "// Mitigate cold starts:\n// Option 1 — AWS Provisioned Concurrency\naws lambda put-provisioned-concurrency-config \\\n  --function-name payment-handler \\\n  --qualifier prod \\\n  --provisioned-concurrent-executions 5\n\n// Option 2 — Keep init code minimal\n// Move DB connections OUTSIDE the handler"
+  },
+  {
+    id: 3,
+    label: "Mission 03 — The Rosetta Stone",
+    scenario: "Your team is debating which cloud to use for serverless. The senior engineer keeps using provider-specific names. You need to align the team.",
+    ask: "Match the correct service names: Lambda (AWS) → ? (Azure) → ? (GCP)",
+    terminal: [
+      "$ # The Serverless Rosetta Stone",
+      "",
+      "  AWS          Azure         GCP",
+      "  ─────────────────────────────",
+      "  Lambda       ???           ???",
+      "  API Gateway  API Mgmt      Cloud Endpoints",
+      "  EventBridge  Event Grid    Pub/Sub",
+      "  SQS          Service Bus   Cloud Tasks",
+      ""
+    ],
+    coldStart: { pct: 70, level: "warm", label: "Warm — deployment ready" },
+    type: "concept",
+    correct: "az-funcs-cloud-funcs",
+    choices: [
+      { id: "az-funcs-cloud-funcs", main: "Azure Functions  ·  Cloud Functions", sub: "The correct equivalent names across all three landlords" },
+      { id: "az-app-cloud-run",     main: "Azure App Service  ·  Cloud Run", sub: "Those are container-based services, not purely serverless FaaS" },
+      { id: "az-logic-cloud-funcs", main: "Azure Logic Apps  ·  Cloud Functions", sub: "Logic Apps are visual workflow tools, not code-first FaaS" },
+      { id: "az-funcs-app-engine",  main: "Azure Functions  ·  App Engine", sub: "App Engine is a PaaS platform — not the same as FaaS" },
+    ],
+    explain: "FaaS (Function as a Service) equivalents: AWS Lambda = Azure Functions = GCP Cloud Functions. All three are triggered by events, scale to zero, and bill per invocation. The key differentiator: Azure also has Durable Functions for stateful workflows. GCP has Cloud Run for containerized functions that need more control.",
+    code: "// Same logic, three platforms:\n\n// AWS Lambda\nexports.handler = async (event) => { ... }\n\n// Azure Functions\nmodule.exports = async function(context, req) { ... }\n\n// GCP Cloud Functions\nexports.helloWorld = (req, res) => { ... }"
+  },
+  {
+    id: 4,
+    label: "Mission 04 — Pricing Model",
+    scenario: "Your marketing site's contact form sends ~500 emails per month. You're deciding between a $15/month EC2 t3.micro vs Lambda. The Lambda execution takes 500ms and uses 128MB RAM.",
+    ask: "How much does Lambda cost for 500 invocations/month?",
+    terminal: [
+      "$ # Lambda Pricing Calculator",
+      "→ Requests:    500 / month",
+      "→ Duration:    500ms each",
+      "→ Memory:      128 MB",
+      "→ Free tier:   1M requests + 400K GB-sec",
+      "",
+      "  Cost = requests_cost + duration_cost",
+      "  Requests: 500 < 1,000,000 → $0.00",
+      "  Duration: 500 × 0.5s × 0.125GB",
+      "          = 31.25 GB-sec < 400,000 → $0.00",
+      "✓ Total: $0.00 / month"
+    ],
+    coldStart: { pct: 95, level: "warm", label: "Warm — free tier active" },
+    type: "concept",
+    correct: "zero",
+    choices: [
+      { id: "zero",    main: "$0.00 — completely within the free tier", sub: "1M free requests/month + 400,000 GB-seconds free every month, forever" },
+      { id: "cents",   main: "A few cents — fractions of a dollar", sub: "Close, but Lambda's free tier is actually much more generous" },
+      { id: "dollars", main: "$1.50 — similar to a small EC2 instance", sub: "Lambda pricing is per-invocation, not hourly — much cheaper at this scale" },
+      { id: "fifteen", main: "$15.00 — same as the EC2", sub: "Lambda's free tier covers millions of executions per month" },
+    ],
+    explain: "AWS Lambda's permanent free tier: 1,000,000 requests/month + 400,000 GB-seconds of compute. 500 emails/month = 500 invocations × 0.5s × 0.125 GB = 31.25 GB-seconds. That's 0.0078% of the free tier. The EC2 would cost $15/month whether or not a single email is sent. Serverless wins on cost at low volumes.",
+    code: "// Lambda cost formula:\n// cost = (requests × $0.0000002) + \n//        (duration_GB_sec × $0.0000166667)\n//\n// At 500 req/month: $0.00 (free tier)\n// Break-even vs EC2 t3.micro ≈ 10M req/month"
+  },
+  {
+    id: 5,
+    label: "Mission 05 — Timeout Trap",
+    scenario: "Your team is building a video transcoding function on Lambda. The transcoding job takes 20 minutes. The function keeps dying mid-job with a 'Task timed out' error.",
+    ask: "What is the root cause, and what is the correct architectural fix?",
+    terminal: [
+      "$ # Execution log",
+      "→ [00:00] transcode-handler invoked",
+      "→ [00:00] Processing: lecture_week6.mp4 (2.1GB)",
+      "→ [14:59] Progress: 74%...",
+      "✗ [15:00] Task timed out after 900 seconds",
+      "",
+      "ERROR: Lambda max timeout = 15 minutes",
+      "Your job needs 20 minutes → IMPOSSIBLE",
+      ""
+    ],
+    coldStart: { pct: 30, level: "cool", label: "Cool — long-running job" },
+    type: "concept",
+    correct: "wrong-tool",
+    choices: [
+      { id: "wrong-tool",  main: "Lambda is the wrong tool — use AWS Batch, ECS, or a Step Functions workflow instead", sub: "Lambda max = 15 min. Long-running jobs need containers or batch compute" },
+      { id: "increase",    main: "Increase the Lambda memory to 10GB — more RAM = faster = under 15 min", sub: "More RAM speeds it up but doesn't guarantee 20 min → under 15 min" },
+      { id: "split",       main: "Split the video into 1-minute chunks and run 20 parallel Lambdas", sub: "Clever, but requires complex orchestration and video reassembly logic" },
+      { id: "sqs",         main: "Put the job in an SQS queue — Lambda will retry until it finishes", sub: "SQS retry won't help — each Lambda invocation still hits the 15-min cap" },
+    ],
+    explain: "Lambda's hard limit is 15 minutes (900 seconds). It's designed for fast, event-driven tasks — not long-running jobs. For video transcoding, the correct tool is AWS Elemental MediaConvert, AWS Batch, or ECS Fargate. Step Functions can orchestrate complex workflows that exceed Lambda's timeout by chaining multiple short functions.",
+    code: "// Correct architecture for long jobs:\n\n// Option 1: AWS Batch\naws batch submit-job \\\n  --job-name transcode-lecture \\\n  --job-queue video-queue\n\n// Option 2: Step Functions + Lambda chunks\n// State machine chains N short Lambdas\n// each processing a video segment"
+  },
+  {
+    id: 6,
+    label: "Mission 06 — 🚨 TRAFFIC SPIKE",
+    scenario: "Your app just went viral. Requests hit 8,000/second. Your old architecture (1 EC2 instance) is falling over. Your co-founder asks: 'Would Lambda have handled this automatically?'",
+    ask: "How does Lambda handle sudden traffic spikes compared to traditional EC2?",
+    terminal: [
+      "$ # Traffic spike — 08:42 AM",
+      "→ [08:42:00] req/sec:    12",
+      "→ [08:42:30] req/sec:   847",
+      "→ [08:43:00] req/sec: 4,200",
+      "→ [08:43:30] req/sec: 8,100",
+      "",
+      "  EC2 (t3.medium, 1 instance):",
+      "✗ CPU: 100%  →  503 errors cascading",
+      "",
+      "  Lambda:",
+      "✓ Scaled to 8,100 concurrent executions",
+      "✓ 0 errors  →  p99 latency: 312ms"
+    ],
+    coldStart: { pct: 55, level: "cool", label: "Scaling — new containers warming" },
+    type: "concept",
+    correct: "auto-scale",
+    choices: [
+      { id: "auto-scale", main: "Lambda automatically scales to match demand — each request gets its own execution environment in parallel", sub: "Up to 1,000 concurrent executions by default, burst to 3,000 in us-east-1" },
+      { id: "queue",      main: "Lambda queues the requests and processes them one at a time", sub: "Lambda is concurrent by default — each invocation is isolated" },
+      { id: "throttle",   main: "Lambda would throttle at 100 req/sec and return 429 errors just like EC2", sub: "The default concurrency limit is 1,000 — much higher than 100" },
+      { id: "crash",      main: "Lambda would crash — it's just EC2 under the hood", sub: "Lambda abstracts away all infrastructure — you never see the underlying VMs" },
+    ],
+    explain: "Serverless auto-scaling is one of its killer features. Lambda spins up a new execution environment for each concurrent request — instantly. EC2 requires minutes to launch a new instance (Auto Scaling Groups). At 8,000 req/sec, Lambda runs 8,000 parallel function instances. The tradeoff: more cold starts under burst, and you pay for all 8,000 concurrent executions.",
+    code: "// Lambda concurrency limits (us-east-1):\n// Default: 1,000 concurrent executions\n// Burst limit: +500/minute up to 3,000\n// Reserved: set per-function\n//\n// To increase: submit AWS Support request\n// or configure Reserved Concurrency"
+  },
+  {
+    id: 7,
+    label: "Mission 07 — Stateless by Design",
+    scenario: "A new developer joins your team and writes a Lambda function that stores user session data in a local dictionary variable (in memory) to 'cache' it between calls. Users are getting each other's data randomly.",
+    ask: "Why is this a critical architectural mistake in serverless?",
+    terminal: [
+      "// The buggy code:",
+      "let sessionCache = {};  // ← GLOBAL VARIABLE",
+      "",
+      "exports.handler = async (event) => {",
+      "  const uid = event.userId;",
+      "  if (!sessionCache[uid]) {",
+      "    sessionCache[uid] = await getUser(uid);",
+      "  }",
+      "  // BUG: Another user may get cached data!",
+      "  return sessionCache[uid];",
+      "};"
+    ],
+    coldStart: { pct: 72, level: "warm", label: "Warm — container reused (the bug!)" },
+    type: "concept",
+    correct: "container-reuse",
+    choices: [
+      { id: "container-reuse", main: "Lambda containers are reused between invocations — global variables persist and can leak data between users", sub: "Stateless design is fundamental: never store user state in Lambda memory" },
+      { id: "memory",          main: "Lambda doesn't have enough RAM to store session data", sub: "Memory size (128MB–10GB) isn't the issue — architecture is" },
+      { id: "async",           main: "The async/await pattern causes race conditions in the cache", sub: "Async isn't the root cause — container reuse across users is" },
+      { id: "concurrent",      main: "Too many concurrent Lambdas are writing to the same variable simultaneously", sub: "Each Lambda container is isolated — but the same container IS reused sequentially" },
+    ],
+    explain: "Lambda containers are reused for performance (avoids cold starts). A global variable set in execution #1 is still there when execution #2 happens to land on the same container. This is called 'container reuse contamination'. Fix: store session state in DynamoDB, ElastiCache (Redis), or pass everything via event payload. Lambda must be stateless by design.",
+    code: "// WRONG: Global state (leaks between calls)\nlet cache = {};\n\n// RIGHT: Stateless — use external store\nconst { DynamoDB } = require('@aws-sdk/client-dynamodb');\nexports.handler = async (event) => {\n  const session = await ddb.get({ \n    Key: { userId: event.userId } \n  });\n  return session;\n};"
+  },
+  {
+    id: 8,
+    label: "Mission 08 — Azure Durable Functions",
+    scenario: "You're building an order processing system on Azure. The workflow is: (1) validate order, (2) charge card, (3) notify warehouse, (4) send confirmation email. Each step takes 1-3 seconds. If the charge fails, steps 3 and 4 must NOT run.",
+    ask: "Which Azure feature is built specifically for this kind of stateful, multi-step workflow?",
+    terminal: [
+      "$ # Azure Durable Functions orchestrator",
+      "→ [1] ValidateOrder()      → OK",
+      "→ [2] ChargeCard()         → OK (txn: 8f3a)",
+      "→ [3] NotifyWarehouse()    → OK",
+      "→ [4] SendConfirmation()   → OK",
+      "✓ Order complete in 4.2s",
+      "",
+      "→ [Replay] ChargeCard()   → DECLINED",
+      "✗ Workflow halted at step 2",
+      "✓ Steps 3 and 4 were never called"
+    ],
+    coldStart: { pct: 80, level: "warm", label: "Warm — orchestrator active" },
+    type: "concept",
+    correct: "durable",
+    choices: [
+      { id: "durable",    main: "Azure Durable Functions — stateful orchestration built on top of Azure Functions", sub: "Handles retries, timeouts, fan-out/fan-in, and human approval steps" },
+      { id: "logic-apps", main: "Azure Logic Apps — visual workflow designer", sub: "Logic Apps work, but Durable Functions is code-first and more powerful for developers" },
+      { id: "service-bus", main: "Azure Service Bus with 4 separate queues, one per step", sub: "Possible but creates complex fan-out logic without built-in state management" },
+      { id: "event-grid",  main: "Azure Event Grid chaining 4 Functions together via events", sub: "Event Grid is for reactive pub/sub — not sequential orchestration with error handling" },
+    ],
+    explain: "Azure Durable Functions is Azure's answer to Step Functions (AWS). It lets you write stateful orchestrations in code — not visual diagrams. The orchestrator function calls activity functions in sequence, handles failures with retries, and maintains state durably in Azure Storage. Key patterns: Function Chaining, Fan-Out/Fan-In, Human Interaction, and Monitor.",
+    code: "// Azure Durable Functions orchestrator\nconst df = require('durable-functions');\n\ndf.app.orchestration('processOrder', function*(ctx) {\n  yield ctx.df.callActivity('ValidateOrder', input);\n  yield ctx.df.callActivity('ChargeCard', input);\n  yield ctx.df.callActivity('NotifyWarehouse', input);\n  yield ctx.df.callActivity('SendEmail', input);\n  // If ChargeCard throws → steps 3,4 never run\n});"
+  },
+  {
+    id: 9,
+    label: "Mission 09 — GCP Triggers",
+    scenario: "On GCP, you want a Cloud Function to automatically run whenever a new row is inserted into a BigQuery table. Which GCP service acts as the 'bridge' between BigQuery and your function?",
+    ask: "What GCP service do you use to trigger a Cloud Function from a BigQuery event?",
+    terminal: [
+      "$ # GCP event flow design",
+      "",
+      "  BigQuery INSERT",
+      "       ↓",
+      "  [ ??? ]  ← What goes here?",
+      "       ↓",
+      "  Cloud Function: process-new-row",
+      "       ↓",
+      "  Output → Cloud Storage / Firestore",
+      "",
+      "  Hint: Think 'messaging backbone' on GCP",
+      ""
+    ],
+    coldStart: { pct: 65, level: "warm", label: "Warm — trigger configured" },
+    type: "concept",
+    correct: "pubsub",
+    choices: [
+      { id: "pubsub",       main: "Pub/Sub — GCP's messaging service publishes BigQuery events that trigger Cloud Functions", sub: "Pub/Sub is the event backbone of GCP — equivalent to AWS SNS/SQS or Azure Event Grid/Service Bus" },
+      { id: "cloud-tasks",  main: "Cloud Tasks — queue-based async execution", sub: "Cloud Tasks is for scheduled or delayed tasks, not reactive event triggers from BigQuery" },
+      { id: "cloud-run",    main: "Cloud Run — deploy a container that polls BigQuery directly", sub: "Cloud Run is container-based compute, not a trigger/event mechanism" },
+      { id: "firestore",    main: "Firestore triggers — Firestore can trigger Cloud Functions natively", sub: "True for Firestore, but BigQuery events need to go through Pub/Sub first" },
+    ],
+    explain: "GCP's event-driven pattern: BigQuery → Pub/Sub topic → Cloud Function subscription. Pub/Sub is GCP's global, durable messaging service — the equivalent of AWS EventBridge + SQS. The Rosetta Stone: AWS EventBridge = Azure Event Grid = GCP Pub/Sub. Everything connects to Pub/Sub on GCP. Cloud Functions can also be triggered directly by HTTP, Cloud Storage, Firestore, and Firebase.",
+    code: "// GCP: BigQuery → Pub/Sub → Cloud Function\n\n// 1. BigQuery exports change events to Pub/Sub\n// 2. Cloud Function subscribes to the topic:\n\nexports.processRow = async (message, context) => {\n  const data = JSON.parse(\n    Buffer.from(message.data, 'base64').toString()\n  );\n  console.log('New row:', data);\n};"
+  },
+  {
+    id: 10,
+    label: "Mission 10 — The Final Architecture",
+    scenario: "FINAL ROUND. A startup is building a real-time notification system: users post content → followers get push notifications within 2 seconds → 50,000 users, unpredictable traffic. They want zero servers to manage and minimal cost at low traffic.",
+    ask: "Which serverless pattern is the most architecturally sound for this system?",
+    terminal: [
+      "$ # Architecture review — final round",
+      "",
+      "  User posts content",
+      "      ↓",
+      "  [ API Gateway ] ← HTTPS endpoint",
+      "      ↓",
+      "  [ Lambda ] ← event handler",
+      "      ↓",
+      "  [ SNS/EventBridge ] ← fan-out",
+      "      ↓  ↓  ↓  ...50,000 parallel",
+      "  [ Lambda ] × N ← notify each follower",
+      "      ↓",
+      "  [ Push Notification Service ]",
+      "✓ End-to-end: ~1.2 seconds"
+    ],
+    coldStart: { pct: 78, level: "warm", label: "Warm — scaled and ready" },
+    type: "concept",
+    correct: "fan-out",
+    choices: [
+      { id: "fan-out",   main: "API Gateway → Lambda → SNS → Lambda fan-out to each follower", sub: "Event-driven fan-out: one Lambda publishes, N Lambdas consume in parallel — scales to 50K instantly" },
+      { id: "loop",      main: "One Lambda loops through all 50,000 followers sequentially", sub: "50,000 sequential DB reads + push calls would take minutes — way over 2 seconds" },
+      { id: "dynamo",    main: "DynamoDB Streams → Lambda processes follower list page by page", sub: "DynamoDB Streams trigger is correct for DB changes, but not for new-post fan-out" },
+      { id: "websocket", main: "A persistent WebSocket server handles all notifications", sub: "WebSockets need a persistent server — not serverless, and doesn't scale to 50K without infrastructure management" },
+    ],
+    explain: "The Fan-Out pattern is serverless architecture at its finest. A single Lambda function publishes one SNS message. SNS instantly delivers that message to 50,000 Lambda subscriptions in parallel — each one sends a push notification to one user. Total time: ~1-2 seconds for all 50K users. Cost: you only pay for the ~50,001 Lambda invocations, not idle servers. This is how Instagram, Twitter, and Slack handle notifications at scale.",
+    code: "// Fan-out pattern:\n\n// 1. Post Lambda publishes to SNS\nawait sns.publish({\n  TopicArn: 'arn:aws:sns:...:notifications',\n  Message: JSON.stringify({ postId, userId })\n}).promise();\n\n// 2. Notification Lambda (auto-scaled × N)\nexports.handler = async ({ Records }) => {\n  for (const record of Records) {\n    const { postId, userId } = JSON.parse(record.Sns.Message);\n    await sendPushNotification(userId, postId);\n  }\n};"
+  }
+];
+
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let S = { username:'', fullname:'', round:0, score:0, streak:0, answers:[] };
+
+// ════════════════════════════════════════════════
+//  LOGIN
+// ════════════════════════════════════════════════
+document.getElementById('gh-in').addEventListener('keydown', e => { if(e.key==='Enter') boot(); });
+document.getElementById('name-in').addEventListener('keydown', e => { if(e.key==='Enter') boot(); });
+
+function boot() {
+  const gh   = document.getElementById('gh-in').value.trim();
+  const name = document.getElementById('name-in').value.trim();
+  if (!gh || !name) return;
+  S.username = gh.toLowerCase();
+  S.fullname = name;
+  document.getElementById('topbar-name').textContent = S.fullname + ' (' + S.username + ')';
+  document.getElementById('topbar-pill').classList.add('show');
+  show('s-game');
+  render();
+}
+
+// ════════════════════════════════════════════════
+//  GAME ENGINE
+// ════════════════════════════════════════════════
+function hdr() {
+  document.getElementById('pill-score').textContent = 'Score: ' + S.score + ' / 10';
+  document.getElementById('pill-round').textContent = 'Round ' + (S.round+1) + ' of ' + ROUNDS.length;
+  document.getElementById('prog').style.width = Math.round((S.round / ROUNDS.length) * 100) + '%';
+  const se = document.getElementById('pill-streak');
+  if (S.streak >= 2) { se.style.display=''; se.textContent='🔥 ×'+S.streak; }
+  else se.style.display='none';
+}
+
+function render() {
+  if (S.round >= ROUNDS.length) { results(); return; }
+  hdr();
+  const r = ROUNDS[S.round];
+  const area = document.getElementById('game-area');
+
+  // Show spike banner on round 6
+  const banner = document.getElementById('spike-banner');
+  if (S.round === 5) { banner.classList.add('on'); setTimeout(() => banner.classList.remove('on'), 8000); }
+  else banner.classList.remove('on');
+
+  // Build terminal
+  let termLines = r.terminal.map(l => {
+    let cls = 't-gray';
+    if (l.startsWith('✓')) cls = 't-green';
+    else if (l.startsWith('✗') || l.includes('ERROR') || l.includes('BUG')) cls = 't-red';
+    else if (l.startsWith('→') || l.startsWith('$')) cls = 't-cyan';
+    else if (l.includes('Lambda') || l.includes('exports') || l.includes('handler')) cls = 't-lambda';
+    return `<div class="t-line ${cls}">${esc(l)}</div>`;
+  }).join('');
+
+  // Cold start meter
+  const cs = r.coldStart;
+  const csHTML = `
+    <div class="cold-meter">
+      <div class="cold-icon">${cs.level==='warm'?'🟢':cs.level==='cool'?'🟡':'🔴'}</div>
+      <div class="cold-label">
+        <strong>Container Status: ${esc(cs.label)}</strong>
+        <div class="cold-track"><div class="cold-fill ${cs.level}" style="width:${cs.pct}%"></div></div>
+      </div>
+    </div>`;
+
+  // Choices
+  const choicesHTML = r.choices.map(c => `
+    <button class="choice" data-id="${c.id}" onclick="pick(this,'${c.id}')">
+      <div>
+        <div class="c-main">${esc(c.main)}</div>
+        <div class="c-sub">${esc(c.sub)}</div>
+      </div>
+    </button>`).join('');
+
+  area.innerHTML = `
+    <div class="q-card">
+      <div class="q-label">${esc(r.label)}</div>
+      <div class="q-scenario">${esc(r.scenario)}</div>
+      <div class="q-ask">${esc(r.ask)}</div>
+      <span class="q-badge">1 POINT</span>
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <div class="terminal-title">execution log — ${esc(r.label)}</div>
+      </div>
+      ${termLines}
+      <div class="t-line t-green"><span class="cursor"></span></div>
+    </div>
+    ${csHTML}
+    <div class="choices-wrap">
+      <div class="section-label">Choose your architecture decision</div>
+      <div class="choices">${choicesHTML}</div>
+    </div>
+    <div class="feedback" id="fb"></div>
+    <button class="btn-next" id="btn-next" onclick="next()">
+      ${S.round+1 < ROUNDS.length ? 'Next Mission →' : 'See Deployment Report →'}
+    </button>`;
+}
+
+function pick(el, id) {
+  const r = ROUNDS[S.round];
+  document.querySelectorAll('.choice').forEach(b => b.disabled = true);
+  const correct = id === r.correct;
+  if (correct) { S.score++; S.streak++; } else S.streak = 0;
+  S.answers.push({ round: S.round+1, label: r.label, correct });
+
+  document.querySelectorAll('.choice').forEach(b => {
+    if (b.dataset.id === r.correct) b.classList.add('correct');
+    else if (b.dataset.id === id && !correct) b.classList.add('wrong');
+  });
+
+  hdr();
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback on ' + (correct ? 'ok' : 'fail');
+  fb.innerHTML = `
+    <div class="fb-title">${correct ? '✓ Architecture approved' + (S.streak>=3?' 🔥 Hot streak!':'') : '✗ Architecture rejected — study the logs'}</div>
+    <div class="fb-body">${esc(r.explain)}</div>
+    <div class="fb-code">${esc(r.code)}</div>`;
+  document.getElementById('btn-next').style.display = '';
+}
+
+function next() { S.round++; render(); }
+
+// ════════════════════════════════════════════════
+//  RESULTS
+// ════════════════════════════════════════════════
+function results() {
+  document.getElementById('prog').style.width = '100%';
+  show('s-results');
+  const s = S.score;
+  const ring = document.getElementById('score-ring');
+  const h = document.getElementById('r-headline');
+  const sub = document.getElementById('r-sub');
+  document.getElementById('final-num').textContent = s;
+  document.getElementById('r-user').textContent = '⚡ ' + S.fullname + ' (' + S.username + ')';
+  if      (s===10) { ring.className='score-ring perfect'; h.textContent='Perfect Deployment! ⚡ You are serverless.'; sub.textContent='10/10 — Every architecture decision was correct. Lambda, Azure Functions, Cloud Functions fear you.'; }
+  else if (s>=8)   { ring.className='score-ring great';   h.textContent='Excellent Architecture!'; sub.textContent='You know your cold starts from your fan-outs. Almost flawless.'; }
+  else if (s>=6)   { ring.className='score-ring ok';      h.textContent='Good Engineer!'; sub.textContent='Solid foundation — review the Rosetta Stone and cold start scenarios before Lab 6.'; }
+  else             { ring.className='score-ring low';     h.textContent='Back to the Drawing Board'; sub.textContent='Re-read the Week 6 slides and try again. Serverless is worth mastering.'; }
+
+  let rows = `<div class="deploy-row hdr"><div>Mission</div><div>Result</div><div>Points</div></div>`;
+  S.answers.forEach(a => {
+    rows += `<div class="deploy-row">
+      <div class="deploy-topic">${esc(a.label)}</div>
+      <div class="deploy-res">${a.correct ? '✓ Approved' : '✗ Rejected'}</div>
+      <div class="deploy-pts ${a.correct?'got':'miss'}">${a.correct?'+1':'0'} / 1</div>
+    </div>`;
+  });
+  rows += `<div class="deploy-row" style="background:var(--surface2)">
+    <div class="deploy-topic" style="font-weight:700">Total</div>
+    <div></div>
+    <div class="deploy-pts got" style="font-size:15px">${s} / 10</div>
+  </div>`;
+  document.getElementById('deploy-summary').innerHTML = rows;
+}
+
+// ════════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════════
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function replay() {
+  S = { username:S.username, fullname:S.fullname, round:0, score:0, streak:0, answers:[] };
+  document.getElementById('prog').style.width = '0%';
+  show('s-game');
+  render();
+}
+</script>
+</body>
+</html>
