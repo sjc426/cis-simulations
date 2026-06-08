@@ -34,7 +34,7 @@ body { font-family:Arial,Helvetica,sans-serif; background:transparent; padding:0
 <script>
 
 // ============================================================
-//  SEMESTER CONFIG — CHANGE ONLY THESE LINES EACH SEMESTER
+//  SEMESTER CONFIG - CHANGE ONLY THESE LINES EACH SEMESTER
 // ============================================================
 var SEMESTER_START = "2026-05-11";
 var TOTAL_WEEKS    = 14;
@@ -46,21 +46,21 @@ var TOPICS = [
   "",
   "Cloud Foundations",
   "Identity & Access: Who Gets In",
-  "Compute — Virtual Machines Across All Three",
-  "Storage — Objects, Blobs & Buckets",
-  "Networking — VPC, VNet & GCP VPC",
-  "Serverless — Lambda, Functions & Cloud Fns",
-  "Databases — RDS, Azure SQL & Cloud SQL",
-  "Midterm — Cloud Foundations Review",
+  "Compute - Virtual Machines Across All Three",
+  "Storage - Objects, Blobs & Buckets",
+  "Networking - VPC, VNet & GCP VPC",
+  "Serverless - Lambda, Functions & Cloud Fns",
+  "Databases - RDS, Azure SQL & Cloud SQL",
+  "Midterm - Cloud Foundations Review",
   "Azure Deep Dive",
   "GCP Deep Dive",
   "Containers & Kubernetes",
   "Security & Compliance",
   "Cost & Architecture",
-  "Final Project — Multi-Cloud Design"
+  "Final Project - Multi-Cloud Design"
 ];
 
-var ICONS = ["","☁️","🔐","🖥️","🗄️","🌐","⚡","🗃️","📝","☁️","🔵","📦","🔒","💰","🏆"];
+var ICONS = ["","cloudy","lock","desktop","database","globe","zap","grid","memo","cloudy","blue_circle","package","lock","money","trophy"];
 
 var SLUGS = [
   "",
@@ -68,7 +68,7 @@ var SLUGS = [
   "week-2-overview-identity-and-access-who-gets-in",
   "week-3-overview-and-checklist",
   "week-4-overview-storage-s3-blob-storage-and-cloud-storage",
-  "week-5-overview",
+  "week-5-overview-networking",
   "week-6-overview",
   "week-7-overview",
   "week-8-overview",
@@ -97,6 +97,14 @@ var READ_SLUGS = [
   "week-13-reading-and-resources",
   "week-14-reading-and-resources"
 ];
+
+var LAB_URLS = {
+  1: "https://ccp.instructure.com/courses/2103716/assignments/19951347?module_item_id=45549771",
+  2: "https://ccp.instructure.com/courses/2103716/assignments/19951397?module_item_id=45549877",
+  3: "https://ccp.instructure.com/courses/2103716/assignments/19976331?module_item_id=45623147",
+  4: "https://ccp.instructure.com/courses/2103716/assignments/20023319?module_item_id=45737649",
+  5: "https://ccp.instructure.com/courses/2103716/assignments/20061119?module_item_id=45841707"
+};
 
 var DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 var MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -139,47 +147,37 @@ function render() {
   var base = baseURL();
   var html = "";
 
-  // Section label
-  html += '<p style="font-size:11px;color:#9333ea;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;font-family:Arial,sans-serif;">📅 Where We Are Right Now</p>';
+  html += '<p style="font-size:11px;color:#9333ea;margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;font-family:Arial,sans-serif;">Where We Are Right Now</p>';
 
-  // Current week card
   html += '<div class="cur-card" role="region" aria-label="Current week ' + cur + '">';
   html += '<div class="cur-header">';
   html += '<span class="week-badge">Week ' + cur + '</span>';
-  html += '<span class="week-title">' + ICONS[cur] + ' ' + TOPICS[cur] + '</span>';
+  html += '<span class="week-title">' + TOPICS[cur] + '</span>';
   html += '<span class="live-dot" aria-hidden="true"></span>';
-  html += '<span class="live-label">Live now &middot; Due ' + due + '</span>';
+  html += '<span class="live-label">Live now - Due ' + due + '</span>';
   html += '</div>';
   html += '<div class="btn-row">';
-  html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
-  html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
-  var LAB_URLS = {
-    1:  'https://ccp.instructure.com/courses/2103716/assignments/19951347?module_item_id=45549771',
-    2:  'https://ccp.instructure.com/courses/2103716/assignments/19951397?module_item_id=45549877',
-    3:  'https://ccp.instructure.com/courses/2103716/assignments/19976331?module_item_id=45623147',
-    4:  'https://ccp.instructure.com/courses/2103716/assignments/20023319?module_item_id=45737649'
-  };
+  html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '">Watch and Read</a>';
+  html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '">Week Overview</a>';
   var labURL = LAB_URLS[cur] || (base + '/assignments');
-  html += '<a class="btn primary" target="_top" href="' + labURL + '">🔬 Lab ' + cur + '</a>'
+  html += '<a class="btn primary" target="_top" href="' + labURL + '">Lab ' + cur + '</a>';
   html += '</div></div>';
 
-  // Next week locked
   if (next > cur) {
     html += '<div class="nxt-card" role="region" aria-label="Upcoming week ' + next + ' locked">';
     html += '<div class="nxt-header">';
     html += '<span class="nxt-badge">Week ' + next + '</span>';
-    html += '<span class="nxt-title">' + ICONS[next] + ' ' + TOPICS[next] + '</span>';
+    html += '<span class="nxt-title">' + TOPICS[next] + '</span>';
     html += '<span class="nxt-date">Opens ' + unlockShort + '</span>';
     html += '</div>';
     html += '<div class="nxt-lock">';
-    html += '<span aria-hidden="true" style="font-size:20px;">🔒</span>';
-    html += '<span>Unlocks ' + unlockFull + ' &mdash; finish Week ' + cur + ' first</span>';
+    html += '<span aria-hidden="true" style="font-size:20px;">locked</span>';
+    html += '<span>Unlocks ' + unlockFull + ' - finish Week ' + cur + ' first</span>';
     html += '</div></div>';
   }
 
   document.getElementById("tracker").innerHTML = html;
 
-  // Auto-resize iframe height to fit content
   var h = document.getElementById("tracker").scrollHeight + 20;
   if (window.parent !== window) {
     window.parent.postMessage({ iframeHeight: h }, "*");
