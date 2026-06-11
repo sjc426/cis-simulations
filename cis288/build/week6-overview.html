@@ -1,0 +1,50 @@
+<div style="font-family: Arial, sans-serif; max-width: 860px;">
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 20px 24px; border-radius: 8px 8px 0 0;">
+    <h2 style="margin: 0; font-size: 22px;">Week 6 — IAM Deep Dive</h2>
+    <p style="margin: 6px 0 0; font-size: 14px;">CIS 288 | Users, Groups, Roles, and Policies — Securing What You Built</p>
+  </div>
+
+  <div style="background-color: #ebf3fb; padding: 14px 24px; border-left: 4px solid #0D1B2A; margin-bottom: 20px;">
+    <p>For five weeks you've been building things in the cloud — VMs, storage buckets, networks. This week we answer the question that should be keeping you up at night: <strong>who is allowed to touch all of it?</strong> Identity and Access Management (IAM) is the security layer that every single cloud request passes through. AWS calls it IAM, Azure calls it Microsoft Entra ID, and Google calls it Cloud IAM — and as always with our three landlords, the concepts are identical and only the names change.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">The Hotel Keycard Analogy</h3>
+    <p>Think of your AWS account as a hotel. The <strong>root account</strong> is the master key that opens every door in the building — including the room where they keep the deed. You don't carry that key around; you lock it in the safe (enable MFA, never use it for daily work). Every employee gets their own <strong>keycard</strong> (an IAM user) that opens only the rooms their job requires. Housekeeping cards open guest rooms but not the office. The <strong>written access rules</strong> deciding which cards open which doors? Those are IAM policies — and in AWS, they're JSON documents. Visitors and contractors don't get permanent cards at all — they get <strong>temporary badges</strong> that expire (IAM roles). That one analogy is 90% of this week.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Users, Groups, and the Golden Rule</h3>
+    <p>An <strong>IAM user</strong> is a permanent identity for a human — a console password, maybe access keys for the command line. A <strong>group</strong> is a collection of users that share a job function: Developers, Admins, ReadOnly. Here's the golden rule that separates professionals from people who create security incidents: <strong>attach policies to groups, never to individual users.</strong> New developer joins? Add them to the Developers group — done, they have everything they need. Developer moves to security? Pull them out of one group, drop them in another. Permissions stay clean, auditable, and reversible in one click.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Policies — The JSON That Decides Everything</h3>
+    <p>Every policy statement has three required pieces: <strong>Effect</strong> (Allow or Deny), <strong>Action</strong> (which API calls, like <code>s3:GetObject</code>), and <strong>Resource</strong> (which things, written as an ARN). Two evaluation rules govern everything: <strong>default deny</strong> — if no policy explicitly allows a request, it's denied, period — and <strong>explicit deny always wins</strong> — if any policy says Deny, no Allow anywhere can override it. You never write rules for what's forbidden by default; you only open the specific doors people need. That principle has a name: <strong>least privilege</strong>, and it's the single most-tested IAM concept on every cloud certification exam.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Roles — Why Services Never Get Passwords</h3>
+    <p>Your EC2 web server needs to read files from S3. The wrong answer — the one that ends up in breach reports — is creating a user, generating access keys, and pasting them into the code. The right answer is an <strong>IAM role</strong>: a temporary identity the EC2 service <em>assumes</em> at runtime. AWS hands the instance short-lived credentials that rotate automatically and never appear in your code, your config files, or your GitHub repo. If it's a human, it's a user in a group. If it's a service or an app, it's a role. No exceptions — and this exact pattern comes back next week when your Lambda functions need an execution role.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">MFA and the Three Landlords</h3>
+    <p>One stolen password should never equal a breach — that's what <strong>multi-factor authentication</strong> guarantees, and it goes on the root account before anything else. Across the landlords: AWS <strong>IAM</strong> users/groups/roles/policies map to Azure's <strong>Microsoft Entra ID</strong> with RBAC role assignments, and to Google's <strong>Cloud IAM</strong> with members, roles, and bindings. Azure scopes permissions down a hierarchy (subscription → resource group → resource); GCP binds them at the project level. Same hotel, same keycards — different front desks.</p>
+  </div>
+
+  <div style="background-color: #fff8e6; border: 1px solid #e6c200; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">✅ Your Week 6 Checklist</h3>
+    <ul style="margin-bottom: 0;">
+      <li>Review the <strong>Week 6 slides</strong> (IAM: Securing What You Built)</li>
+      <li>Play the <strong>⚡ Serverless Showdown simulation</strong> (it previews next week!)</li>
+      <li>Take <strong>Quiz 1 — Compute, Storage &amp; Networking</strong> (in class Wednesday)</li>
+      <li>Complete <strong>Lab 6 — Lock Down Your Cloud: IAM Roles &amp; Policies</strong> (due Sunday 6/21, 11:59 PM)</li>
+    </ul>
+  </div>
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 12px 24px; border-radius: 0 0 8px 8px; font-size: 13px;">
+    <p style="margin: 0;">💡 <strong>Why this matters:</strong> "Misconfigured IAM" appears in nearly every major cloud breach post-mortem. The engineer who can write a least-privilege policy and explain why roles beat access keys is the engineer who gets hired.</p>
+  </div>
+</div>
