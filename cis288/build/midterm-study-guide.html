@@ -1,0 +1,92 @@
+<div style="font-family: Arial, sans-serif; max-width: 860px;">
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 20px 24px; border-radius: 8px 8px 0 0;">
+    <h2 style="margin: 0; font-size: 22px;">Midterm Study Guide — Weeks 1–7</h2>
+    <p style="margin: 6px 0 0; font-size: 14px;">CIS 288 | Exam #1: Cloud Foundations Assessment</p>
+  </div>
+
+  <div style="background-color: #ebf3fb; padding: 14px 24px; border-left: 4px solid #0D1B2A; margin-bottom: 20px;">
+    <p>The midterm covers everything from Week 1 through Week 7 and comes in two parts. <strong>Part 1 is a written exam</strong> taken in class — closed book, monitored, multiple choice and short answer. <strong>Part 2 is a lab practical</strong>: you'll complete a hands-on build in the AWS console and submit documented proof, exactly like a weekly lab but timed. If you did the labs yourself, Part 2 will feel familiar. If you didn't... this is the week that finds out.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">📦 Domain 1 — Cloud Foundations (Weeks 1–2)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>The Three Landlords: AWS, Azure, GCP — market position and console basics</li>
+      <li>Service models: IaaS vs. PaaS vs. SaaS — and which model each service you've used falls under</li>
+      <li>Shared Responsibility Model: what the provider secures vs. what YOU secure</li>
+      <li>Regions, Availability Zones, and why spreading across AZs matters</li>
+      <li>Identity basics: signing in, root vs. admin accounts, why MFA on day one</li>
+    </ul>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">🖥️ Domain 2 — Compute (Week 3)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>EC2, Azure VMs, Compute Engine — the same machine from three landlords</li>
+      <li>Instance types and sizing: when do you need more CPU vs. more memory?</li>
+      <li>Pricing models: On-Demand vs. Reserved vs. Spot — and when each makes sense</li>
+      <li>AMIs / images, key pairs, and connecting via SSH</li>
+      <li>Vertical vs. horizontal scaling</li>
+    </ul>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">🪣 Domain 3 — Storage (Week 4)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>S3, Blob Storage, Cloud Storage — object storage across the landlords</li>
+      <li>Buckets, objects, and keys; globally unique bucket names</li>
+      <li>Storage classes/tiers: hot vs. cool vs. archive — match the class to the access pattern</li>
+      <li>Object storage vs. block storage (EBS) vs. file storage (EFS) — know which problem each solves</li>
+      <li>Public access blocks and why "accidentally public S3 bucket" is a famous breach genre</li>
+    </ul>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">🌐 Domain 4 — Networking (Week 5)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>VPC / VNet — the gated community. CIDR notation: /16 vs. /24 vs. /32 (know the math!)</li>
+      <li>Public vs. private subnets — what makes a subnet "public"? (the route table!)</li>
+      <li>Internet Gateway vs. NAT Gateway — direction of traffic each enables</li>
+      <li>Security Groups: stateful, instance-level, ALLOW-only — vs. NACLs</li>
+      <li>SG references: allowing the web tier to reach the DB tier without IP addresses</li>
+      <li>The 3-tier architecture: web public, app private, database private — always</li>
+    </ul>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">🔐 Domain 5 — IAM (Week 6)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>The hotel keycard analogy: root = master key, users = keycards, roles = visitor badges, policies = the rulebook</li>
+      <li>Policy anatomy: Effect + Action + Resource (+ Condition)</li>
+      <li>Evaluation logic: default deny; explicit Deny always wins</li>
+      <li>Groups over direct attachment — why, with the onboarding scenario</li>
+      <li>Roles vs. access keys for services — temporary credentials, no keys in code</li>
+      <li>Least privilege and MFA — the two habits that prevent breaches</li>
+    </ul>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">⚡ Domain 6 — Serverless (Week 7)</h3>
+    <ul style="margin-bottom: 0;">
+      <li>The vending machine vs. the leased restaurant — pay-per-execution vs. pay-per-hour</li>
+      <li>Lambda / Azure Functions / Cloud Run functions — handler, runtime, trigger, execution role</li>
+      <li>Stateless design, auto-scaling, and cold starts (which runtimes are slow and why)</li>
+      <li>The 15-minute Lambda timeout — which workloads it disqualifies</li>
+      <li>Common triggers: API Gateway (sync), S3 events (async), EventBridge schedules</li>
+    </ul>
+  </div>
+
+  <div style="background-color: #fff8e6; border: 1px solid #e6c200; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">📝 Exam Format</h3>
+    <ul>
+      <li><strong>Part 1 — Written (in class, Wednesday):</strong> 30 multiple choice + 4 short answer · 60 minutes · closed book, monitored</li>
+      <li><strong>Part 2 — Lab Practical (take-home, due Sunday 11:59 PM):</strong> a timed AWS console build with documented screenshots — VPC, IAM, and S3 tasks combined</li>
+    </ul>
+    <p style="margin-bottom: 0;"><strong>How to study:</strong> redo Labs 5 and 6 from a blank account without looking at the instructions. If you can rebuild the VPC and the IAM structure from memory, you're ready for Part 2. For Part 1, the six domain cards above are the exam blueprint — every question maps to a bullet on this page.</p>
+  </div>
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 12px 24px; border-radius: 0 0 8px 8px; font-size: 13px;">
+    <p style="margin: 0;">💡 <strong>Office hours before the exam:</strong> message me through Canvas to book a review session. Come with specific questions — "explain everything" is not a question, but "why does explicit deny beat allow" absolutely is.</p>
+  </div>
+</div>
