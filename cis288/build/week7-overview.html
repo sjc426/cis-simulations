@@ -1,0 +1,50 @@
+<div style="font-family: Arial, sans-serif; max-width: 860px;">
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 20px 24px; border-radius: 8px 8px 0 0;">
+    <h2 style="margin: 0; font-size: 22px;">Week 7 — Serverless Computing</h2>
+    <p style="margin: 6px 0 0; font-size: 14px;">CIS 288 | Lambda, Azure Functions, and Cloud Functions — All Three Landlords</p>
+  </div>
+
+  <div style="background-color: #ebf3fb; padding: 14px 24px; border-left: 4px solid #0D1B2A; margin-bottom: 20px;">
+    <p>Here's a secret: "serverless" is a lie. There are absolutely servers — racks and racks of them. The difference is that <strong>you never see them, patch them, or pay for them while they're idle.</strong> You upload a function, pick what triggers it, and the cloud handles everything else. This week you'll deploy the exact same function on all three landlords — AWS Lambda, Azure Functions, and GCP Cloud Run functions — and judge for yourself which one makes it easiest.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">The Vending Machine Analogy</h3>
+    <p>Running an EC2 instance is like <strong>leasing a restaurant</strong>: rent is due 24/7, even at 3 AM when nobody's eating, and you handle the cleaning, repairs, and staffing. Serverless is a <strong>vending machine</strong>: you pay only when someone buys a snack. No purchase, no cost — and the machine owner handles restocking, power, and maintenance. Somebody presses a button (an HTTP request arrives, a file lands in S3, a timer fires) and the machine runs exactly once for that purchase. That button press has a name: a <strong>trigger</strong>.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Stateless, Scaled, and Occasionally Cold</h3>
+    <p>Three properties define how serverless behaves. <strong>Stateless:</strong> every invocation starts fresh with no memory of the last run — anything worth remembering goes in S3, DynamoDB, or a database. <strong>Auto-scaling:</strong> one request runs one copy; a thousand simultaneous requests run a thousand copies, instantly, with zero load balancers to configure. <strong>Cold starts:</strong> the first call after idle time has to spin up a container, adding anywhere from 100 milliseconds to several seconds. Python and Node wake up fast; Java and .NET hit the snooze button. You'll measure a real cold start in this week's lab.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Anatomy of a Lambda Function</h3>
+    <p>Every Lambda has four parts. The <strong>handler</strong> — the entry-point function that receives the trigger's event data as JSON. The <strong>runtime</strong> — your language environment (Python, Node, Java, Go...). <strong>Environment variables</strong> — configuration without code changes. And the <strong>execution role</strong> — straight out of Week 6: the IAM role your function assumes when it runs. Your function needs <code>s3:GetObject</code>? That permission goes on the execution role. Last week wasn't theoretical — it was the prerequisite.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">Know the Limits (Before They Find You)</h3>
+    <p>Lambda caps execution at <strong>15 minutes</strong> — a 45-minute video render job dies at minute 15, full stop. Memory runs from 128 MB to 10 GB, and here's the counterintuitive part: <strong>CPU scales with memory</strong>, so a bigger function sometimes finishes so much faster that it's cheaper. Long-lived connections (think WebSockets), giant stateful apps, and databases don't belong in functions. Serverless is a brilliant tool — for the right jobs. Knowing which jobs is the skill.</p>
+  </div>
+
+  <div style="border: 1px solid #D0E4F5; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; background-color: #ffffff;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">The Three Landlords Sell the Same Machine</h3>
+    <p>AWS <strong>Lambda</strong> (the 2014 pioneer), Azure <strong>Functions</strong>, and GCP <strong>Cloud Run functions</strong> are the same product wearing different uniforms: a handler, an HTTP/storage/timer trigger, a pay-per-execution bill, and a generous free tier (1M requests/month on AWS and Azure, 2M on GCP). The differences show up in the details — deploy speed, auth defaults, timeout ceilings — and this week's lab is built specifically so you experience those differences with your own hands.</p>
+  </div>
+
+  <div style="background-color: #fff8e6; border: 1px solid #e6c200; border-radius: 6px; padding: 16px 20px; margin-bottom: 14px;">
+    <h3 style="margin-top: 0; color: #0d1b2a; font-size: 18px;">✅ Your Week 7 Checklist</h3>
+    <ul style="margin-bottom: 0;">
+      <li>Review the <strong>Week 7 slides</strong> (Serverless: Lambda, Azure Functions, Cloud Functions)</li>
+      <li>Post in <strong>Discussion #6 — The TaskRabbit of the Cloud</strong></li>
+      <li>Complete <strong>Lab 7 — Deploy a Serverless Function on All 3 Platforms</strong> (due Sunday 6/28, 11:59 PM)</li>
+      <li>Start reviewing for the <strong>Week 8 Midterm</strong> — the study guide is already posted</li>
+    </ul>
+  </div>
+
+  <div style="background-color: #0d1b2a; color: #ffffff; padding: 12px 24px; border-radius: 0 0 8px 8px; font-size: 13px;">
+    <p style="margin: 0;">💡 <strong>Why this matters:</strong> "Tell me about a time you chose serverless over a VM — and a time you didn't" is a real interview question. After this week, you'll have deployed on all three clouds and have a real answer.</p>
+  </div>
+</div>
