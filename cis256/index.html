@@ -1,1 +1,804 @@
-PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9IlVURi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCwgaW5pdGlhbC1zY2FsZT0xLjAiPgo8dGl0bGU+Q0lTIDI1NiDigJQgTmV0d29yayBSb3V0aW5nICYgU3dpdGNoaW5nPC90aXRsZT4KPGxpbmsgcmVsPSJwcmVjb25uZWN0IiBocmVmPSJodHRwczovL2ZvbnRzLmdvb2dsZWFwaXMuY29tIj4KPGxpbmsgaHJlZj0iaHR0cHM6Ly9mb250cy5nb29nbGVhcGlzLmNvbS9jc3MyP2ZhbWlseT1PcmJpdHJvbjp3Z2h0QDQwMDs3MDA7OTAwJmZhbWlseT1TaGFyZStUZWNoK01vbm8mZmFtaWx5PUludGVyOndnaHRAMzAwOzQwMDs2MDAmZGlzcGxheT1zd2FwIiByZWw9InN0eWxlc2hlZXQiPg==
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 256 — Network Routing & Switching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#049fd9;
+  --blue-dim:#0077a8;
+  --blue-glow:#00bceb;
+  --blue-dark:#020d1a;
+  --navy:#003087;
+  --gold:#C69214;
+  --gold-dim:#8a6510;
+  --cyan:#00e5ff;
+  --white:#e8f4ff;
+  --bg:#020a14;
+  --bg2:#040f1e;
+  --bg3:#071524;
+  --border:#0d2035;
+  --border2:#132840;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-display:'Orbitron',monospace;
+  --font-body:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--font-body);overflow-x:hidden;cursor:default}
+
+/* ── PARTICLES ── */
+#particles{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4}
+
+/* ── SKIP NAV ── */
+#skipnav{position:absolute;left:-9999px;top:0;background:var(--blue);color:#000;padding:8px 16px;font-family:var(--font-mono);font-size:12px;z-index:9999}
+#skipnav:focus{left:0}
+
+/* ── STICKY NAV ── */
+#sitenav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(2,10,20,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border2);padding:0 20px;height:44px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--blue);letter-spacing:0.15em}
+#sitenav nav{display:flex;gap:4px}
+#sitenav nav a{font-family:var(--font-mono);font-size:11px;color:#4a7a9b;text-decoration:none;padding:4px 10px;border:1px solid transparent;letter-spacing:0.08em;transition:all 0.2s}
+#sitenav nav a:hover,#sitenav nav a.active{color:var(--blue);border-color:var(--border2)}
+body{padding-top:44px}
+
+/* ════════════════════════════════════════
+   SECTION 1 — SPLIT BOOT HERO
+════════════════════════════════════════ */
+#boot{position:relative;z-index:10;padding:48px 20px 60px;border-bottom:1px solid var(--border)}
+.boot-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border2)}
+.boot-panel{padding:28px 28px 24px;position:relative}
+.boot-panel.cli{border-right:1px solid var(--border2);background:rgba(4,159,217,0.03)}
+.boot-panel.ai-side{background:rgba(0,188,235,0.04)}
+.panel-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.25em;text-transform:uppercase;padding:0 0 12px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.panel-label.cli{color:var(--blue-dim)}
+.panel-label.ai-l{color:var(--cyan)}
+.panel-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;animation:blink 1.2s infinite}
+.panel-dot.cli{background:var(--blue)}
+.panel-dot.ai-l{background:var(--cyan)}
+.cli-line{font-family:var(--font-mono);font-size:12px;margin:4px 0;opacity:0;white-space:nowrap;overflow:hidden}
+.cli-line.active{animation:fadeInLine 0.08s forwards}
+.cli-line.ios{color:var(--blue-dim)}
+.cli-line.ok{color:var(--blue)}
+.cli-line.warn{color:var(--gold)}
+.cli-line.prompt{color:var(--white)}
+.ai-line{font-family:var(--font-mono);font-size:12px;margin:4px 0;opacity:0}
+.ai-line.active{animation:fadeInLine 0.08s forwards}
+.ai-line.agent{color:var(--cyan)}
+.ai-line.ok{color:var(--blue-glow)}
+.ai-line.info{color:#6ec6e6}
+.ai-line.ready{color:var(--white)}
+@keyframes fadeInLine{to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+
+/* hero title below boot grid */
+.hero-lower{max-width:1000px;margin:0 auto;padding-top:36px;text-align:center}
+.hero-title{font-family:var(--font-display);font-size:clamp(1.8rem,5vw,4rem);font-weight:900;color:var(--white);letter-spacing:0.04em;line-height:1.1;opacity:0;transform:translateY(18px);transition:all 0.8s ease}
+.hero-title span{color:var(--blue)}
+.hero-title.visible{opacity:1;transform:translateY(0)}
+.hero-sub{font-family:var(--font-mono);font-size:clamp(0.7rem,1.5vw,0.9rem);color:var(--gold);letter-spacing:0.2em;margin-top:10px;opacity:0;transition:all 0.8s ease 0.3s}
+.hero-sub.visible{opacity:1}
+.course-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--blue-dim);padding:6px 18px;font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);margin:20px auto 0;opacity:0;transition:all 0.6s ease 0.6s}
+.course-badge.visible{opacity:1}
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;width:100%;max-width:1000px;margin:28px auto 0;opacity:0;transform:translateY(16px);transition:all 0.8s ease 0.9s}
+.stat-row.visible{opacity:1;transform:translateY(0)}
+.stat-box{border:1px solid var(--border2);background:rgba(4,159,217,0.04);padding:14px 10px;text-align:center;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);animation:scan 3.5s infinite}
+.stat-box:nth-child(2)::before{animation-delay:0.5s}
+.stat-box:nth-child(3)::before{animation-delay:1s}
+.stat-box:nth-child(4)::before{animation-delay:1.5s}
+.stat-box:nth-child(5)::before{animation-delay:2s}
+@keyframes scan{to{left:200%}}
+.stat-num{font-family:var(--font-display);font-size:2rem;font-weight:900;color:var(--blue);display:block}
+.stat-label{font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);margin-top:4px;display:block;text-transform:uppercase;letter-spacing:0.1em}
+
+/* section common */
+.section-header{max-width:1000px;margin:0 auto 36px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.section-tag{font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-bottom:6px}
+.section-title{font-family:var(--font-display);font-size:clamp(1.3rem,2.8vw,2rem);font-weight:700;color:var(--white);letter-spacing:0.05em}
+.section-title span{color:var(--blue)}
+
+/* ════════════════════════════════════════
+   SECTION 2 — LIVE TOPOLOGY
+════════════════════════════════════════ */
+#topology-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.topo-wrap{max-width:1000px;margin:0 auto}
+.topo-canvas-wrap{border:1px solid var(--border2);background:rgba(4,159,217,0.02);padding:8px;position:relative}
+#topoCanvas{width:100%;display:block}
+.topo-legend{display:flex;gap:24px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.leg-item{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:#4a7a9b;letter-spacing:0.1em}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* ════════════════════════════════════════
+   SECTION 3 — PACKET JOURNEY (15 WEEKS)
+════════════════════════════════════════ */
+#roadmap-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.roadmap-wrap{max-width:1000px;margin:0 auto}
+.roadmap-track{position:relative;padding:20px 0 40px}
+.roadmap-line{position:absolute;top:42px;left:0;right:0;height:2px;background:var(--border2)}
+.roadmap-fill{position:absolute;top:42px;left:0;height:2px;background:linear-gradient(90deg,var(--blue),var(--cyan));width:0;transition:width 1.5s ease}
+.roadmap-nodes{display:grid;grid-template-columns:repeat(15,1fr);gap:4px;position:relative}
+.week-node{display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.week-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);background:var(--bg);position:relative;z-index:2;transition:all 0.3s;flex-shrink:0}
+.week-dot.active{border-color:var(--blue);background:var(--blue);box-shadow:0 0 8px rgba(4,159,217,0.6)}
+.week-dot.midterm{border-color:var(--gold)}
+.week-dot.midterm.active{background:var(--gold);box-shadow:0 0 8px rgba(198,146,20,0.6)}
+.week-dot.final{border-color:var(--cyan)}
+.week-dot.final.active{background:var(--cyan);box-shadow:0 0 8px rgba(0,229,255,0.7)}
+.week-num{font-family:var(--font-mono);font-size:9px;color:var(--blue-dim);margin-top:6px;letter-spacing:0.05em}
+.week-tooltip{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);padding:8px 12px;font-family:var(--font-mono);font-size:10px;color:var(--white);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:10;min-width:160px;text-align:center}
+.week-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--border2)}
+.week-node:hover .week-tooltip{opacity:1}
+.week-node:hover .week-dot{border-color:var(--blue-glow);box-shadow:0 0 12px rgba(0,188,235,0.5)}
+
+/* ════════════════════════════════════════
+   SECTION 4 — AGENTICOPS FEED
+════════════════════════════════════════ */
+#ops-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.ops-grid{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ops-panel{border:1px solid var(--border2);background:rgba(4,159,217,0.03)}
+.ops-panel-title{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.ops-panel-title.agent{color:var(--cyan)}
+.ops-panel-title.net{color:var(--blue)}
+.ops-feed{padding:12px 16px;height:220px;overflow:hidden;position:relative}
+.ops-feed::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,var(--bg3));pointer-events:none}
+.ops-item{font-family:var(--font-mono);font-size:11px;padding:5px 0;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;opacity:0;animation:slideIn 0.4s ease forwards}
+@keyframes slideIn{to{opacity:1}}
+.ops-ts{color:#2a4a60;flex-shrink:0;font-size:10px}
+.ops-tag{flex-shrink:0;padding:1px 5px;font-size:9px;border-radius:2px;margin-top:1px}
+.ops-tag.ok{background:rgba(4,159,217,0.15);color:var(--blue)}
+.ops-tag.warn{background:rgba(198,146,20,0.15);color:var(--gold)}
+.ops-tag.info{background:rgba(0,229,255,0.1);color:var(--cyan)}
+.ops-tag.auto{background:rgba(0,188,235,0.12);color:var(--blue-glow)}
+.ops-msg{color:#8ab8d0;font-size:11px}
+
+/* ════════════════════════════════════════
+   SECTION 5 — SKILL TREE
+════════════════════════════════════════ */
+#skilltree{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.tree-grid{max-width:1000px;margin:40px auto 0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.skill-node{border:1px solid var(--border2);background:rgba(4,159,217,0.02);padding:16px 10px;text-align:center;position:relative;cursor:pointer;transition:all 0.3s ease;opacity:0.45}
+.skill-node.unlocked{opacity:1;border-color:var(--blue-dim)}
+.skill-node.unlocked:hover{border-color:var(--blue);background:rgba(4,159,217,0.08);transform:translateY(-2px)}
+.skill-node.capstone{border-color:var(--cyan);opacity:1}
+.skill-node.capstone:hover{background:rgba(0,229,255,0.06)}
+.skill-icon{font-size:1.6rem;display:block;margin-bottom:8px}
+.skill-name{font-family:var(--font-display);font-size:9px;font-weight:700;color:var(--white);letter-spacing:0.1em;display:block;margin-bottom:4px}
+.skill-weeks{font-family:var(--font-mono);font-size:9px;color:var(--blue-dim);display:block}
+.skill-node.unlocked .skill-name{color:var(--blue)}
+.skill-node.capstone .skill-name{color:var(--cyan)}
+.skill-connector{position:absolute;top:50%;right:-14px;width:14px;height:1px;background:linear-gradient(90deg,var(--blue-dim),transparent);z-index:1}
+
+/* ════════════════════════════════════════
+   SECTION 6 — COUNTDOWN
+════════════════════════════════════════ */
+#countdown-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
+.countdown-wrapper{max-width:1000px;margin:0 auto}
+.mission-date{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);letter-spacing:0.15em;margin-bottom:32px}
+.clock-display{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 0 32px}
+.clock-unit{border:1px solid var(--border2);background:rgba(4,159,217,0.04);padding:24px 10px;text-align:center;position:relative}
+.clock-num{font-family:var(--font-display);font-size:2.8rem;font-weight:900;color:var(--blue);display:block;line-height:1}
+.clock-label{font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);display:block;margin-top:6px;letter-spacing:0.15em;text-transform:uppercase}
+.mission-brief{border:1px solid var(--border2);background:rgba(4,159,217,0.02);padding:24px;font-family:var(--font-mono);font-size:12px;line-height:1.8}
+.brief-line{color:var(--blue-dim);margin:2px 0}
+.brief-line.highlight{color:var(--white)}
+.brief-line.gold{color:var(--gold)}
+
+/* ════════════════════════════════════════
+   SECTION 7 — PROFESSOR
+════════════════════════════════════════ */
+#prof-section{position:relative;z-index:10;padding:60px 20px 48px}
+.prof-card{max-width:1000px;margin:0 auto;border:1px solid var(--border2);background:rgba(4,159,217,0.02);padding:32px;display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center}
+.prof-avatar{width:80px;height:80px;border:2px solid var(--blue-dim);border-radius:50%;background:rgba(4,159,217,0.1);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.8rem;font-weight:900;color:var(--blue)}
+.prof-info h3{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--white);letter-spacing:0.08em;margin-bottom:4px}
+.prof-title{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);letter-spacing:0.1em;display:block;margin-bottom:10px}
+.prof-links{display:flex;gap:10px;flex-wrap:wrap}
+.prof-link{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);text-decoration:none;border:1px solid var(--border2);padding:4px 10px;transition:all 0.2s}
+.prof-link:hover{color:var(--blue);border-color:var(--blue-dim)}
+.prof-badge{border:1px solid var(--border2);padding:12px 20px;text-align:center}
+.prof-badge-label{font-family:var(--font-mono);font-size:9px;color:var(--blue-dim);letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:4px}
+.prof-badge-val{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--gold)}
+footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-family:var(--font-mono);font-size:10px;color:#1e3a50;letter-spacing:0.1em}
+
+/* ── ADA ── */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
+  #particles{display:none}
+}
+@media(max-width:700px){
+  .boot-grid{grid-template-columns:1fr}
+  .boot-panel.cli{border-right:none;border-bottom:1px solid var(--border2)}
+  .tree-grid{grid-template-columns:repeat(3,1fr)}
+  .ops-grid{grid-template-columns:1fr}
+  .prof-card{grid-template-columns:1fr;text-align:center}
+  .roadmap-nodes{grid-template-columns:repeat(8,1fr)}
+  .week-node:nth-child(n+9){display:none}
+}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+</style>
+</head>
+<body>
+
+<a href="#boot" id="skipnav">Skip to main content</a>
+
+<header id="sitenav" role="banner">
+  <span class="nav-brand" aria-label="CIS 256 Navigation">CIS&nbsp;256</span>
+  <nav aria-label="Course sections">
+    <a href="#boot" class="active">Intro</a>
+    <a href="#topology-section">Topology</a>
+    <a href="#roadmap-section">Roadmap</a>
+    <a href="#ops-section">AgenticOps</a>
+    <a href="#skilltree">Skills</a>
+    <a href="#countdown-section">Countdown</a>
+    <a href="#prof-section">Prof. Chang</a>
+  </nav>
+</header>
+
+<canvas id="particles"></canvas>
+
+<main id="main-content">
+
+<!-- ══════════════════════════════════════
+     SECTION 1 — SPLIT BOOT HERO
+══════════════════════════════════════ -->
+<section id="boot" style="opacity:1;transform:translateY(0)">
+  <div class="boot-grid">
+    <div class="boot-panel cli" aria-label="Cisco IOS CLI initialization">
+      <div class="panel-label cli">
+        <span class="panel-dot cli"></span>
+        CISCO IOS — CLI INIT
+      </div>
+      <div id="cliLines"></div>
+    </div>
+    <div class="boot-panel ai-side" aria-label="AI agent initialization">
+      <div class="panel-label ai-l">
+        <span class="panel-dot ai-l"></span>
+        AI AGENT — NETWORK OPS
+      </div>
+      <div id="aiLines"></div>
+    </div>
+  </div>
+
+  <div class="hero-lower">
+    <h1 class="hero-title" id="heroTitle">
+      NETWORK ROUTING<br>&amp; <span>SWITCHING</span>
+    </h1>
+    <p class="hero-sub" id="heroSub">CIS 256 · FALL 2026 · COMMUNITY COLLEGE OF PHILADELPHIA</p>
+    <div class="course-badge" id="courseBadge">
+      <span class="panel-dot cli"></span>
+      CIS 256 950 HYBAS 15A FA26
+      <span class="panel-dot cli" style="animation-delay:0.6s"></span>
+    </div>
+    <div class="stat-row" id="statRow">
+      <div class="stat-box"><span class="stat-num">15</span><span class="stat-label">Weeks</span></div>
+      <div class="stat-box"><span class="stat-num">5</span><span class="stat-label">Domains</span></div>
+      <div class="stat-box"><span class="stat-num">50</span><span class="stat-label">Assignments</span></div>
+      <div class="stat-box"><span class="stat-num">1</span><span class="stat-label">Capstone</span></div>
+      <div class="stat-box"><span class="stat-num">AI</span><span class="stat-label">Ready</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 2 — LIVE TOPOLOGY
+══════════════════════════════════════ -->
+<section id="topology-section" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div class="topo-wrap">
+    <div class="section-header">
+      <span class="section-tag">// section_02 :: live_topology</span>
+      <h2 class="section-title">WHAT YOU'LL <span>BUILD</span></h2>
+    </div>
+    <div class="topo-canvas-wrap">
+      <canvas id="topoCanvas" height="340" aria-label="Animated network topology diagram showing routers, switches, access points, cloud and AI nodes connecting"></canvas>
+    </div>
+    <div class="topo-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:#049fd9"></div>ROUTER</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#00bceb"></div>SWITCH (L2/L3)</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#C69214"></div>ACCESS POINT</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#00e5ff"></div>AI NODE</div>
+      <div class="leg-item"><div class="leg-dot" style="background:#6ec6e6"></div>END HOST</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 3 — PACKET JOURNEY ROADMAP
+══════════════════════════════════════ -->
+<section id="roadmap-section" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div class="roadmap-wrap">
+    <div class="section-header">
+      <span class="section-tag">// section_03 :: packet_journey</span>
+      <h2 class="section-title">15-WEEK <span>ROADMAP</span></h2>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);margin-bottom:28px;letter-spacing:0.05em">▶ Hover each hop to see the week's mission. Every packet needs a path — so do you.</p>
+    <div class="roadmap-track">
+      <div class="roadmap-line"></div>
+      <div class="roadmap-fill" id="roadmapFill"></div>
+      <div class="roadmap-nodes" id="roadmapNodes"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 4 — AGENTICOPS FEED
+══════════════════════════════════════ -->
+<section id="ops-section" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div style="max-width:1000px;margin:0 auto">
+    <div class="section-header">
+      <span class="section-tag">// section_04 :: agenticops_feed</span>
+      <h2 class="section-title">CISCO <span>AGENTICOPS</span></h2>
+    </div>
+    <p style="font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);margin-bottom:28px;letter-spacing:0.05em">▶ This is what Cisco's AI-era network operations looks like. You'll learn to design the infrastructure it runs on.</p>
+    <div class="ops-grid">
+      <div class="ops-panel">
+        <div class="ops-panel-title agent">
+          <span class="panel-dot ai-l"></span>
+          AI AGENT — AUTONOMOUS OPS
+        </div>
+        <div class="ops-feed" id="agentFeed"></div>
+      </div>
+      <div class="ops-panel">
+        <div class="ops-panel-title net">
+          <span class="panel-dot cli"></span>
+          NETWORK — LIVE TELEMETRY
+        </div>
+        <div class="ops-feed" id="netFeed"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 5 — SKILL TREE
+══════════════════════════════════════ -->
+<section id="skilltree" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div style="max-width:1000px;margin:0 auto">
+    <div class="section-header">
+      <span class="section-tag">// section_05 :: skill_progression</span>
+      <h2 class="section-title">SKILL <span>DOMAINS</span></h2>
+    </div>
+    <div class="tree-grid">
+      <div class="skill-node unlocked">
+        <span class="skill-connector"></span>
+        <span class="skill-icon">🔌</span>
+        <span class="skill-name">Layer 2<br>Fundamentals</span>
+        <span class="skill-weeks">Weeks 1–4</span>
+      </div>
+      <div class="skill-node unlocked">
+        <span class="skill-connector"></span>
+        <span class="skill-icon">🌐</span>
+        <span class="skill-name">Layer 3<br>Routing</span>
+        <span class="skill-weeks">Weeks 5–9</span>
+      </div>
+      <div class="skill-node unlocked">
+        <span class="skill-connector"></span>
+        <span class="skill-icon">📡</span>
+        <span class="skill-name">Wireless &amp;<br>Edge</span>
+        <span class="skill-weeks">Weeks 7, 10</span>
+      </div>
+      <div class="skill-node unlocked">
+        <span class="skill-connector"></span>
+        <span class="skill-icon">🛡️</span>
+        <span class="skill-name">Network<br>Security</span>
+        <span class="skill-weeks">Weeks 12–13</span>
+      </div>
+      <div class="skill-node capstone">
+        <span class="skill-icon">🤖</span>
+        <span class="skill-name">AI &amp;<br>Automation</span>
+        <span class="skill-weeks">Weeks 10, 14</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 6 — COUNTDOWN
+══════════════════════════════════════ -->
+<section id="countdown-section" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div class="countdown-wrapper">
+    <div class="section-header">
+      <span class="section-tag">// section_06 :: semester_clock</span>
+      <h2 class="section-title">SEMESTER <span>COUNTDOWN</span></h2>
+    </div>
+    <p class="mission-date">▶ MISSION START: SEPTEMBER 8, 2026 · 0800 HRS · CCP HYBRID</p>
+    <div class="clock-display">
+      <div class="clock-unit"><span class="clock-num" id="cdDays">--</span><span class="clock-label">Days</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cdHours">--</span><span class="clock-label">Hours</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cdMins">--</span><span class="clock-label">Minutes</span></div>
+      <div class="clock-unit"><span class="clock-num" id="cdSecs">--</span><span class="clock-label">Seconds</span></div>
+    </div>
+    <div class="mission-brief">
+      <div class="brief-line">// MISSION BRIEF — CIS 256 FA26</div>
+      <div class="brief-line">//</div>
+      <div class="brief-line highlight">// You will design, configure, and troubleshoot enterprise networks.</div>
+      <div class="brief-line highlight">// You will work with VLANs, OSPF, STP, IPv6, ACLs, and wireless.</div>
+      <div class="brief-line highlight">// You will understand how AI agents are changing network operations.</div>
+      <div class="brief-line">//</div>
+      <div class="brief-line gold">// TOOLS: Cisco Packet Tracer · IOS CLI · DevNet · Wireshark</div>
+      <div class="brief-line gold">// FORMAT: Hybrid · 15 Weeks · Weekly Labs + Quizzes</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     SECTION 7 — PROFESSOR
+══════════════════════════════════════ -->
+<section id="prof-section" style="opacity:0;transform:translateY(30px);transition:opacity 0.8s,transform 0.8s">
+  <div class="prof-card">
+    <div class="prof-avatar" aria-hidden="true">SC</div>
+    <div class="prof-info">
+      <h3>PROF. SONNY CHANG</h3>
+      <span class="prof-title">// INSTRUCTOR · CIS DEPARTMENT · COMMUNITY COLLEGE OF PHILADELPHIA</span>
+      <div class="prof-links">
+        <a href="mailto:schang@ccp.edu" class="prof-link">✉ schang@ccp.edu</a>
+        <a href="https://ccp.instructure.com" class="prof-link">⬡ Canvas LMS</a>
+        <a href="https://www.netacad.com" class="prof-link" target="_blank">⬡ Cisco NetAcad</a>
+      </div>
+    </div>
+    <div class="prof-badge">
+      <span class="prof-badge-label">Certification</span>
+      <span class="prof-badge-val">CCNA</span>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  CIS 256 — NETWORK ROUTING &amp; SWITCHING · FA26 · COMMUNITY COLLEGE OF PHILADELPHIA · BUILT WITH CISCO AI-ERA CURRICULUM
+</footer>
+
+<script>
+// ══ PARTICLES ══════════════════════════════════════════════════
+(function(){
+  const c=document.getElementById('particles');
+  const ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=window.innerWidth;H=c.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<55;i++)pts.push({x:Math.random()*1400,y:Math.random()*900,vx:(Math.random()-0.5)*0.18,vy:(Math.random()-0.5)*0.18});
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1;
+      if(p.y<0||p.y>H)p.vy*=-1;
+      ctx.beginPath();ctx.arc(p.x,p.y,1,0,Math.PI*2);
+      ctx.fillStyle='rgba(4,159,217,0.35)';ctx.fill();
+    });
+    pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<110){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);
+        ctx.strokeStyle=`rgba(4,159,217,${0.12*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}
+    }));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ══ SPLIT BOOT SEQUENCE ════════════════════════════════════════
+const cliSeq=[
+  {t:'ios',text:'Cisco IOS Software, Version 16.9.8'},
+  {t:'ios',text:'Copyright (c) Cisco Systems, Inc.'},
+  {t:'ios',text:'ROM: Bootstrap program is IOx'},
+  {t:'ok', text:'Loading flash:packages.conf ... [OK]'},
+  {t:'ok', text:'Initializing interface GigabitEthernet0/0 ... [OK]'},
+  {t:'ok', text:'Initializing interface GigabitEthernet0/1 ... [OK]'},
+  {t:'warn',text:'WARNING: VLAN database not synchronized'},
+  {t:'ok', text:'VLAN database loaded from NVRAM ... [OK]'},
+  {t:'ok', text:'OSPF process 1 started ... [OK]'},
+  {t:'ok', text:'STP: Bridge elected as ROOT ... [OK]'},
+  {t:'prompt',text:'R1>enable'},
+  {t:'prompt',text:'R1#'},
+];
+const aiSeq=[
+  {t:'agent',text:'[AI-Agent] Initializing network intelligence...'},
+  {t:'info', text:'[AI-Agent] Loading topology graph ... done'},
+  {t:'info', text:'[AI-Agent] Connecting to telemetry stream...'},
+  {t:'ok',   text:'[AI-Agent] OSPF neighbor R2 adjacency UP ✓'},
+  {t:'ok',   text:'[AI-Agent] OSPF neighbor R3 adjacency UP ✓'},
+  {t:'agent',text:'[AI-Agent] Analyzing routing table...'},
+  {t:'info', text:'[AI-Agent] 14 routes learned via OSPFv2'},
+  {t:'agent',text:'[AI-Agent] Running STP convergence check...'},
+  {t:'ok',   text:'[AI-Agent] Topology stable — no TCN events ✓'},
+  {t:'agent',text:'[AI-Agent] AgenticOps: monitoring active'},
+  {t:'ready',text:'[AI-Agent] Network: HEALTHY · Threats: NONE'},
+  {t:'ready',text:'[AI-Agent] Ready. Awaiting operator.'},
+];
+(async function bootAnim(){
+  const cliEl=document.getElementById('cliLines');
+  const aiEl=document.getElementById('aiLines');
+  const max=Math.max(cliSeq.length,aiSeq.length);
+  for(let i=0;i<max;i++){
+    await new Promise(r=>setTimeout(r,160+Math.random()*100));
+    if(i<cliSeq.length){
+      const d=document.createElement('div');
+      d.className=`cli-line ${cliSeq[i].t} active`;
+      d.textContent=cliSeq[i].text;
+      cliEl.appendChild(d);
+    }
+    if(i<aiSeq.length){
+      const d=document.createElement('div');
+      d.className=`ai-line ${aiSeq[i].t} active`;
+      d.textContent=aiSeq[i].text;
+      aiEl.appendChild(d);
+    }
+  }
+  // reveal hero after boot
+  setTimeout(()=>{
+    document.getElementById('heroTitle').classList.add('visible');
+    document.getElementById('heroSub').classList.add('visible');
+    document.getElementById('courseBadge').classList.add('visible');
+    document.getElementById('statRow').classList.add('visible');
+  },300);
+})();
+
+// ══ TOPOLOGY CANVAS ════════════════════════════════════════════
+(function(){
+  const canvas=document.getElementById('topoCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||960;
+  const H=340;
+  canvas.width=W;canvas.height=H;
+
+  const nodes=[
+    {id:'internet', label:'INTERNET',x:0.5,y:0.08,color:'#6ec6e6',r:14,type:'cloud'},
+    {id:'r1',       label:'R1',      x:0.5,y:0.28,color:'#049fd9',r:13,type:'router'},
+    {id:'r2',       label:'R2',      x:0.22,y:0.48,color:'#049fd9',r:13,type:'router'},
+    {id:'r3',       label:'R3',      x:0.78,y:0.48,color:'#049fd9',r:13,type:'router'},
+    {id:'sw1',      label:'SW1',     x:0.22,y:0.7, color:'#00bceb',r:12,type:'switch'},
+    {id:'sw2',      label:'SW2',     x:0.5,y:0.7,  color:'#00bceb',r:12,type:'switch'},
+    {id:'sw3',      label:'SW3',     x:0.78,y:0.7, color:'#00bceb',r:12,type:'switch'},
+    {id:'ap1',      label:'AP1',     x:0.1, y:0.88,color:'#C69214',r:10,type:'ap'},
+    {id:'ai1',      label:'AI-NODE', x:0.5,y:0.9,  color:'#00e5ff',r:12,type:'ai'},
+    {id:'pc1',      label:'PC',      x:0.34,y:0.9, color:'#6ec6e6',r:8, type:'host'},
+    {id:'pc2',      label:'SRV',     x:0.66,y:0.9, color:'#6ec6e6',r:8, type:'host'},
+  ];
+  const edges=[
+    ['internet','r1'],
+    ['r1','r2'],['r1','r3'],['r2','r3'],
+    ['r2','sw1'],['r1','sw2'],['r3','sw3'],
+    ['sw1','ap1'],['sw1','pc1'],
+    ['sw2','ai1'],
+    ['sw3','pc2'],
+  ];
+
+  // resolve coords
+  nodes.forEach(n=>{n.px=n.x*W;n.py=n.y*H});
+  const nodeMap={};nodes.forEach(n=>nodeMap[n.id]=n);
+
+  let drawn=0;
+  const totalEdges=edges.length;
+  let edgeProgress=0;
+  let packetT=0;
+  let packetEdgeIdx=0;
+  const packetPath=['internet','r1','r2','sw1','pc1'];
+
+  function lerp(a,b,t){return a+(b-a)*t}
+  function easeInOut(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+
+  function drawNode(n,alpha){
+    ctx.globalAlpha=alpha;
+    // glow
+    const grd=ctx.createRadialGradient(n.px,n.py,0,n.px,n.py,n.r*2.5);
+    grd.addColorStop(0,n.color+'44');
+    grd.addColorStop(1,'transparent');
+    ctx.beginPath();ctx.arc(n.px,n.py,n.r*2.5,0,Math.PI*2);
+    ctx.fillStyle=grd;ctx.fill();
+    // circle
+    ctx.beginPath();ctx.arc(n.px,n.py,n.r,0,Math.PI*2);
+    ctx.strokeStyle=n.color;ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle=n.color+'22';ctx.fill();
+    // icon char
+    ctx.fillStyle=n.color;ctx.font=`bold ${Math.floor(n.r*0.85)}px Share Tech Mono,monospace`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    const icons={router:'R',switch:'S',ap:'AP',ai:'AI',cloud:'☁',host:'H'};
+    ctx.fillText(icons[n.type]||'?',n.px,n.py);
+    // label
+    ctx.fillStyle='#4a7a9b';ctx.font=`9px Share Tech Mono,monospace`;
+    ctx.fillText(n.label,n.px,n.py+n.r+10);
+    ctx.globalAlpha=1;
+  }
+
+  function drawEdge(a,b,progress,pulse){
+    const ax=a.px,ay=a.py,bx=b.px,by=b.py;
+    const ex=lerp(ax,bx,progress),ey=lerp(ay,by,progress);
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ex,ey);
+    ctx.strokeStyle=pulse?'rgba(0,229,255,0.6)':'rgba(4,159,217,0.25)';
+    ctx.lineWidth=pulse?1.5:1;
+    ctx.setLineDash(pulse?[4,4]:[2,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  const EDGE_STEPS=60;
+  let frame=0;
+  let nodeAlpha=new Array(nodes.length).fill(0);
+  let edgeDrawn=new Array(edges.length).fill(0);
+
+  function animate(){
+    ctx.clearRect(0,0,W,H);
+    frame++;
+
+    // draw edges progressively
+    edges.forEach((e,i)=>{
+      const a=nodeMap[e[0]],b=nodeMap[e[1]];
+      if(frame>i*8+10){
+        edgeDrawn[i]=Math.min(1,edgeDrawn[i]+0.04);
+        drawEdge(a,b,edgeDrawn[i],false);
+      }
+    });
+
+    // draw nodes progressively
+    nodes.forEach((n,i)=>{
+      if(frame>i*10){
+        nodeAlpha[i]=Math.min(1,nodeAlpha[i]+0.06);
+        drawNode(n,nodeAlpha[i]);
+      }
+    });
+
+    // animate packet along path
+    if(frame>120){
+      packetT+=0.008;
+      if(packetT>1){packetT=0;packetEdgeIdx=(packetEdgeIdx+1)%(packetPath.length-1)}
+      const src=nodeMap[packetPath[packetEdgeIdx]];
+      const dst=nodeMap[packetPath[packetEdgeIdx+1]];
+      const t=easeInOut(packetT);
+      const px=lerp(src.px,dst.px,t);
+      const py=lerp(src.py,dst.py,t);
+      ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);
+      ctx.fillStyle='#00e5ff';ctx.fill();
+      ctx.beginPath();ctx.arc(px,py,8,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,229,255,0.3)';ctx.lineWidth=1;ctx.stroke();
+    }
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ══ ROADMAP ════════════════════════════════════════════════════
+const weeks=[
+  {n:'W1', label:'Networking Today — OSI, Protocols, Digital World'},
+  {n:'W2', label:'Physical Layer — Cabling & Signals'},
+  {n:'W3', label:'Protocols, PDU Analysis & Hypervisors'},
+  {n:'W4', label:'VLANs, Trunking & Inter-VLAN Routing'},
+  {n:'W5', label:'IoT, VoIP & Edge Devices'},
+  {n:'W6', label:'Spanning Tree Protocol & L2 Security'},
+  {n:'W7', label:'Wireless 802.11 Networks'},
+  {n:'W8', label:'MIDTERM — Domains 1 & 2',type:'midterm'},
+  {n:'W9', label:'IP Routing — Static & OSPFv2'},
+  {n:'W10',label:'AI & Network Operations (ASYNC)'},
+  {n:'W11',label:'IPv6, OSPFv3 & HSRP/VRRP'},
+  {n:'W12',label:'Network Services & Security (DHCP, DNS, NAT, ACL)'},
+  {n:'W13',label:'Domain 5 Synthesis & Capstone Prep'},
+  {n:'W14',label:'Capstone Due — No Class (PD Day)'},
+  {n:'W15',label:'FINAL EXAM',type:'final'},
+];
+const nodesEl=document.getElementById('roadmapNodes');
+weeks.forEach((w,i)=>{
+  const div=document.createElement('div');
+  div.className='week-node';
+  const dot=document.createElement('div');
+  dot.className='week-dot'+(w.type?' '+w.type:'');
+  const num=document.createElement('div');
+  num.className='week-num';
+  num.textContent=w.n;
+  const tip=document.createElement('div');
+  tip.className='week-tooltip';
+  tip.textContent=w.label;
+  div.appendChild(tip);div.appendChild(dot);div.appendChild(num);
+  nodesEl.appendChild(div);
+  setTimeout(()=>{
+    dot.classList.add('active');
+    const pct=Math.round(((i+1)/weeks.length)*100);
+    document.getElementById('roadmapFill').style.width=pct+'%';
+  },600+i*120);
+});
+
+// ══ AGENTICOPS FEED ════════════════════════════════════════════
+const agentEvents=[
+  {tag:'AUTO',msg:'OSPF neighbor R2 adjacency established'},
+  {tag:'OK',  msg:'VLAN 10 (Engineering) — traffic nominal'},
+  {tag:'WARN',msg:'Interface Gi0/2 utilization 89% — throttling'},
+  {tag:'AUTO',msg:'STP topology change detected — recalculating'},
+  {tag:'OK',  msg:'STP converged — new root port: Gi0/1'},
+  {tag:'AUTO',msg:'DHCP pool exhausted — expanding range auto'},
+  {tag:'OK',  msg:'IPv6 OSPFv3 area 0 sync complete'},
+  {tag:'AUTO',msg:'Wireless client band-steered to 5GHz'},
+  {tag:'INFO',msg:'ACL 101 matched 1,204 packets — logging'},
+  {tag:'AUTO',msg:'NAT translation table optimized'},
+  {tag:'OK',  msg:'HSRP: R1 elected ACTIVE router'},
+  {tag:'AUTO',msg:'AI traffic QoS policy applied — low latency'},
+  {tag:'INFO',msg:'OSPFv2 route to 10.20.0.0/24 via R3 preferred'},
+  {tag:'AUTO',msg:'Rogue AP detected — quarantined via ACL'},
+  {tag:'OK',  msg:'Capstone topology validated — all paths UP ✓'},
+];
+const netEvents=[
+  {tag:'OK',  msg:'R1 Gi0/0 — UP — 1000Mbps full-duplex'},
+  {tag:'OK',  msg:'SW1 — 24 ports active — VLAN 10,20,30,99'},
+  {tag:'INFO',msg:'OSPF: 14 routes in routing table'},
+  {tag:'WARN',msg:'SW2 port Fa0/12 — CRC errors detected'},
+  {tag:'OK',  msg:'Trunk Gi0/1 — VLANs 10,20,30 allowed'},
+  {tag:'INFO',msg:'DHCP ack: 192.168.10.45 → PC-Lab-07'},
+  {tag:'OK',  msg:'Ping 10.10.10.1 → 10.20.20.1: 2ms RTT'},
+  {tag:'INFO',msg:'DNS query: www.ccp.edu → 198.51.100.25'},
+  {tag:'WARN',msg:'STP: BPDU guard triggered on Fa0/5'},
+  {tag:'OK',  msg:'NAT: 10.0.0.0/8 → 203.0.113.45 active'},
+  {tag:'INFO',msg:'Wireless: 14 clients — SSID CCP-Secure'},
+  {tag:'OK',  msg:'IPv6: 2001:db8::/32 routing active'},
+  {tag:'INFO',msg:'Telemetry: 3,847 events/sec streaming'},
+  {tag:'OK',  msg:'Uptime: R1 47d 3h — R2 47d 3h — R3 47d 2h'},
+];
+function buildFeed(el,events,delay){
+  let idx=0;
+  function addItem(){
+    if(idx>=events.length)idx=0;
+    const ev=events[idx++];
+    if(el.children.length>12)el.removeChild(el.children[0]);
+    const d=document.createElement('div');
+    d.className='ops-item';
+    d.style.animationDelay='0s';
+    const now=new Date();
+    const ts=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    d.innerHTML=`<span class="ops-ts">${ts}</span><span class="ops-tag ${ev.tag.toLowerCase()}">${ev.tag}</span><span class="ops-msg">${ev.msg}</span>`;
+    el.appendChild(d);
+  }
+  // stagger initial fill
+  for(let i=0;i<8;i++)setTimeout(()=>addItem(),delay+i*180);
+  // then live updates
+  setTimeout(()=>setInterval(addItem,delay===0?2800:3200),delay+8*180+500);
+}
+buildFeed(document.getElementById('agentFeed'),agentEvents,0);
+buildFeed(document.getElementById('netFeed'),netEvents,400);
+
+// ══ COUNTDOWN ══════════════════════════════════════════════════
+function updateClock(){
+  const target=new Date('2026-09-08T08:00:00');
+  const now=new Date();
+  const diff=target-now;
+  if(diff<=0){
+    ['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>{document.getElementById(id).textContent='00'});return;
+  }
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor((diff%86400000)/3600000);
+  const m=Math.floor((diff%3600000)/60000);
+  const s=Math.floor((diff%60000)/1000);
+  document.getElementById('cdDays').textContent=String(d).padStart(2,'0');
+  document.getElementById('cdHours').textContent=String(h).padStart(2,'0');
+  document.getElementById('cdMins').textContent=String(m).padStart(2,'0');
+  document.getElementById('cdSecs').textContent=String(s).padStart(2,'0');
+}
+updateClock();setInterval(updateClock,1000);
+
+// ══ SCROLL REVEAL ══════════════════════════════════════════════
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)'}
+  });
+},{threshold:0.08});
+document.querySelectorAll('section').forEach(s=>{
+  if(s.id!=='boot')observer.observe(s);
+});
+
+// ══ STICKY NAV HIGHLIGHT ═══════════════════════════════════════
+(function(){
+  const sections=['boot','topology-section','roadmap-section','ops-section','skilltree','countdown-section','prof-section'];
+  const links=document.querySelectorAll('#sitenav nav a');
+  function update(){
+    let cur=sections[0];
+    sections.forEach(id=>{
+      const el=document.getElementById(id);
+      if(el&&window.scrollY>=el.offsetTop-60)cur=id;
+    });
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+  }
+  window.addEventListener('scroll',update,{passive:true});
+  update();
+})();
+</script>
+</body>
+</html>
