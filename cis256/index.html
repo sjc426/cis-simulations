@@ -754,32 +754,141 @@ const aiSeq=[
   let packetT=0,packetEdgeIdx=0;
   const packetPath=['internet','r1','r2','sw1','pc1'];
 
+  // ── WORLD MAP — simplified continent outlines as canvas paths ──────────────
+  // Scaled to fit canvas W×H using equirectangular approximation
+  // Paths are hand-simplified polygons of the major landmasses
+  function drawWorldMap(){
+    const scx=x=>x*W,scy=y=>y*H;
+    ctx.save();
+    ctx.globalAlpha=0.07;
+    ctx.strokeStyle='#049fd9';
+    ctx.lineWidth=0.8;
+    ctx.fillStyle='rgba(4,159,217,0.06)';
+
+    // Helper to draw a land polygon from [x%,y%] pairs
+    function landPath(pts){
+      ctx.beginPath();
+      ctx.moveTo(scx(pts[0][0]),scy(pts[0][1]));
+      for(let i=1;i<pts.length;i++)ctx.lineTo(scx(pts[i][0]),scy(pts[i][1]));
+      ctx.closePath();ctx.fill();ctx.stroke();
+    }
+
+    // North America
+    landPath([[0.05,0.12],[0.07,0.08],[0.12,0.07],[0.18,0.08],[0.22,0.10],[0.26,0.12],[0.27,0.15],
+              [0.24,0.18],[0.26,0.22],[0.28,0.26],[0.26,0.30],[0.24,0.34],[0.22,0.38],[0.18,0.42],
+              [0.16,0.44],[0.14,0.42],[0.12,0.38],[0.10,0.34],[0.08,0.28],[0.06,0.22],[0.05,0.18]]);
+    // Central America / Caribbean (small peninsula)
+    landPath([[0.20,0.42],[0.22,0.44],[0.22,0.47],[0.20,0.48],[0.19,0.46],[0.19,0.44]]);
+    // South America
+    landPath([[0.22,0.48],[0.25,0.46],[0.28,0.47],[0.30,0.50],[0.32,0.54],[0.32,0.60],[0.30,0.66],
+              [0.28,0.72],[0.26,0.78],[0.24,0.82],[0.22,0.80],[0.20,0.76],[0.18,0.70],[0.18,0.64],
+              [0.20,0.58],[0.20,0.52]]);
+    // Europe
+    landPath([[0.44,0.10],[0.46,0.08],[0.50,0.09],[0.53,0.10],[0.54,0.13],[0.52,0.16],[0.50,0.18],
+              [0.48,0.20],[0.46,0.20],[0.44,0.18],[0.43,0.15]]);
+    // Scandinavia bump
+    landPath([[0.46,0.07],[0.48,0.05],[0.50,0.06],[0.50,0.09],[0.48,0.10],[0.46,0.09]]);
+    // Africa
+    landPath([[0.44,0.22],[0.47,0.20],[0.52,0.21],[0.56,0.23],[0.58,0.27],[0.58,0.34],[0.56,0.40],
+              [0.54,0.48],[0.52,0.56],[0.50,0.62],[0.48,0.66],[0.46,0.64],[0.44,0.58],[0.42,0.50],
+              [0.42,0.42],[0.42,0.34],[0.43,0.28]]);
+    // Asia (main body)
+    landPath([[0.54,0.10],[0.58,0.08],[0.64,0.08],[0.70,0.10],[0.76,0.12],[0.80,0.15],[0.82,0.18],
+              [0.84,0.22],[0.84,0.28],[0.82,0.32],[0.80,0.34],[0.76,0.35],[0.72,0.34],[0.68,0.32],
+              [0.66,0.30],[0.64,0.28],[0.62,0.26],[0.60,0.24],[0.58,0.22],[0.56,0.20],[0.54,0.18],
+              [0.53,0.15]]);
+    // India subcontinent
+    landPath([[0.62,0.28],[0.64,0.30],[0.65,0.34],[0.64,0.38],[0.62,0.40],[0.60,0.38],[0.59,0.34],[0.60,0.30]]);
+    // Southeast Asia peninsula
+    landPath([[0.72,0.34],[0.74,0.36],[0.74,0.40],[0.72,0.42],[0.70,0.40],[0.70,0.36]]);
+    // Australia
+    landPath([[0.74,0.60],[0.78,0.58],[0.82,0.58],[0.86,0.60],[0.88,0.64],[0.88,0.70],[0.86,0.74],
+              [0.82,0.76],[0.78,0.76],[0.74,0.74],[0.72,0.70],[0.72,0.64]]);
+    // Greenland
+    landPath([[0.18,0.06],[0.22,0.04],[0.26,0.05],[0.28,0.08],[0.26,0.11],[0.22,0.12],[0.18,0.10]]);
+    // UK/Ireland blip
+    landPath([[0.43,0.11],[0.44,0.10],[0.45,0.12],[0.44,0.14],[0.43,0.13]]);
+    // Japan
+    landPath([[0.82,0.18],[0.84,0.17],[0.85,0.20],[0.84,0.22],[0.82,0.21]]);
+
+    // Grid lines (lat/lon) for map feel
+    ctx.globalAlpha=0.04;
+    ctx.strokeStyle='#00bceb';ctx.lineWidth=0.5;
+    for(let gx=0;gx<=1;gx+=0.1){ctx.beginPath();ctx.moveTo(scx(gx),0);ctx.lineTo(scx(gx),H);ctx.stroke();}
+    for(let gy=0;gy<=1;gy+=0.2){ctx.beginPath();ctx.moveTo(0,scy(gy));ctx.lineTo(W,scy(gy));ctx.stroke();}
+
+    ctx.restore();
+  }
+
+  // ── EDGE drawing: thick glowing links ───────────────────────────────────────
+  function drawEdgeFull(a,b,progress){
+    const ax=a.px,ay=a.py;
+    const bx=lerp(ax,b.px,progress),by=lerp(ay,b.py,progress);
+    // glow layer (wide, soft)
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+    ctx.strokeStyle='rgba(4,159,217,0.18)';ctx.lineWidth=6;ctx.setLineDash([]);ctx.stroke();
+    // mid layer
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+    ctx.strokeStyle='rgba(4,159,217,0.45)';ctx.lineWidth=2.5;ctx.stroke();
+    // core bright line
+    ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);
+    ctx.strokeStyle='rgba(0,188,235,0.85)';ctx.lineWidth=1.2;ctx.stroke();
+    // animated tick marks along the link (every 18px)
+    const dist=Math.hypot(b.px-ax,b.py-ay)*progress;
+    const steps=Math.floor(dist/18);
+    const dx=(b.px-ax)/Math.hypot(b.px-ax,b.py-ay),dy=(b.py-ay)/Math.hypot(b.px-ax,b.py-ay);
+    const tick=(performance.now()/800)%1;
+    for(let s=0;s<steps;s++){
+      const t=((s/steps)+tick)%1;
+      if(t>progress)continue;
+      const tx=ax+dx*dist*t,ty=ay+dy*dist*t;
+      ctx.beginPath();ctx.arc(tx,ty,1.5,0,Math.PI*2);
+      ctx.fillStyle='rgba(0,229,255,0.6)';ctx.fill();
+    }
+  }
+
   function animate(){
     ctx.clearRect(0,0,W,H);
     frame++;
-    // edges
+
+    // 1. World map background
+    drawWorldMap();
+
+    // 2. Edges — thick glowing
     edges.forEach((e,i)=>{
       const a=nodeMap[e[0]],b=nodeMap[e[1]];
       if(frame>i*8+10){
         edgeDrawn[i]=Math.min(1,edgeDrawn[i]+0.04);
-        const ex=lerp(a.px,b.px,edgeDrawn[i]),ey=lerp(a.py,b.py,edgeDrawn[i]);
-        ctx.beginPath();ctx.moveTo(a.px,a.py);ctx.lineTo(ex,ey);
-        ctx.strokeStyle='rgba(4,159,217,0.25)';ctx.lineWidth=1;ctx.setLineDash([2,4]);ctx.stroke();ctx.setLineDash([]);
+        drawEdgeFull(a,b,edgeDrawn[i]);
       }
     });
-    // nodes
+
+    // 3. Nodes
     nodes.forEach((n,i)=>{
       if(frame>i*10){nodeAlpha[i]=Math.min(1,nodeAlpha[i]+0.06);drawCiscoIcon(ctx,n,nodeAlpha[i]);}
     });
-    // packet
+
+    // 4. Packet with trail
     if(frame>120){
       packetT+=0.008;
       if(packetT>1){packetT=0;packetEdgeIdx=(packetEdgeIdx+1)%(packetPath.length-1)}
       const src=nodeMap[packetPath[packetEdgeIdx]],dst=nodeMap[packetPath[packetEdgeIdx+1]];
       const t=easeInOut(packetT);
       const px=lerp(src.px,dst.px,t),py=lerp(src.py,dst.py,t);
-      ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle='#00e5ff';ctx.fill();
-      ctx.beginPath();ctx.arc(px,py,8,0,Math.PI*2);ctx.strokeStyle='rgba(0,229,255,0.3)';ctx.lineWidth=1;ctx.stroke();
+      // trail
+      for(let tr=1;tr<=5;tr++){
+        const tt=Math.max(0,t-tr*0.04);
+        const tx=lerp(src.px,dst.px,easeInOut(tt)),ty=lerp(src.py,dst.py,easeInOut(tt));
+        ctx.beginPath();ctx.arc(tx,ty,2.5-tr*0.3,0,Math.PI*2);
+        ctx.fillStyle=`rgba(0,229,255,${0.4-tr*0.07})`;ctx.fill();
+      }
+      // packet head
+      ctx.beginPath();ctx.arc(px,py,5,0,Math.PI*2);
+      ctx.fillStyle='#00e5ff';ctx.fill();
+      ctx.beginPath();ctx.arc(px,py,9,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,229,255,0.5)';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.beginPath();ctx.arc(px,py,14,0,Math.PI*2);
+      ctx.strokeStyle='rgba(0,229,255,0.15)';ctx.lineWidth=1;ctx.stroke();
     }
     requestAnimationFrame(animate);
   }
