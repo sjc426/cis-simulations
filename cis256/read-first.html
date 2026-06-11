@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 256 — Start Here</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#049fd9;--blue-dim:#0077a8;--blue-glow:#00bceb;
+  --navy:#020a14;--navy2:#040f1e;--navy3:#071524;
+  --gold:#C69214;--cyan:#00e5ff;--white:#e8f4ff;
+  --border:#0d2035;--border2:#132840;--red:#ff4060;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-display:'Orbitron',monospace;
+  --font-body:'Inter',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:var(--font-body);overflow-x:hidden;min-height:100vh}
+
+/* ── SKIP NAV ── */
+#skipnav{position:absolute;left:-9999px;top:4px;background:var(--blue);color:#000;padding:8px 16px;font-family:var(--font-mono);font-size:12px;z-index:9999;text-decoration:none}
+#skipnav:focus{left:8px}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* ── NAV TABS ── */
+#tabnav{position:sticky;top:0;z-index:100;background:rgba(2,10,20,0.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--border2);display:flex;align-items:stretch;overflow-x:auto}
+.tab-btn{font-family:var(--font-mono);font-size:11px;color:#4a7a9b;background:none;border:none;border-bottom:2px solid transparent;padding:14px 18px;cursor:pointer;letter-spacing:0.08em;white-space:nowrap;transition:all 0.2s;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:var(--blue-glow)}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-num{font-size:9px;background:var(--border2);color:var(--blue-dim);padding:2px 5px;border-radius:2px;font-family:var(--font-mono)}
+.tab-btn.active .tab-num{background:rgba(4,159,217,0.2);color:var(--blue)}
+
+/* ── PANELS ── */
+.panel{display:none;animation:panelIn 0.35s ease}
+.panel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HERO BOOT PANEL ── */
+#hero{padding:48px 32px 40px;border-bottom:1px solid var(--border);max-width:960px;margin:0 auto}
+.boot-frame{border:1px solid var(--border2);background:rgba(4,159,217,0.03);padding:28px 32px;position:relative;margin-bottom:36px}
+.boot-frame::before{content:'CIS256.SYS';position:absolute;top:-10px;left:20px;background:var(--navy);padding:0 8px;font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);letter-spacing:0.2em}
+.boot-frame::after{content:'SECURE BOOT v2.56';position:absolute;top:-10px;right:20px;background:var(--navy);padding:0 8px;font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);letter-spacing:0.2em}
+#bootLines{min-height:160px}
+.bline{font-family:var(--font-mono);font-size:12px;margin:3px 0;opacity:0}
+.bline.active{animation:fadeIn 0.06s forwards}
+.bline.dim{color:var(--blue-dim)}.bline.ok{color:var(--blue)}.bline.warn{color:var(--gold)}.bline.info{color:var(--cyan)}.bline.prompt{color:var(--white)}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* hero title */
+.hero-title{font-family:var(--font-display);font-size:clamp(2rem,5vw,3.8rem);font-weight:900;text-align:center;margin:8px 0 6px;opacity:0;transform:translateY(16px);transition:all 0.7s ease}
+.hero-title span{color:var(--blue)}
+.hero-title.show{opacity:1;transform:none}
+.hero-sub{font-family:var(--font-mono);font-size:clamp(0.7rem,1.5vw,0.85rem);color:var(--gold);text-align:center;letter-spacing:0.2em;opacity:0;transition:all 0.7s ease 0.2s}
+.hero-sub.show{opacity:1}
+
+/* stat strip */
+.stat-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:32px;opacity:0;transform:translateY(12px);transition:all 0.7s ease 0.5s}
+.stat-strip.show{opacity:1;transform:none}
+.stat-box{border:1px solid var(--border2);background:rgba(4,159,217,0.04);padding:12px 8px;text-align:center;position:relative;overflow:hidden}
+.stat-box::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);animation:scan 3s infinite}
+.stat-box:nth-child(2)::before{animation-delay:.4s}.stat-box:nth-child(3)::before{animation-delay:.8s}
+.stat-box:nth-child(4)::before{animation-delay:1.2s}.stat-box:nth-child(5)::before{animation-delay:1.6s}
+@keyframes scan{to{left:200%}}
+.stat-n{font-family:var(--font-display);font-size:1.7rem;font-weight:900;color:var(--blue);display:block;line-height:1}
+.stat-l{font-family:var(--font-mono);font-size:9px;color:var(--blue-dim);display:block;margin-top:4px;text-transform:uppercase;letter-spacing:0.1em}
+
+/* ── CONTENT SECTIONS ── */
+.content-wrap{max-width:960px;margin:0 auto;padding:40px 32px}
+
+/* section header */
+.sec-tag{font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);letter-spacing:0.3em;text-transform:uppercase;display:block;margin-bottom:6px}
+.sec-title{font-family:var(--font-display);font-size:clamp(1.2rem,2.5vw,1.8rem);font-weight:700;color:var(--white);letter-spacing:0.05em;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+.sec-title span{color:var(--blue)}
+
+/* card grid */
+.card-grid{display:grid;gap:16px;margin-bottom:32px}
+.card-grid.cols2{grid-template-columns:1fr 1fr}
+.card-grid.cols3{grid-template-columns:repeat(3,1fr)}
+.card{border:1px solid var(--border2);background:rgba(4,159,217,0.03);padding:20px;position:relative;overflow:hidden;transition:all 0.25s}
+.card:hover{border-color:var(--blue-dim);background:rgba(4,159,217,0.07)}
+.card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--blue)}
+.card.gold::before{background:var(--gold)}
+.card.cyan::before{background:var(--cyan)}
+.card.red::before{background:var(--red)}
+.card-icon{font-size:1.4rem;margin-bottom:8px;display:block}
+.card-title{font-family:var(--font-display);font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;display:block}
+.card.gold .card-title{color:var(--gold)}
+.card.cyan .card-title{color:var(--cyan)}
+.card.red .card-title{color:var(--red)}
+.card p{font-size:13px;color:#8ab8d0;line-height:1.7}
+.card ul{font-size:13px;color:#8ab8d0;line-height:1.9;padding-left:16px}
+.card li{margin-bottom:2px}
+
+/* quote block */
+.quote-block{border:1px solid var(--border2);border-left:3px solid var(--blue);background:rgba(4,159,217,0.04);padding:24px 28px;margin:24px 0}
+.quote-text{font-family:var(--font-body);font-size:1.05rem;color:var(--white);line-height:1.8;font-style:italic;margin-bottom:10px}
+.quote-attr{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);letter-spacing:0.1em}
+
+/* checklist */
+.checklist{list-style:none;padding:0;margin:16px 0}
+.checklist li{font-family:var(--font-mono);font-size:12px;color:#8ab8d0;padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.checklist li:last-child{border-bottom:none}
+.check-box{width:14px;height:14px;border:1px solid var(--blue-dim);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--blue)}
+
+/* law card */
+.law-card{border:1px solid var(--border2);background:rgba(255,64,96,0.04);padding:18px 20px;margin-bottom:12px;position:relative}
+.law-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red)}
+.law-name{font-family:var(--font-display);font-size:10px;font-weight:700;color:var(--red);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:6px;display:block}
+.law-desc{font-size:13px;color:#8ab8d0;line-height:1.6}
+
+/* tool row */
+.tool-row{display:flex;align-items:flex-start;gap:16px;border:1px solid var(--border2);background:rgba(4,159,217,0.03);padding:18px 20px;margin-bottom:12px;transition:all 0.2s}
+.tool-row:hover{border-color:var(--blue-dim)}
+.tool-num{font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--blue);opacity:0.4;flex-shrink:0;width:32px}
+.tool-info{flex:1}
+.tool-name{font-family:var(--font-display);font-size:11px;font-weight:700;color:var(--blue);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:6px;display:block}
+.tool-desc{font-size:13px;color:#8ab8d0;line-height:1.6;margin-bottom:8px}
+.tool-link{font-family:var(--font-mono);font-size:11px;color:var(--cyan);text-decoration:none;border:1px solid var(--border2);padding:3px 10px;display:inline-block;transition:all 0.2s}
+.tool-link:hover{border-color:var(--cyan);color:var(--white)}
+
+/* schedule table */
+.sched-table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+.sched-table th{font-family:var(--font-mono);font-size:10px;color:var(--blue-dim);letter-spacing:0.15em;text-transform:uppercase;text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);background:rgba(4,159,217,0.05)}
+.sched-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:#8ab8d0;vertical-align:top}
+.sched-table tr:hover td{background:rgba(4,159,217,0.04);color:var(--white)}
+.sched-table td:first-child{font-family:var(--font-mono);font-size:11px;color:var(--blue);white-space:nowrap}
+
+/* week badge */
+.week-badge{font-family:var(--font-mono);font-size:9px;background:rgba(4,159,217,0.15);color:var(--blue);padding:2px 6px;border-radius:2px;letter-spacing:0.1em}
+.week-badge.gold{background:rgba(198,146,20,0.15);color:var(--gold)}
+.week-badge.cyan{background:rgba(0,229,255,0.1);color:var(--cyan)}
+
+/* cta button */
+.cta-wrap{text-align:center;margin:36px 0 8px}
+.cta-btn{font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:0.2em;color:#000;background:var(--blue);border:none;padding:14px 32px;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.2s;text-transform:uppercase}
+.cta-btn:hover{background:var(--blue-glow);transform:translateY(-1px)}
+.cta-btn.outline{background:transparent;color:var(--blue);border:1px solid var(--blue-dim)}
+.cta-btn.outline:hover{background:rgba(4,159,217,0.1)}
+
+/* progress dots */
+.prog-dots{display:flex;gap:6px;justify-content:center;padding:16px 0}
+.prog-dot{width:6px;height:6px;border-radius:50%;background:var(--border2);transition:all 0.3s;cursor:pointer}
+.prog-dot.active{background:var(--blue);box-shadow:0 0 8px rgba(4,159,217,0.6)}
+
+/* divider */
+.divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+
+/* inline code */
+code{font-family:var(--font-mono);font-size:11px;background:rgba(4,159,217,0.1);color:var(--cyan);padding:2px 6px;border-radius:2px}
+
+/* scroll reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease,transform 0.6s ease}
+.reveal.show{opacity:1;transform:none}
+
+/* ADA reduced motion */
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:0.01ms !important;transition-duration:0.01ms !important}
+}
+
+/* responsive */
+@media(max-width:680px){
+  .card-grid.cols2,.card-grid.cols3{grid-template-columns:1fr}
+  .stat-strip{grid-template-columns:repeat(3,1fr)}
+  .content-wrap{padding:28px 16px}
+  #hero{padding:28px 16px 24px}
+  .boot-frame{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<a href="#main" id="skipnav">Skip to main content</a>
+
+<!-- TAB NAV -->
+<nav id="tabnav" role="navigation" aria-label="Start Here sections">
+  <button class="tab-btn active" onclick="switchTab(0)" aria-selected="true" aria-controls="panel-0" id="tab-0">
+    <span class="tab-num">01</span>WELCOME
+  </button>
+  <button class="tab-btn" onclick="switchTab(1)" aria-selected="false" aria-controls="panel-1" id="tab-1">
+    <span class="tab-num">02</span>EXPECTATIONS
+  </button>
+  <button class="tab-btn" onclick="switchTab(2)" aria-selected="false" aria-controls="panel-2" id="tab-2">
+    <span class="tab-num">03</span>TOOLS &amp; SETUP
+  </button>
+  <button class="tab-btn" onclick="switchTab(3)" aria-selected="false" aria-controls="panel-3" id="tab-3">
+    <span class="tab-num">04</span>LEGAL FRAMEWORK
+  </button>
+</nav>
+
+<main id="main">
+
+<!-- ════════════════════════════════
+     PANEL 0 — WELCOME
+════════════════════════════════ -->
+<div class="panel active" id="panel-0" role="tabpanel" aria-labelledby="tab-0">
+
+  <div id="hero">
+    <div class="boot-frame" aria-label="System boot sequence">
+      <div id="bootLines" role="log" aria-live="polite" aria-label="Boot messages"></div>
+    </div>
+    <h1 class="hero-title" id="heroTitle">WELCOME TO <span>CIS 256</span></h1>
+    <p class="hero-sub" id="heroSub">NETWORK ROUTING &amp; SWITCHING · FALL 2026 · COMMUNITY COLLEGE OF PHILADELPHIA</p>
+    <div class="stat-strip" id="statStrip" role="list" aria-label="Course statistics">
+      <div class="stat-box" role="listitem"><span class="stat-n">15</span><span class="stat-l">Weeks</span></div>
+      <div class="stat-box" role="listitem"><span class="stat-n">10</span><span class="stat-l">Labs</span></div>
+      <div class="stat-box" role="listitem"><span class="stat-n">5</span><span class="stat-l">Domains</span></div>
+      <div class="stat-box" role="listitem"><span class="stat-n">1</span><span class="stat-l">Capstone</span></div>
+      <div class="stat-box" role="listitem"><span class="stat-n">AI</span><span class="stat-l">Ready</span></div>
+    </div>
+  </div>
+
+  <div class="content-wrap">
+
+    <div class="reveal">
+      <span class="sec-tag">// 01 :: about_this_course</span>
+      <div class="sec-title">WHAT YOU WILL <span>LEARN</span></div>
+      <div class="card-grid cols3">
+        <div class="card reveal">
+          <span class="card-icon">🔌</span>
+          <span class="card-title">Layer 2 Fundamentals</span>
+          <p>VLANs, trunking, STP, inter-VLAN routing, and Layer 2 security. Weeks 1–4.</p>
+        </div>
+        <div class="card reveal">
+          <span class="card-icon">🌐</span>
+          <span class="card-title">Layer 3 Routing</span>
+          <p>Static routes, OSPFv2, OSPFv3, IPv6, HSRP/VRRP, and DHCP. Weeks 5–11.</p>
+        </div>
+        <div class="card reveal">
+          <span class="card-icon">📡</span>
+          <span class="card-title">Wireless &amp; Edge</span>
+          <p>802.11 band selection, channel planning, IoT, VoIP, and cloud-managed networks. Weeks 7 &amp; 10.</p>
+        </div>
+        <div class="card gold reveal">
+          <span class="card-icon">🛡️</span>
+          <span class="card-title">Network Security</span>
+          <p>ACLs, NAT, DNS, port security, BPDU guard, and firewall fundamentals. Weeks 12–13.</p>
+        </div>
+        <div class="card cyan reveal">
+          <span class="card-icon">🤖</span>
+          <span class="card-title">AI &amp; Automation</span>
+          <p>AgenticOps, DevNet, Cisco AI Defense, and evaluating AI-generated network configs. Weeks 10 &amp; 14.</p>
+        </div>
+        <div class="card reveal">
+          <span class="card-icon">🏗️</span>
+          <span class="card-title">Capstone Project</span>
+          <p>Design and document a full enterprise network for Keystone Community Health. Week 14.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// 02 :: weekly_structure</span>
+      <div class="sec-title">HOW EACH WEEK <span>WORKS</span></div>
+      <table class="sched-table" aria-label="Weekly schedule structure">
+        <thead><tr><th>DAY</th><th>ACTIVITY</th><th>WHERE</th></tr></thead>
+        <tbody>
+          <tr><td>MON–TUE</td><td>Read the Week Overview page. Watch any linked videos. Review slides.</td><td>Canvas Pages</td></tr>
+          <tr><td>WEDNESDAY</td><td>Live hybrid class — lecture, demo, Q&amp;A. Recorded for async students.</td><td>In-person / Zoom</td></tr>
+          <tr><td>THU–SAT</td><td>Complete the Packet Tracer lab. Submit before Sunday midnight.</td><td>Canvas Assignments</td></tr>
+          <tr><td>SUNDAY</td><td>Weekly quiz closes at 11:59 PM. Discussion posts due.</td><td>Canvas Quizzes</td></tr>
+        </tbody>
+      </table>
+      <div class="card-grid cols2 reveal" style="margin-top:16px">
+        <div class="card gold">
+          <span class="card-title">📅 Async Weeks</span>
+          <ul>
+            <li><span class="week-badge gold">W10</span> Nov 11 — Veterans Day — no class</li>
+            <li><span class="week-badge gold">W14</span> Dec 9 — PD Day — Capstone due</li>
+          </ul>
+        </div>
+        <div class="card cyan">
+          <span class="card-title">🎯 Two Major Milestones</span>
+          <ul>
+            <li><span class="week-badge">W8</span> Midterm — Written + Packet Tracer practical</li>
+            <li><span class="week-badge cyan">W15</span> Final Exam — Cumulative, all 5 domains</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// 03 :: career_outcomes</span>
+      <div class="sec-title">WHERE THIS TAKES <span>YOU</span></div>
+      <div class="card-grid cols2">
+        <div class="card reveal">
+          <span class="card-title">Roles You're Building Toward</span>
+          <ul>
+            <li>Network Technician — deploy and troubleshoot devices</li>
+            <li>Junior Network Engineer — enterprise design and optimization</li>
+            <li>Cloud Network Specialist — Meraki, AWS VPC, Azure vNET</li>
+            <li>Security Analyst — ACLs, firewall rules, network controls</li>
+          </ul>
+        </div>
+        <div class="card cyan reveal">
+          <span class="card-title">CCNA Certification Path</span>
+          <ul>
+            <li>Domain 1 — Network Infrastructure (W1–W4)</li>
+            <li>Domain 2 — Switching &amp; Access (W5–W8)</li>
+            <li>Domain 3 — IP Routing (W9–W11)</li>
+            <li>Domain 4 — Services &amp; Security (W12–W13)</li>
+            <li>Domain 5 — AI &amp; Automation (W10, W14)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      <p class="quote-text">"The network is the business. When the network goes down, revenue stops. The engineer who can design, troubleshoot, and secure that network — and evaluate AI recommendations with a critical eye — will always have a job. That's you by December."</p>
+      <span class="quote-attr">— Professor Sonny Chang · CIS Department · Community College of Philadelphia</span>
+    </div>
+
+    <div class="cta-wrap reveal">
+      <button class="cta-btn" onclick="switchTab(1)">▶ NEXT: COURSE EXPECTATIONS</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PANEL 1 — EXPECTATIONS
+════════════════════════════════ -->
+<div class="panel" id="panel-1" role="tabpanel" aria-labelledby="tab-1">
+  <div class="content-wrap">
+    <span class="sec-tag">// 02 :: professional_conduct</span>
+    <div class="sec-title">COURSE EXPECTATIONS &amp; <span>CODE OF ETHICS</span></div>
+
+    <div class="card-grid cols3 reveal">
+      <div class="card">
+        <span class="card-icon">👔</span>
+        <span class="card-title">Professional Conduct</span>
+        <p>You are a network professional in training. Treat every lab, discussion, and interaction as if it were a real workplace environment.</p>
+      </div>
+      <div class="card gold">
+        <span class="card-icon">🎓</span>
+        <span class="card-title">Academic Integrity</span>
+        <p>All submitted work must be your own. Sharing Packet Tracer lab files or quiz answers is a violation regardless of intent.</p>
+      </div>
+      <div class="card cyan">
+        <span class="card-icon">🤖</span>
+        <span class="card-title">AI Tool Policy</span>
+        <p>Use AI assistants to learn and verify — not to complete assignments. You must be able to explain and defend every configuration you submit.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// expected_behaviors</span>
+      <div class="sec-title" style="font-size:1.1rem">WHAT I EXPECT <span>FROM YOU</span></div>
+      <ul class="checklist" aria-label="Expected behaviors">
+        <li><span class="check-box" aria-hidden="true">✓</span>Attempt every lab before asking for help — read the error, Google the IOS command, try again</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>Ask questions in Discussions so classmates benefit from the answer, not just you</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>Submit on time — late work is accepted up to 3 days with a 10% per day penalty</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>Participate in Wednesday class — even hybrid students are expected to engage asynchronously</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>Label every file correctly: <code>CIS256_Lab01_LastnameFirstname.pkt</code></li>
+        <li><span class="check-box" aria-hidden="true">✓</span>Use the Canvas inbox for private questions — not email</li>
+      </ul>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// academic_integrity</span>
+      <div class="sec-title" style="font-size:1.1rem">WHAT IS <span>ALLOWED vs NOT ALLOWED</span></div>
+      <div class="card-grid cols2">
+        <div class="card cyan">
+          <span class="card-title">✅ Allowed</span>
+          <ul>
+            <li>Discussing concepts and approaches with classmates</li>
+            <li>Using AI to explain IOS commands or networking theory</li>
+            <li>Referencing Cisco documentation and textbooks</li>
+            <li>Asking the professor or tutor for help</li>
+            <li>Using your own previous lab files as reference</li>
+          </ul>
+        </div>
+        <div class="card red">
+          <span class="card-title">❌ Not Allowed</span>
+          <ul>
+            <li>Submitting another student's .pkt or .docx file</li>
+            <li>Having AI complete the lab steps for you</li>
+            <li>Copying quiz answers from any source</li>
+            <li>Sharing your completed lab files before the due date</li>
+            <li>Using unauthorized tools on Packet Tracer assessments</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// professor_commitment</span>
+      <div class="sec-title" style="font-size:1.1rem">PROFESSOR CHANG'S <span>COMMITMENT TO YOU</span></div>
+      <div class="card-grid cols3">
+        <div class="card">
+          <span class="card-title">⏱ 48-Hour Response</span>
+          <p>All Canvas inbox messages answered within 48 hours on weekdays. Weekends: by Monday morning.</p>
+        </div>
+        <div class="card">
+          <span class="card-title">📊 Weekly Feedback</span>
+          <p>Lab and quiz grades posted within 7 days of the due date, with written feedback on every lab.</p>
+        </div>
+        <div class="card gold">
+          <span class="card-title">🚪 Open Door</span>
+          <p>Office hours by appointment. If you are struggling, reach out early — there is always a path forward.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-wrap reveal">
+      <button class="cta-btn outline" onclick="switchTab(0)" style="margin-right:12px">← BACK</button>
+      <button class="cta-btn" onclick="switchTab(2)">▶ NEXT: TOOLS &amp; SETUP</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PANEL 2 — TOOLS & SETUP
+════════════════════════════════ -->
+<div class="panel" id="panel-2" role="tabpanel" aria-labelledby="tab-2">
+  <div class="content-wrap">
+    <span class="sec-tag">// 03 :: tools_and_setup</span>
+    <div class="sec-title">COURSE TECHNOLOGIES &amp; <span>TOOL SETUP</span></div>
+
+    <div class="tool-row reveal" aria-label="Tool 1: Cisco Packet Tracer">
+      <div class="tool-num">01</div>
+      <div class="tool-info">
+        <span class="tool-name">Cisco Packet Tracer — Your Network Simulation Lab</span>
+        <p class="tool-desc">The primary tool for all labs. Simulates real Cisco IOS routers, switches, and access points. Free with a Cisco NetAcad account. Download version 8.2 or later. Available for Windows, macOS, and Linux.</p>
+        <a href="https://www.netacad.com/resources/lab-downloads" class="tool-link" target="_blank" rel="noopener noreferrer">▶ Download Packet Tracer</a>
+      </div>
+    </div>
+
+    <div class="tool-row reveal" aria-label="Tool 2: Cisco DevNet">
+      <div class="tool-num">02</div>
+      <div class="tool-info">
+        <span class="tool-name">Cisco DevNet — Your Cloud Sandbox Portal</span>
+        <p class="tool-desc">Used in Week 10 and the Capstone. Provides access to real Cisco hardware sandboxes in the cloud — IOS XE, Catalyst Center, and Meraki dashboard. Free account required. Sign up with your CCP email.</p>
+        <a href="https://developer.cisco.com" class="tool-link" target="_blank" rel="noopener noreferrer">▶ Create DevNet Account</a>
+      </div>
+    </div>
+
+    <div class="tool-row reveal" aria-label="Tool 3: Canvas LMS">
+      <div class="tool-num">03</div>
+      <div class="tool-info">
+        <span class="tool-name">Canvas LMS — Your Course Hub</span>
+        <p class="tool-desc">All assignments, labs, quizzes, and grades live here. Download the Canvas Student mobile app for push notifications on grades and announcements. Enable notifications — missing an announcement is not an excuse for a late submission.</p>
+        <a href="https://ccp.instructure.com" class="tool-link" target="_blank" rel="noopener noreferrer">▶ Canvas Dashboard</a>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// week1_checklist</span>
+      <div class="sec-title" style="font-size:1.1rem">WEEK 1 SETUP CHECKLIST <span style="color:var(--gold)">Due Sun Sep 14</span></div>
+      <ul class="checklist" aria-label="Week 1 setup checklist">
+        <li><span class="check-box" aria-hidden="true">□</span>Create a free Cisco NetAcad account at netacad.com using your CCP email</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Download and install Cisco Packet Tracer 8.2+</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Open Packet Tracer, place one router and one switch, connect them — confirm it launches</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Create a free Cisco DevNet account at developer.cisco.com</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Install the Canvas Student app on your phone and enable notifications</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Post your introduction in Discussion 1 — Who Are You?</li>
+        <li><span class="check-box" aria-hidden="true">□</span>Submit Lab 1 by Sunday 11:59 PM</li>
+      </ul>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// optional_tools</span>
+      <div class="sec-title" style="font-size:1.1rem">OPTIONAL BUT <span>RECOMMENDED</span></div>
+      <div class="card-grid cols3">
+        <div class="card">
+          <span class="card-title">Wireshark</span>
+          <p>Free packet analyzer. Used in labs 3 and 9. Install now so it is ready. wireshark.org</p>
+        </div>
+        <div class="card">
+          <span class="card-title">Cisco Skills for All</span>
+          <p>Free Cisco courses — Introduction to Networks aligns directly with this class. Great for extra practice.</p>
+        </div>
+        <div class="card gold">
+          <span class="card-title">CCNA 200-301 Study</span>
+          <p>OCG or Boson practice exams. Not required now — but start thinking about the February 2027 exam window.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-wrap reveal">
+      <button class="cta-btn outline" onclick="switchTab(1)" style="margin-right:12px">← BACK</button>
+      <button class="cta-btn" onclick="switchTab(3)">▶ NEXT: LEGAL FRAMEWORK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     PANEL 3 — LEGAL FRAMEWORK
+════════════════════════════════ -->
+<div class="panel" id="panel-3" role="tabpanel" aria-labelledby="tab-3">
+  <div class="content-wrap">
+    <span class="sec-tag">// 04 :: legal_framework</span>
+    <div class="sec-title">LEGAL FRAMEWORK — <span>WHAT YOU CAN AND CANNOT DO</span></div>
+
+    <div class="quote-block reveal" style="border-left-color:var(--red)">
+      <p class="quote-text">"The Golden Rule of Network Access: You may only access systems you own, or systems for which you have explicit written authorization. Everything else is a federal crime."</p>
+      <span class="quote-attr">— CIS 256 Course Policy · Community College of Philadelphia</span>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// federal_laws</span>
+      <div class="sec-title" style="font-size:1.1rem">FEDERAL LAWS <span>YOU MUST KNOW</span></div>
+
+      <div class="law-card reveal">
+        <span class="law-name">Computer Fraud and Abuse Act (CFAA) — 18 U.S.C. § 1030</span>
+        <p class="law-desc">Criminalizes unauthorized access to computers and networks. Penalties range from 1 to 20 years depending on the offense. "I was just curious" is not a defense. "I didn't know it was unauthorized" is not a defense.</p>
+      </div>
+      <div class="law-card reveal">
+        <span class="law-name">Wiretap Act — 18 U.S.C. § 2511</span>
+        <p class="law-desc">Prohibits intercepting electronic communications without authorization. Running Wireshark on a network you do not own or control — even passively — is a federal violation.</p>
+      </div>
+      <div class="law-card reveal">
+        <span class="law-name">Electronic Communications Privacy Act (ECPA)</span>
+        <p class="law-desc">Extends wiretap protections to stored electronic communications and data. Accessing someone's stored emails, files, or network logs without authorization violates federal law.</p>
+      </div>
+      <div class="law-card reveal">
+        <span class="law-name">Pennsylvania Computer Hacking Laws — 18 Pa. C.S. § 7611–7615</span>
+        <p class="law-desc">State-level offenses that mirror federal law. Pennsylvania prosecutes independently of federal charges — you can face both simultaneously.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// authorized_environments</span>
+      <div class="sec-title" style="font-size:1.1rem">WHERE YOU ARE <span>AUTHORIZED TO WORK</span></div>
+      <div class="card-grid cols2">
+        <div class="card cyan reveal">
+          <span class="card-title">✅ Fully Authorized</span>
+          <ul>
+            <li>Cisco Packet Tracer simulated networks</li>
+            <li>Cisco DevNet Always-On sandboxes</li>
+            <li>Your own home router/network (with caution)</li>
+            <li>CCP classroom lab equipment during class</li>
+            <li>Networks you own and control completely</li>
+          </ul>
+        </div>
+        <div class="card red reveal">
+          <span class="card-title">❌ Never Authorized</span>
+          <ul>
+            <li>CCP's production network infrastructure</li>
+            <li>Public Wi-Fi networks — scanning or sniffing</li>
+            <li>Your neighbor's or employer's network</li>
+            <li>Any system not explicitly listed as a lab target</li>
+            <li>Running nmap, Wireshark, or any tool on unknown networks</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// real_world_cases</span>
+      <div class="sec-title" style="font-size:1.1rem">REAL CASES — <span>REAL CONSEQUENCES</span></div>
+      <div class="card-grid cols3">
+        <div class="card red reveal">
+          <span class="card-title">Case 1: The Curious Student</span>
+          <p>A student ran nmap against their college's network "just to see what was open." IT flagged it within minutes. The student faced suspension and a referral to campus security — no criminal charges only because the college chose not to press them.</p>
+        </div>
+        <div class="card red reveal">
+          <span class="card-title">Case 2: The Wi-Fi Sniffer</span>
+          <p>A student ran Wireshark at a coffee shop capturing packets. Even without reading them, passive capture on a network you don't own violates the Wiretap Act. Federal charges were filed.</p>
+        </div>
+        <div class="card red reveal">
+          <span class="card-title">Case 3: The "Researcher"</span>
+          <p>A student scanned a company network to "report vulnerabilities." Without written authorization, this is unauthorized access under the CFAA regardless of intent. The student was prosecuted.</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="reveal">
+      <span class="sec-tag">// commitment</span>
+      <div class="sec-title" style="font-size:1.1rem">YOUR PROFESSIONAL <span>COMMITMENT</span></div>
+      <ul class="checklist" aria-label="Professional commitment items">
+        <li><span class="check-box" aria-hidden="true">✓</span>I will only access networks and systems I own or have explicit written authorization to access</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>I will use Packet Tracer and DevNet sandboxes for all labs — never production systems</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>I understand that "educational purpose" does not grant authorization to access systems</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>I will report any accidental unauthorized access to Professor Chang immediately</li>
+        <li><span class="check-box" aria-hidden="true">✓</span>I understand that violations may result in course failure, suspension, and criminal prosecution</li>
+      </ul>
+    </div>
+
+    <div class="cta-wrap reveal">
+      <button class="cta-btn outline" onclick="switchTab(2)" style="margin-right:12px">← BACK</button>
+      <a href="https://ccp.instructure.com/courses/2129428/modules" class="cta-btn" style="text-decoration:none">▶ GO TO WEEK 1</a>
+    </div>
+
+    <!-- progress dots -->
+    <div class="prog-dots" aria-label="Section progress" role="navigation">
+      <div class="prog-dot" onclick="switchTab(0)" role="button" tabindex="0" aria-label="Welcome"></div>
+      <div class="prog-dot" onclick="switchTab(1)" role="button" tabindex="0" aria-label="Expectations"></div>
+      <div class="prog-dot" onclick="switchTab(2)" role="button" tabindex="0" aria-label="Tools"></div>
+      <div class="prog-dot active" onclick="switchTab(3)" role="button" tabindex="0" aria-label="Legal Framework"></div>
+    </div>
+
+  </div>
+</div>
+
+</main>
+
+<script>
+// ── BOOT SEQUENCE ──────────────────────────────────────────────────────
+const bootLines=[
+  {t:'dim',  text:'CIS256.SYS loading ... v2.56.FA26'},
+  {t:'ok',   text:'Verifying student credentials ... [OK]'},
+  {t:'ok',   text:'Loading course modules 1–15 ... [OK]'},
+  {t:'ok',   text:'Mounting Packet Tracer lab environment ... [OK]'},
+  {t:'ok',   text:'Cisco NetAcad integration ... [OK]'},
+  {t:'warn', text:'NOTICE: Unauthorized network access is a federal offense'},
+  {t:'ok',   text:'DevNet sandbox connection established ... [OK]'},
+  {t:'ok',   text:'AgenticOps monitoring: ACTIVE'},
+  {t:'info', text:'[AI-Agent] Course intelligence loaded — 15 weeks, 10 labs, 1 capstone'},
+  {t:'prompt',text:'> Welcome, Network Engineer. CIS 256 FA26 is ready.'},
+];
+(async function bootAnim(){
+  const el=document.getElementById('bootLines');
+  for(let i=0;i<bootLines.length;i++){
+    await new Promise(r=>setTimeout(r,150+Math.random()*90));
+    const d=document.createElement('div');
+    d.className=`bline ${bootLines[i].t} active`;
+    d.textContent=bootLines[i].text;
+    el.appendChild(d);
+  }
+  setTimeout(()=>{
+    document.getElementById('heroTitle').classList.add('show');
+    document.getElementById('heroSub').classList.add('show');
+    document.getElementById('statStrip').classList.add('show');
+  },200);
+})();
+
+// ── TAB SWITCHING ──────────────────────────────────────────────────────
+function switchTab(idx){
+  document.querySelectorAll('.panel').forEach((p,i)=>{
+    p.classList.toggle('active',i===idx);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active',i===idx);
+    b.setAttribute('aria-selected',i===idx?'true':'false');
+  });
+  // update progress dots if on panel 3
+  document.querySelectorAll('.prog-dot').forEach((d,i)=>{
+    d.classList.toggle('active',i===idx);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+  // trigger reveals on new panel
+  setTimeout(triggerReveals, 50);
+}
+
+// ── SCROLL REVEAL ──────────────────────────────────────────────────────
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('show')});
+},{threshold:0.1});
+
+function triggerReveals(){
+  document.querySelectorAll('.reveal:not(.show)').forEach(el=>revealObs.observe(el));
+}
+triggerReveals();
+
+// ── KEYBOARD NAV for progress dots ──
+document.querySelectorAll('.prog-dot').forEach((d,i)=>{
+  d.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')switchTab(i)});
+});
+</script>
+</body>
+</html>
