@@ -736,3 +736,76 @@ function showFeedback(isCorrect, text, breakdown) {
   fb.innerHTML = html;
   fb.classList.remove('hidden');
 }
+function renderScenario() {
+  if (currentScenario >= scenarios.length) {
+    endGame();
+    return;
+  }
+
+  const scenario = scenarios[currentScenario];
+
+  document.getElementById('scenario-label').textContent   = scenario.label;
+  document.getElementById('scenario-title').textContent   = scenario.title;
+  document.getElementById('scenario-body').innerHTML      = scenario.body;
+  document.getElementById('scenario-question').textContent = scenario.question;
+  document.getElementById('concept-emoji').textContent    = scenario.conceptEmoji;
+  document.getElementById('concept-main').textContent     = scenario.concept;
+  document.getElementById('concept-sub').textContent      = scenario.conceptSub;
+
+  const optionsContainer = document.getElementById('options-container');
+  optionsContainer.innerHTML = '';
+  scenario.options.forEach((option, index) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = option;
+    btn.onclick = () => selectAnswer(index);
+    optionsContainer.appendChild(btn);
+  });
+
+  document.getElementById('score-display').textContent = score;
+  document.getElementById('round-display').textContent = `${currentScenario + 1}/${scenarios.length}`;
+  document.getElementById('progress-fill').style.width = `${(currentScenario / scenarios.length) * 100}%`;
+
+  if (streak >= 3) {
+    document.getElementById('streak-pill').classList.remove('hidden');
+    document.getElementById('streak-display').textContent = streak;
+  } else {
+    document.getElementById('streak-pill').classList.add('hidden');
+  }
+
+  document.getElementById('feedback').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  answered = false;
+}
+
+function nextScenario() {
+  currentScenario++;
+  renderScenario();
+}
+
+function endGame() {
+  document.getElementById('game-area').classList.add('hidden');
+  document.getElementById('final-screen').classList.remove('hidden');
+
+  const pct = Math.round((correctCount / scenarios.length) * 100);
+  document.getElementById('final-score').textContent       = score;
+  document.getElementById('final-correct').textContent     = correctCount + '/' + scenarios.length;
+  document.getElementById('final-streak').textContent      = bestStreak;
+  document.getElementById('final-percentage').textContent  = pct + '%';
+  document.getElementById('progress-fill').style.width     = '100%';
+
+  let msg = '';
+  if (pct === 100)      msg = 'Perfect score! You are a networking architect.';
+  else if (pct >= 80)   msg = 'Excellent work — strong networking fundamentals!';
+  else if (pct >= 60)   msg = 'Good effort! Review the concepts and try again.';
+  else                  msg = 'Keep studying — networking takes practice!';
+  document.getElementById('final-message').textContent = msg;
+}
+
+// Wire up Next button and kick off the game
+document.getElementById('next-btn').addEventListener('click', nextScenario);
+renderScenario();
+
+</script>
+</body>
+</html>
