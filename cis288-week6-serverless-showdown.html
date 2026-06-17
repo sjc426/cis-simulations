@@ -1204,7 +1204,7 @@ function pick(el, id) {
     <div class="fb-title">${correct ? '✓ Architecture approved' + (S.streak>=3?' 🔥 Hot streak!':'') : '✗ Architecture rejected — study the logs'}</div>
     <div class="fb-body">${esc(r.explain)}</div>
     <div class="fb-code">${esc(r.code)}</div>`;
-  document.getElementById('btn-next').style.display = '';
+  document.getElementById('btn-next').style.display = 'block';
 }
 
 function next() { S.round++; render(); }
