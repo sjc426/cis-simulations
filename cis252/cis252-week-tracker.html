@@ -38,17 +38,18 @@ var COURSE_ID      = "2103664";
 var COURSE_CODE    = "CIS 252";
 // ============================================================
 
+// Index 0 unused (placeholder) so week number can index directly. Verified against live Canvas module structure 2026-06-28.
 var TOPICS = [
   "",
-  "Managing Network Servers — Foundations",
-  "Virtualization, Cloud & Your First Server",
-  "Active Directory — Installation & Administration",
+  "Understanding Server Administration Concepts",
+  "Virtualization, Cloud Computing & Your First Cloud Server",
+  "Active Directory — Installation, Configuration & Administration",
   "Physical Assets & Network Security Concepts",
   "Server Hardware & Server Hardening",
   "Configuring Storage Management",
   "Exam 1 — Midterm",
-  "Installing & Configuring an OS + The Pivot to Agentic",
   "Troubleshooting OS, Application & Network Configurations",
+  "Installing & Configuring an OS + The Pivot to Agentic",
   "Managing Post-Installation Administration Tasks",
   "Managing Data Security",
   "Managing Service and Data Availability",
@@ -56,19 +57,19 @@ var TOPICS = [
   "Decommissioning Servers (Project Submission)"
 ];
 
-var ICONS = ["","🖧","🖥️","🔐","🛡️","⚙️","🗄️","📝","🤖","🔧","📋","🔒","📡","🤝","🏆"];
+var ICONS = ["","🖧","🖥️","🔐","🛡️","⚙️","🗄️","📝","🔍","🤖","📋","🔒","📡","🤝","🏆"];
 
 var SLUGS = [
   "",
-  "week-1-overview",
+  "week-1-overview-understanding-server-administration-concepts",
   "week-2-overview-summary",
   "week-3-overview-active-directory-installation-configuration-and-administration",
   "week-4-overview-physical-assets-and-network-security-concepts",
-  "week-5-overview-managing-server-hardware",
+  "week-5-overview-server-hardware-and-server-hardening",
   "week-6-overview-configuring-storage-management",
   "week-7-overview-exam-1-midterm",
-  "week-8-overview-installing-and-configuring-an-os-+-the-pivot-to-agentic",
-  "week-9-overview-troubleshooting-os-application-and-network-configurations",
+  "week-8-overview-troubleshooting-os-application-and-network-configurations",
+  "week-9-overview-installing-and-configuring-an-os-+-the-pivot-to-agentic",
   "week-10-overview-managing-post-installation-administration-tasks",
   "week-11-overview-managing-data-security",
   "week-12-overview-managing-service-and-data-availability",
@@ -86,7 +87,7 @@ var READ_SLUGS = [
   "week-6-reading-and-resources-~45-min",
   "week-7-overview-exam-1-midterm",
   "week-8-reading-and-resources",
-  "week-9-overview-troubleshooting-os-application-and-network-configurations",
+  "week-9-overview-installing-and-configuring-an-os-+-the-pivot-to-agentic",
   "week-10-overview-managing-post-installation-administration-tasks",
   "week-11-overview-managing-data-security",
   "week-12-overview-managing-service-and-data-availability",
@@ -136,6 +137,7 @@ function render() {
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + READ_SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + READ_SLUGS[cur] + '" data-api-returntype="Page">📺 Watch &amp; Read</a>';
   html += '<a class="btn" target="_top" href="' + base + '/pages/' + SLUGS[cur] + '" data-api-endpoint="https://ccp.instructure.com/api/v1/courses/' + COURSE_ID + '/pages/' + SLUGS[cur] + '" data-api-returntype="Page">📋 Week Overview</a>';
 
+  // Lab/Exam URLs by week number — verified against live Canvas assignment IDs 2026-06-28
   var LAB_URLS = {
     1:  'https://ccp.instructure.com/courses/2103664/assignments/19871789?module_item_id=45328023',
     2:  'https://ccp.instructure.com/courses/2103664/assignments/19871801?module_item_id=45328033',
@@ -144,10 +146,12 @@ function render() {
     5:  'https://ccp.instructure.com/courses/2103664/assignments/20025805?module_item_id=45742571',
     6:  'https://ccp.instructure.com/courses/2103664/assignments/20027645?module_item_id=45750751',
     7:  'https://ccp.instructure.com/courses/2103664/assignments/20029093?module_item_id=45755799',
-    8:  'https://ccp.instructure.com/courses/2103664/assignments/20054917?module_item_id=45826055'
+    8:  'https://ccp.instructure.com/courses/2103664/assignments/20167831?module_item_id=46133475',
+    9:  'https://ccp.instructure.com/courses/2103664/assignments/20054917?module_item_id=45826055'
   };
+  var LAB_NUM = { 8: 7, 9: 8 };
   var labURL = LAB_URLS[cur] || (base + '/assignments');
-  var labLabel = cur === 7 ? '📝 Midterm Exam' : '🔬 Lab ' + cur;
+  var labLabel = cur === 7 ? '📝 Midterm Exam' : ('🔬 Lab ' + (LAB_NUM[cur] || cur));
   html += '<a class="btn primary" target="_top" href="' + labURL + '">' + labLabel + '</a>';
   html += '</div></div>';
 
