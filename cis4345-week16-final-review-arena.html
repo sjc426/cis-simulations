@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Final Review Arena 🏆 Three Landlords, One Final Exam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+    --blue:#4f8ef7; --blue-dim:#1e2d4f;
+    --green:#3ecf8e; --green-dim:#0d2e1f;
+    --red:#f87171; --red-dim:#2e1010;
+    --yellow:#fbbf24; --yellow-dim:#2e2208;
+    --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+    --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+    --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+    --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-width:380px; line-height:1.5;
+  }
+  .skip-link{
+    position:absolute; left:-9999px; top:0; background:var(--blue); color:#fff;
+    padding:10px 16px; z-index:1000; border-radius:0 0 6px 0; font-weight:600;
+  }
+  .skip-link:focus{ left:0; }
+
+  button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+  a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+    flex-wrap:wrap; gap:10px;
+  }
+  .logo-row{ display:flex; align-items:center; gap:10px; }
+  .dots{ display:flex; gap:4px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+  .dot.aws{ background:var(--aws); }
+  .dot.azure{ background:var(--azure); }
+  .dot.gcp{ background:var(--gcp); }
+  .logo-text{ font-family:var(--mono); font-weight:600; font-size:1.05rem; }
+
+  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+    padding:6px 14px; font-family:var(--mono); font-size:0.85rem; color:var(--text2);
+    display:flex; align-items:center; gap:6px;
+  }
+  .pill strong{ color:var(--text); }
+
+  #progress-wrap{
+    height:3px; background:var(--surface2); width:100%;
+  }
+  #progress-bar{
+    height:100%; background:var(--blue); width:0%; transition:width .3s ease;
+  }
+
+  main{
+    max-width:800px; margin:0 auto; padding:24px 16px 60px;
+  }
+
+  h1{ font-size:1.15rem; margin:0; }
+
+  .round-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:24px; margin-top:20px;
+  }
+  .round-label{
+    font-family:var(--mono); font-size:0.8rem; color:var(--blue); text-transform:uppercase;
+    letter-spacing:0.05em; margin-bottom:8px;
+  }
+  .round-card h2{ font-size:1.4rem; margin:0 0 12px; }
+  .round-body{ color:var(--text2); margin-bottom:16px; font-size:0.98rem; }
+
+  .concept-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--surface2);
+    border:1px solid var(--border); border-radius:8px; padding:8px 14px; margin-bottom:20px;
+  }
+  .concept-badge .cb-title{ font-weight:600; font-size:0.9rem; }
+  .concept-badge .cb-sub{ color:var(--text2); font-size:0.8rem; }
+
+  .question-text{ font-weight:600; margin:0 0 14px; font-size:1rem; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt-btn{
+    background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    border-radius:8px; padding:14px 16px; text-align:left; font-family:var(--sans);
+    font-size:0.95rem; cursor:pointer; transition:background .15s, border-color .15s;
+    width:100%;
+  }
+  .opt-btn:hover:not(:disabled){ background:var(--blue-dim); border-color:var(--blue); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct-answer{ background:var(--green-dim); border-color:var(--green); }
+  .opt-btn.wrong-answer{ background:var(--red-dim); border-color:var(--red); }
+
+  .fb{
+    margin-top:20px; padding:18px; border-radius:10px; border:1px solid var(--border);
+  }
+  .fb.success{ background:var(--green-dim); border-color:var(--green); }
+  .fb.error{ background:var(--red-dim); border-color:var(--red); }
+  .fb-head{ display:flex; align-items:center; gap:8px; font-weight:600; margin-bottom:8px; font-size:1.05rem; }
+  .fb-text{ color:var(--text); margin-bottom:14px; font-size:0.95rem; }
+  .fb-row{
+    display:flex; gap:10px; align-items:flex-start; padding:8px 0; font-size:0.9rem;
+    border-top:1px solid rgba(255,255,255,0.05);
+  }
+  .fb-row:first-of-type{ border-top:none; }
+  .fb-row .icon{ flex-shrink:0; }
+
+  .streak-flash{
+    display:inline-block; font-family:var(--mono); color:var(--yellow); font-weight:600;
+    margin-left:8px; animation:flash 0.6s ease;
+  }
+  @keyframes flash{
+    0%{ transform:scale(0.5); opacity:0; }
+    50%{ transform:scale(1.2); opacity:1; }
+    100%{ transform:scale(1); opacity:1; }
+  }
+
+  .next-btn{
+    margin-top:20px; background:var(--blue); color:#fff; border:none; border-radius:8px;
+    padding:14px 22px; font-family:var(--sans); font-weight:600; font-size:0.95rem;
+    cursor:pointer; width:100%;
+  }
+  .next-btn:hover{ background:#3a7ce0; }
+
+  .final-screen{ text-align:center; padding:30px 10px; }
+  .final-score{
+    font-family:var(--mono); font-size:3.5rem; font-weight:600; color:var(--yellow);
+    margin:10px 0;
+  }
+  .final-label{ color:var(--text2); font-size:1rem; margin-bottom:20px; }
+  .stat-boxes{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:12px; margin:24px 0;
+  }
+  .stat-box{
+    background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+    padding:16px 10px;
+  }
+  .stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--blue); }
+  .stat-box .lbl{ color:var(--text2); font-size:0.8rem; margin-top:4px; }
+  .replay-btn{
+    background:var(--green); color:#0f1117; border:none; border-radius:8px;
+    padding:14px 28px; font-family:var(--sans); font-weight:600; font-size:1rem;
+    cursor:pointer; margin-top:10px;
+  }
+  .replay-btn:hover{ background:#2fb87a; }
+
+  .cloud-tag{
+    display:inline-block; font-family:var(--mono); font-size:0.75rem; padding:2px 8px;
+    border-radius:4px; margin-right:6px;
+  }
+  .tag-aws{ background:var(--aws-dim); border:1px solid var(--aws-border); color:var(--aws); }
+  .tag-azure{ background:var(--azure-dim); border:1px solid var(--azure-border); color:var(--azure); }
+  .tag-gcp{ background:var(--gcp-dim); border:1px solid var(--gcp-border); color:var(--gcp); }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      transition-duration:0.01ms !important;
+    }
+  }
+
+  @media (max-width:480px){
+    .round-card{ padding:18px; }
+    .final-score{ font-size:2.6rem; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="topbar">
+  <div class="logo-row">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <span class="logo-text">CIS 4345 Final Review Arena</span>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <strong id="round-el">1</strong>/<span id="round-total">7</span></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-el">Score: <strong>0</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-el">Streak: <strong>0</strong></div>
+  </div>
+</header>
+
+<div id="progress-wrap">
+  <div id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <h1>🏆 Final Exam Review: Three Landlords, One Final Push</h1>
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Three Landlords & Cloud Rosetta Stone Recap",
+    title:"Translating a Client's AWS-Speak into Azure",
+    body:"You're a cloud consultant meeting with a client who previously worked only with AWS. They ask you to spin up an 'EC2 instance' in their new Azure environment, but Azure doesn't use that term. You need to translate the vocabulary correctly so the migration team doesn't get confused during the cutover meeting.",
+    concept:"Cloud Rosetta Stone",
+    conceptEmoji:"🗺️",
+    conceptSub:"Same services, different landlord vocabulary",
+    question:"What is the Azure equivalent of an AWS EC2 instance?",
+    options:[
+      "A. Azure Blob Storage",
+      "B. Azure Virtual Machines",
+      "C. Azure Functions",
+      "D. Azure Cosmos DB"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Azure Virtual Machines is the direct compute equivalent of AWS EC2 — both provide on-demand, resizable virtual servers. Knowing this 'Rosetta Stone' mapping is essential when working across the Three Landlords (AWS, Azure, GCP).",
+      wrong:"The correct answer is Azure Virtual Machines. EC2 provides virtual compute instances in AWS, and Azure VMs serve the exact same purpose — resizable, on-demand servers you configure and manage.",
+      breakdown:[
+        {icon:"✅", text:"EC2 (AWS) = Virtual Machines (Azure) = Compute Engine (GCP) — all are IaaS compute."},
+        {icon:"💡", text:"Blob Storage is Azure's object storage, equivalent to AWS S3, not compute."},
+        {icon:"⚠️", text:"Common mistake: confusing storage services with compute services because names sound generic."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Compute, Storage & Networking Recap",
+    title:"Choosing Storage for Infrequently Accessed Compliance Logs",
+    body:"Your company must retain seven years of audit logs for compliance, but these logs are almost never accessed after the first 30 days. Your manager wants to minimize monthly storage costs while still meeting the retention requirement. You're deciding between storage tiers in AWS S3.",
+    concept:"Cloud Storage Tiers",
+    conceptEmoji:"🗄️",
+    conceptSub:"Matching storage class to access patterns",
+    question:"Which S3 storage class is the BEST fit for this scenario?",
+    options:[
+      "A. S3 Standard",
+      "B. S3 Intelligent-Tiering",
+      "C. S3 Glacier Deep Archive",
+      "D. S3 Standard-Infrequent Access"
+    ],
+    correct:2,
+    feedback:{
+      correct:"S3 Glacier Deep Archive is designed for exactly this use case — data that's rarely accessed but must be retained for years for compliance, at the lowest possible storage cost with longer retrieval times being acceptable.",
+      wrong:"The correct answer is S3 Glacier Deep Archive. It offers the lowest cost per GB for long-term archival data where retrieval speed isn't critical — a perfect match for 7-year compliance logs accessed almost never after 30 days.",
+      breakdown:[
+        {icon:"✅", text:"Glacier Deep Archive = cheapest storage, slowest retrieval (hours) — ideal for compliance archives."},
+        {icon:"💡", text:"Standard-IA works for data accessed monthly, not multi-year archives."},
+        {icon:"⚠️", text:"Common mistake: choosing Intelligent-Tiering when access patterns are already known and predictable — it adds monitoring fees you don't need."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Containers, Serverless & Databases Recap",
+    title:"Modernizing a Legacy Batch Job",
+    body:"Your team has a legacy nightly batch script that processes uploaded CSV files. It runs for about 90 seconds, once per night, and the workload is unpredictable in volume. Your director wants to reduce the infrastructure footprint and avoid paying for idle servers 23.5 hours a day.",
+    concept:"Serverless Computing",
+    conceptEmoji:"⚡",
+    conceptSub:"Event-driven, pay-per-execution compute",
+    question:"Which approach best fits this workload?",
+    options:[
+      "A. Run it on a permanently provisioned EC2 instance",
+      "B. Deploy it as a serverless function (e.g., AWS Lambda) triggered by file upload",
+      "C. Containerize it and run it 24/7 in Kubernetes",
+      "D. Move it to a dedicated on-premises server"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A serverless function like AWS Lambda is ideal — it runs only when triggered (e.g., by an S3 file upload event), executes for seconds, and you pay only for that execution time. No idle server costs, no manual scaling.",
+      wrong:"The correct answer is a serverless function. Serverless compute is purpose-built for short, event-driven, unpredictable workloads — you avoid paying for the 23+ idle hours a permanent server would cost you.",
+      breakdown:[
+        {icon:"✅", text:"Serverless = pay-per-execution, auto-scales to zero when idle."},
+        {icon:"💡", text:"Containers in Kubernetes still require running nodes/clusters even when idle unless scaled to zero explicitly."},
+        {icon:"⚠️", text:"Common mistake: assuming 'serverless' means no servers exist — servers exist, but you don't manage or pay for them when idle."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — IAM & Security Compliance Review",
+    title:"A Developer Requests 'Just in Case' Admin Access",
+    body:"A junior developer on your team asks for full Administrator IAM permissions on the production AWS account so they 'don't have to keep asking for access' while building a new feature that only needs to read from one S3 bucket and write to one DynamoDB table. Your security policy requires justifying every permission grant.",
+    concept:"IAM Least Privilege",
+    conceptEmoji:"🔐",
+    conceptSub:"Granting only the access required, nothing more",
+    question:"What is the correct IAM response to this request?",
+    options:[
+      "A. Grant full Administrator access — it's faster and avoids future tickets",
+      "B. Create a custom IAM policy scoped to only the specific S3 bucket and DynamoDB table needed",
+      "C. Deny all access until a senior engineer personally runs every deployment",
+      "D. Give the developer root account credentials for convenience"
+    ],
+    correct:1,
+    feedback:{
+      correct:"The Principle of Least Privilege means granting only the exact permissions required for the task — in this case, a scoped policy for one S3 bucket and one DynamoDB table. This limits blast radius if credentials are ever compromised.",
+      wrong:"The correct answer is creating a custom scoped IAM policy. Least privilege is a foundational security and compliance principle — over-granting access (especially Admin or root) creates unnecessary risk and often violates audit requirements like SOC 2 or HIPAA.",
+      breakdown:[
+        {icon:"✅", text:"Least privilege = access limited to exactly what the role/task requires."},
+        {icon:"💡", text:"Scoped policies are auditable and easy to justify during compliance reviews."},
+        {icon:"⚠️", text:"Common mistake: granting broad access 'temporarily' — temporary access often becomes permanent and unmonitored."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Cost Management & Multi-Cloud Architecture",
+    title:"A Surprise $4,000 Cloud Bill",
+    body:"Your startup's finance team is alarmed — this month's AWS bill jumped from $600 to $4,000. Investigation reveals a data science team spun up several large GPU instances for a hackathon and forgot to terminate them after the weekend. Leadership now wants safeguards to prevent this from happening again.",
+    concept:"Cost Governance",
+    conceptEmoji:"💸",
+    conceptSub:"Preventing runaway cloud spend",
+    question:"Which control would BEST prevent this exact situation from recurring?",
+    options:[
+      "A. Switching the entire company to a different cloud provider",
+      "B. Setting up budget alerts and auto-shutdown policies/tags for non-production instances",
+      "C. Banning the data science team from using cloud resources entirely",
+      "D. Only allowing purchases through the AWS Free Tier"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Budget alerts (via AWS Budgets or Azure Cost Management) combined with automated shutdown policies or lifecycle tags on non-production resources directly addresses the root cause: forgotten, unmonitored instances left running.",
+      wrong:"The correct answer is budget alerts plus auto-shutdown policies. Switching providers doesn't fix the underlying governance gap, and banning the team blocks legitimate innovation work — the real fix is automated cost guardrails.",
+      breakdown:[
+        {icon:"✅", text:"Budget alerts notify teams/finance before costs spiral, not after the invoice arrives."},
+        {icon:"💡", text:"Auto-shutdown or scheduled termination for dev/test tagged resources prevents 'forgotten' instances."},
+        {icon:"⚠️", text:"Common mistake: reacting with blanket bans instead of building proactive cost governance tooling."}
+      ]
+    }
+  },
+  {
+    id:6,
+    label:"Scenario 6 — Cloud Certifications & Career Pathways",
+    title:"Planning Your Post-Graduation Certification Path",
+    body:"You're graduating in one semester and want a certification that validates broad, vendor-neutral cloud knowledge for job applications — something recruiters recognize regardless of whether the employer uses AWS, Azure, or GCP. You've already completed CIS 4345 and feel confident in fundamentals across all three platforms.",
+    concept:"Cloud Career Pathways",
+    conceptEmoji:"🎓",
+    conceptSub:"Matching certifications to career goals",
+    question:"Which certification best matches this vendor-neutral goal?",
+    options:[
+      "A. AWS Certified Solutions Architect – Associate",
+      "B. Microsoft Azure Fundamentals (AZ-900)",
+      "C. CompTIA Cloud+",
+      "D. Google Associate Cloud Engineer"
+    ],
+    correct:2,
+    feedback:{
+      correct:"CompTIA Cloud+ is vendor-neutral, covering cloud concepts, deployment, and security applicable across AWS, Azure, and GCP — making it ideal when you want a credential recruiters trust regardless of which specific cloud a future employer uses.",
+      wrong:"The correct answer is CompTIA Cloud+. The other three options are valuable but are vendor-specific certifications tied to
