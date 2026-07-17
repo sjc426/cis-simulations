@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — GCP Deep Dive 🌐 Master the Third Landlord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; line-height:1.5;
+}
+.skip-link{
+  position:absolute; left:-9999px; top:0; background:var(--blue); color:#fff;
+  padding:10px 16px; z-index:1000; border-radius:0 0 8px 0; font-weight:600;
+}
+.skip-link:focus{left:0;}
+main{max-width:820px; margin:0 auto; padding:16px; padding-bottom:60px;}
+
+header.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px; padding:14px 16px; background:var(--surface);
+  border:1px solid var(--border); border-radius:12px; margin-bottom:14px;
+}
+.logo{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:4px;}
+.dot{width:10px; height:10px; border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+.logo-title{font-family:var(--mono); font-weight:600; font-size:15px;}
+.pills{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-family:var(--mono); font-size:13px; font-weight:600;
+  display:flex; align-items:center; gap:6px;
+}
+.pill.streak-flash{animation:flash 0.6s ease;}
+@keyframes flash{
+  0%{background:var(--yellow-dim); box-shadow:0 0 0 0 var(--yellow);}
+  50%{background:var(--yellow-dim); box-shadow:0 0 12px 2px var(--yellow);}
+  100%{background:var(--surface2); box-shadow:none;}
+}
+
+.progress-wrap{
+  height:3px; background:var(--surface2); border-radius:2px; overflow:hidden; margin-bottom:20px;
+}
+.progress-bar{
+  height:100%; background:var(--gcp); width:0%; transition:width 0.35s ease;
+}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-bottom:16px;
+}
+.round-label{
+  font-family:var(--mono); font-size:12px; color:var(--text2); text-transform:uppercase;
+  letter-spacing:0.06em; margin-bottom:8px;
+}
+h1{font-size:20px; margin:0 0 4px 0;}
+h2.scenario-title{font-size:19px; margin:0 0 12px 0; color:var(--text);}
+.body-text{font-size:15px; color:var(--text2); margin-bottom:16px;}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--gcp-dim);
+  border:1px solid var(--gcp-border); color:var(--gcp); border-radius:10px;
+  padding:8px 14px; font-size:13px; font-family:var(--mono); margin-bottom:18px;
+}
+.concept-badge .sub{color:var(--text2); font-family:var(--sans);}
+
+.question{font-weight:600; margin-bottom:14px; font-size:15px;}
+
+.options{display:flex; flex-direction:column; gap:10px;}
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); border-radius:10px; padding:14px 16px; font-size:14.5px;
+  font-family:var(--sans); cursor:pointer; transition:background 0.15s, border-color 0.15s, transform 0.1s;
+  width:100%;
+}
+.opt-btn:hover:not(:disabled){background:#2a2f47; border-color:var(--blue);}
+.opt-btn:active:not(:disabled){transform:scale(0.995);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct-choice{
+  background:var(--green-dim); border-color:var(--green); color:var(--green);
+}
+.opt-btn.wrong-choice{
+  background:var(--red-dim); border-color:var(--red); color:var(--red);
+}
+.opt-btn.reveal-correct{
+  background:var(--green-dim); border-color:var(--green); color:var(--green);
+}
+
+button:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+a:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+
+.fb{
+  margin-top:18px; border-radius:12px; padding:18px; border:1px solid var(--border);
+}
+.fb.success{background:var(--green-dim); border-color:var(--green);}
+.fb.error{background:var(--red-dim); border-color:var(--red);}
+.fb-head{
+  display:flex; align-items:center; gap:10px; font-weight:600; font-size:16px; margin-bottom:8px;
+}
+.fb-head.success-text{color:var(--green);}
+.fb-head.error-text{color:var(--red);}
+.fb-explain{font-size:14.5px; color:var(--text); margin-bottom:14px;}
+.breakdown{display:flex; flex-direction:column; gap:8px;}
+.breakdown-row{
+  display:flex; gap:10px; align-items:flex-start; font-size:14px; color:var(--text2);
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+}
+.breakdown-row .ic{font-size:16px; flex-shrink:0;}
+
+.next-btn{
+  margin-top:18px; background:var(--gcp); color:#04170a; border:none; border-radius:10px;
+  padding:14px 22px; font-family:var(--mono); font-weight:600; font-size:15px; cursor:pointer;
+  width:100%;
+}
+.next-btn:hover{filter:brightness(1.08);}
+
+.final-screen{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:32px 22px; text-align:center;
+}
+.final-score{
+  font-family:var(--mono); font-size:52px; font-weight:600; color:var(--gcp); margin:10px 0;
+}
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:24px 0;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px;
+}
+.stat-num{font-family:var(--mono); font-size:24px; font-weight:600; color:var(--blue);}
+.stat-label{font-size:12px; color:var(--text2); margin-top:4px;}
+.replay-btn{
+  background:var(--blue); color:#fff; border:none; border-radius:10px;
+  padding:14px 28px; font-family:var(--mono); font-weight:600; font-size:15px; cursor:pointer; margin-top:10px;
+}
+.replay-btn:hover{filter:brightness(1.1);}
+
+.grade-msg{font-size:16px; color:var(--text2); margin-top:6px;}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+@media (max-width:480px){
+  .final-score{font-size:40px;}
+  h1{font-size:17px;}
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<main id="main-content">
+  <header class="topbar">
+    <div class="logo">
+      <div class="dots">
+        <span class="dot aws" aria-hidden="true"></span>
+        <span class="dot azure" aria-hidden="true"></span>
+        <span class="dot gcp" aria-hidden="true"></span>
+      </div>
+      <div class="logo-title">CIS 4345 · Cloud Landlords</div>
+    </div>
+    <h1>GCP Deep Dive <span role="img" aria-label="globe">🌐</span> Master the Third Landlord</h1>
+    <div class="pills">
+      <div class="pill" id="score-pill">
+        <span aria-hidden="true">⭐</span>
+        <span aria-live="polite" aria-atomic="true" id="score-el">Score: 0</span>
+      </div>
+      <div class="pill" id="round-pill">
+        <span aria-hidden="true">📍</span>
+        <span id="round-el">Round: 1/7</span>
+      </div>
+      <div class="pill" id="streak-pill">
+        <span aria-hidden="true">🔥</span>
+        <span aria-live="polite" aria-atomic="true" id="streak-el">Streak: 0</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+  </div>
+
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — GCP Organization & Project Hierarchy",
+    title:"Onboarding Acme Robotics onto GCP",
+    body:"Acme Robotics just signed up for Google Cloud. They have three departments — Engineering, Marketing, and Finance — each needing separate billing visibility and separate resource isolation, but the CTO wants centralized policy control across all of them from day one.",
+    concept:"Org & Project Hierarchy",
+    conceptEmoji:"🏢",
+    conceptSub:"How GCP structures resources top-down",
+    question:"What is the correct GCP resource hierarchy structure Acme should set up?",
+    options:[
+      "A. One Project shared by all departments, with separate service accounts per team",
+      "B. An Organization node at the top, with Folders per department, and Projects inside each Folder",
+      "C. Three separate Organizations, one per department, linked by IAM federation",
+      "D. A single Folder containing all department resources with no Project separation"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Exactly right — GCP's hierarchy flows Organization → Folder → Project → Resources. Folders let you group projects by department while still inheriting org-wide IAM policies.",
+      wrong:"The correct structure is Organization → Folders (per department) → Projects. This gives Acme both centralized policy control at the Organization level and resource/billing isolation at the Project level within each Folder.",
+      breakdown:[
+        {icon:"✅", text:"GCP hierarchy: Organization is the root node tied to your domain."},
+        {icon:"💡", text:"Folders group Projects logically (by team, environment, or department) and inherit IAM from the Organization."},
+        {icon:"⚠️", text:"Don't confuse GCP Projects with AWS Accounts — Projects are the billing/resource container, not the top-level entity."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Compute Engine & Instance Groups",
+    title:"Handling a Black Friday Traffic Spike",
+    body:"You manage a retail web app on Compute Engine. Last Black Friday, a single VM instance crashed under load and the site went down for two hours. Marketing wants zero downtime this year no matter how much traffic spikes.",
+    concept:"Compute Engine & Instance Groups",
+    conceptEmoji:"⚙️",
+    conceptSub:"Scaling VMs automatically",
+    question:"What GCP feature should you configure to prevent this from happening again?",
+    options:[
+      "A. A larger single VM with more vCPUs and RAM, resized manually before the event",
+      "B. A Managed Instance Group (MIG) with autoscaling behind a Load Balancer",
+      "C. An Unmanaged Instance Group with manually added VMs for redundancy",
+      "D. A Cloud Storage bucket configured to cache and serve static content instead"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct — a Managed Instance Group with autoscaling policies automatically adds/removes identical VM instances based on load, and pairs with a Load Balancer to distribute traffic and survive spikes.",
+      wrong:"The right answer is a Managed Instance Group (MIG) with autoscaling behind a Load Balancer. MIGs use an instance template to spin up identical VMs automatically as demand grows, and health checks replace unhealthy instances — true elasticity, not manual resizing.",
+      breakdown:[
+        {icon:"✅", text:"MIGs use an instance template so every VM in the group is identical and reproducible."},
+        {icon:"💡", text:"Autoscaling policies can trigger on CPU utilization, load balancing capacity, or custom metrics."},
+        {icon:"⚠️", text:"Unmanaged Instance Groups do NOT support autoscaling or auto-healing — they're just a grouping label for existing dissimilar VMs."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — GCP's Global VPC Architecture",
+    title:"Connecting Offices Across Continents",
+    body:"Acme Robotics has engineering teams in Philadelphia and Singapore. They want both offices' Compute Engine VMs to communicate over private internal IPs without setting up VPN tunnels or peering between separate networks, and without duplicating firewall rules per region.",
+    concept:"GCP's Global VPC Architecture",
+    conceptEmoji:"🌍",
+    conceptSub:"Why GCP's VPC is different from AWS/Azure",
+    question:"What makes this possible in GCP that would require extra networking work in AWS or Azure?",
+    options:[
+      "A. GCP VPCs are global resources — a single VPC can span multiple regions/subnets worldwide without peering",
+      "B. GCP automatically creates a VPN mesh between every region for free",
+      "C. GCP requires a Shared VPC Host Project to bridge continents",
+      "D. GCP VPCs are regional like AWS, so Acme still needs VPC Peering between Philly and Singapore"
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct — this is one of GCP's signature architectural differences. A GCP VPC is a global resource; you simply add subnets in whichever regions you need (e.g., us-east1 and asia-southeast1), and all VMs across those subnets share the same private IP space and firewall rules automatically.",
+      wrong:"The right answer is that GCP VPCs are global by design. Unlike AWS (regional VPCs needing peering/Transit Gateway) or Azure (regional VNets needing VNet Peering), one GCP VPC can have subnets in every region on Earth, with unified firewall rules and no peering required between them.",
+      breakdown:[
+        {icon:"✅", text:"A single GCP VPC can contain subnets in any/all regions — it is NOT regionally scoped."},
+        {icon:"💡", text:"Firewall rules in GCP apply at the VPC level, so one rule set governs traffic across all regions in that VPC."},
+        {icon:"⚠️", text:"This is a key 'Three Landlords' contrast — AWS and Azure require peering or hub-and-spoke designs to connect regions; GCP does not."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Cloud Storage: IAM Bindings vs ACLs",
+    title:"A Contractor Needs Access to One File",
+    body:"A freelance designer needs read access to a single logo file inside your company's Cloud Storage bucket — nothing else in the bucket. Your manager asks you to grant access 'the GCP-recommended way' rather than the legacy way, since your org uses uniform bucket-level access.",
+    concept:"Cloud Storage: IAM Bindings vs ACLs",
+    conceptEmoji:"🗄️",
+    conceptSub:"Object-level access control in GCP",
+    question:"Which access control approach is recommended, and why?",
+    options:[
+      "A. Use an Access Control List (ACL) on the specific object — ACLs are GCP's modern, recommended method",
+      "B. Use IAM bindings at the bucket level with a broad Storage Object Viewer role for the contractor",
+      "C. Since the bucket uses uniform bucket-level access, ACLs are disabled — use IAM Conditions to scope a Storage Object Viewer binding to that specific object path",
+      "D. Make the entire bucket public and share the direct object URL with the contractor"
+    ],
+    correct:2,
+    feedback:{
+      correct:"Correct — with uniform bucket-level access enabled, per-object ACLs are disabled entirely. IAM is the only mechanism, and IAM Conditions let you scope a role binding down to a specific object or path prefix, satisfying least privilege without exposing the whole bucket.",
+      wrong:"The right approach is IAM Conditions on an IAM binding. Uniform bucket-level access disables legacy ACLs by design (Google's recommended posture), so fine-grained per-object access must be achieved through conditional IAM bindings, not ACLs, and never broad bucket-wide access for a single file.",
+      breakdown:[
+        {icon:"✅", text:"Uniform bucket-level access = ACLs are OFF; all permissions flow through IAM only."},
+        {icon:"💡", text:"IAM Conditions allow scoping by resource name, path prefix, or even time/date for temporary access."},
+        {icon:"⚠️", text:"Common mistake: granting bucket-level Storage Object Viewer gives access to EVERY object in the bucket, violating least privilege."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — GCP Cloud IAM Roles",
+    title:"The Intern Who Needed 'Just Enough' Access",
+    body:"A new intern needs to restart Compute Engine VMs and view logs during their rotation — nothing more. Your team lead says 'don't use Editor, that's way too broad,' but also doesn't want you spending a week writing a role from scratch for a 3-month internship.",
+    concept:"GCP Cloud IAM Roles",
+    conceptEmoji:"🔑",
+    conceptSub:"Primitive vs Predefined vs Custom",
+    question:"What's the best IAM role choice here, following least privilege?",
+    options:[
+      "A. Grant the Primitive Editor role — it's fast to assign and covers restart + logging permissions",
+      "B. Assign Predefined roles: Compute Instance Admin (v1) scoped narrowly, plus Logs Viewer",
+      "C. Build a fully Custom role from individual permissions to precisely match the internship tasks",
+      "D. Grant Owner temporarily since the internship is short-term anyway"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct — Predefined roles like Compute Instance Admin (or a more scoped variant) combined with Logs Viewer give task-appropriate permissions without the broad blast radius of Editor/Owner, and without the maintenance overhead of building a Custom role for a temporary need.",
+      wrong:"Predefined roles are the sweet spot here. Primitive roles (Owner/Editor/Viewer) are far too broad — Editor grants edit access to almost every resource type in the project, way beyond 'restart VMs and view logs.' Custom roles are powerful but are overkill/maintenance burden for a short-term intern task; GCP already ships Predefined roles for exactly this granularity.",
+      breakdown:[
+        {icon:"✅", text:"Primitive roles (Owner, Editor, Viewer) predate IAM and are project-wide — very coarse-grained."},
+        {icon:"💡", text:"Predefined roles are curated by Google per-service (e.g., roles/compute.instanceAdmin.v1) for common job functions."},
+        {icon:"⚠️", text:"Reach for Custom roles only when Predefined roles don't fit — they require ongoing maintenance as GCP permissions evolve."}
+      ]
+    }
+  },
+  {
+    id:6,
+    label:"Scenario 6 — gcloud CLI & GCP Marketplace",
+    title:"Automating a Repeatable Dev Environment",
+    body:"Your team keeps manually clicking through the Console
