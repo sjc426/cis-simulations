@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Multi-Cloud Architecture 🏢 Three Landlords Side by Side</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+    --blue:#4f8ef7; --blue-dim:#1e2d4f;
+    --green:#3ecf8e; --green-dim:#0d2e1f;
+    --red:#f87171; --red-dim:#2e1010;
+    --yellow:#fbbf24; --yellow-dim:#2e2208;
+    --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+    --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+    --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+    --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-width:380px;
+  }
+  .skip-link{
+    position:absolute; left:-999px; top:0; background:var(--blue); color:#001; padding:10px 16px;
+    z-index:1000; border-radius:0 0 8px 0; font-family:var(--sans); font-weight:600;
+  }
+  .skip-link:focus{ left:0; }
+
+  header{
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:14px 18px; display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; position:sticky; top:0; z-index:50;
+  }
+  .logo-row{ display:flex; align-items:center; gap:10px; }
+  .dots{ display:flex; gap:4px; }
+  .dot{ width:12px; height:12px; border-radius:50%; }
+  .dot.aws{ background:var(--aws); }
+  .dot.azure{ background:var(--azure); }
+  .dot.gcp{ background:var(--gcp); }
+  header h1{ font-size:1.05rem; margin:0; font-weight:600; }
+  header h1 small{ display:block; font-size:0.72rem; color:var(--text2); font-weight:400; margin-top:2px; }
+
+  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+    padding:6px 12px; font-family:var(--mono); font-size:0.8rem; color:var(--text2);
+    display:flex; align-items:center; gap:6px;
+  }
+  .pill b{ color:var(--text); }
+  .pill.streak-hot{ border-color:var(--yellow); color:var(--yellow); }
+
+  .progress-wrap{ height:3px; width:100%; background:var(--border); }
+  .progress-bar{ height:100%; background:linear-gradient(90deg,var(--aws),var(--azure),var(--gcp)); transition:width .4s ease; }
+
+  main{ max-width:820px; margin:0 auto; padding:20px 16px 60px; }
+
+  .round-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:22px; margin-top:18px;
+  }
+  .round-label{ font-family:var(--mono); font-size:0.78rem; color:var(--text2); text-transform:uppercase; letter-spacing:0.06em; }
+  .round-card h2{ margin:8px 0 12px; font-size:1.3rem; color:var(--text); }
+  .round-body{ color:var(--text2); line-height:1.6; font-size:0.98rem; margin-bottom:16px; }
+
+  .concept-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--blue-dim); border:1px solid var(--blue); color:var(--blue);
+    border-radius:20px; padding:6px 14px; font-size:0.82rem; font-family:var(--mono);
+    margin-bottom:18px;
+  }
+  .concept-badge .sub{ color:var(--text2); font-family:var(--sans); }
+
+  .question{ font-weight:600; margin-bottom:14px; font-size:1.02rem; }
+
+  .options{ display:grid; gap:10px; }
+  .opt-btn{
+    text-align:left; background:var(--surface2); border:1px solid var(--border);
+    color:var(--text); border-radius:10px; padding:14px 16px; font-family:var(--sans);
+    font-size:0.95rem; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+    display:flex; align-items:flex-start; gap:10px; line-height:1.5;
+  }
+  .opt-btn:hover:not(:disabled){ background:var(--blue-dim); border-color:var(--blue); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.selected-correct{ background:var(--green-dim); border-color:var(--green); }
+  .opt-btn.selected-wrong{ background:var(--red-dim); border-color:var(--red); }
+  .opt-btn.reveal-correct{ border-color:var(--green); }
+  .opt-letter{ font-family:var(--mono); font-weight:600; color:var(--text2); flex-shrink:0; }
+
+  button:focus-visible, a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  .fb{
+    margin-top:18px; padding:18px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface2);
+  }
+  .fb.correct{ border-color:var(--green); background:var(--green-dim); }
+  .fb.wrong{ border-color:var(--red); background:var(--red-dim); }
+  .fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; margin-bottom:8px; font-size:1.05rem; }
+  .fb-text{ color:var(--text); line-height:1.6; margin-bottom:12px; font-size:0.95rem; }
+  .breakdown{ display:grid; gap:8px; }
+  .breakdown-row{ display:flex; gap:10px; align-items:flex-start; font-size:0.9rem; color:var(--text2); }
+  .breakdown-row .icon{ flex-shrink:0; }
+
+  .next-btn{
+    margin-top:18px; background:var(--blue); color:#0a0e1a; border:none; border-radius:10px;
+    padding:12px 22px; font-family:var(--sans); font-weight:600; font-size:0.98rem; cursor:pointer;
+    display:block; width:100%;
+  }
+  .next-btn:hover{ background:#6ba1f9; }
+
+  .streak-flash{
+    animation: flashPulse 0.6s ease;
+  }
+  @keyframes flashPulse{
+    0%{ transform:scale(1); }
+    30%{ transform:scale(1.12); }
+    100%{ transform:scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+  }
+
+  .final-screen{ text-align:center; padding:30px 10px; }
+  .final-score{ font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--green); margin:10px 0; }
+  .final-stats{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:24px 0; }
+  .stat-box{ background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; }
+  .stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; }
+  .stat-box .label{ color:var(--text2); font-size:0.82rem; margin-top:4px; }
+  .replay-btn{
+    background:var(--gcp); color:#04180a; border:none; border-radius:10px; padding:14px 28px;
+    font-weight:600; font-size:1rem; cursor:pointer; font-family:var(--sans);
+  }
+  .replay-btn:hover{ background:#4fc76b; }
+
+  .badge-aws{ background:var(--aws-dim); border-color:var(--aws-border); color:var(--aws); }
+  .badge-azure{ background:var(--azure-dim); border-color:var(--azure-border); color:var(--azure); }
+  .badge-gcp{ background:var(--gcp-dim); border-color:var(--gcp-border); color:var(--gcp); }
+
+  footer.meta{ text-align:center; color:var(--text3); font-size:0.78rem; margin-top:30px; font-family:var(--mono); }
+
+  @media (max-width:480px){
+    .final-stats{ grid-template-columns:1fr 1fr; }
+    header h1{ font-size:0.95rem; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-row">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <h1>Multi-Cloud Architecture Battle
+      <small>CIS 4345 — Week 14 — Three Landlords Side by Side</small>
+    </h1>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <b id="round-el">1</b>/7</div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-pill">Score <b id="score-el">0</b></div>
+    <div class="pill" id="streak-pill" aria-live="polite" aria-atomic="true">Streak <b id="streak-el">0</b></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area"></div>
+  <footer class="meta">CIS 4345 — Introduction to Cloud Computing · Prof. Sonny Chang · Temple University</footer>
+</main>
+
+<script>
+const scenarios = [
+{
+  id:1,
+  label:"Scenario 1 — Multi-Cloud Strategy Rationale",
+  title:"The CFO Asks: Why Not Just Pick One Cloud?",
+  body:"You're the cloud architect at a mid-size healthcare analytics firm. The CFO is frustrated that the company runs workloads on AWS, Azure, AND GCP, and wants to consolidate to save on training and support costs. She asks you to justify the multi-cloud approach in the next board meeting.",
+  concept:"Multi-Cloud Strategy Rationale",
+  conceptEmoji:"🧭",
+  conceptSub:"Why organizations choose more than one landlord",
+  question:"Which is the STRONGEST business justification for staying multi-cloud here?",
+  options:[
+    "A. Multi-cloud is trendy and looks impressive on the company website",
+    "B. Avoiding vendor lock-in, meeting client contractual requirements (e.g., Azure-only clients), and leveraging best-of-breed services (GCP BigQuery for analytics) outweighs the added complexity cost",
+    "C. Multi-cloud always costs less than single-cloud because you can shop for the cheapest provider every month",
+    "D. Employees get bored using only one cloud provider, so variety improves morale"
+  ],
+  correct:1,
+  feedback:{
+    correct:"Exactly — real multi-cloud decisions are driven by risk mitigation, contractual/compliance needs, and best-of-breed service selection, not novelty. The complexity cost is real, but it's a deliberate tradeoff against these benefits.",
+    wrong:"The strongest justification is B: avoiding lock-in, meeting client requirements, and using best-of-breed services. Multi-cloud is NOT automatically cheaper (switching and duplication costs are real), and it's never chosen for 'trendiness' or morale.",
+    breakdown:[
+      {icon:"✅", text:"Valid drivers: vendor lock-in avoidance, compliance/contract mandates, best-of-breed services, M&A inherited infrastructure, disaster recovery redundancy."},
+      {icon:"💡", text:"Multi-cloud almost always costs MORE in operational overhead — it's a strategic tradeoff, not a savings hack."},
+      {icon:"⚠️", text:"Common mistake: assuming multi-cloud is inherently cheaper or a resume-building trend rather than a calculated risk/benefit decision."}
+    ]
+  }
+},
+{
+  id:2,
+  label:"Scenario 2 — Multi-Cloud Challenges",
+  title:"3 AM Page: Which Console Do I Even Log Into?",
+  body:"Your on-call engineer gets paged for a production outage. The alert doesn't specify which cloud provider triggered it. She has to check AWS CloudWatch, Azure Monitor, and GCP Cloud Logging separately — each with different terminology, IAM logins, and dashboard layouts — before she can even start troubleshooting.",
+  concept:"Multi-Cloud Challenges",
+  conceptEmoji:"⚠️",
+  conceptSub:"The real costs of running three landlords at once",
+  question:"What is this scenario primarily illustrating as a core multi-cloud challenge?",
+  options:[
+    "A. Increased operational complexity and tooling fragmentation across inconsistent management planes",
+    "B. AWS is simply a worse cloud provider than Azure or GCP for monitoring",
+    "C. The engineer needs more coffee to stay awake during on-call shifts",
+    "D. Multi-cloud environments are always less secure than single-cloud"
+  ],
+  correct:0,
+  feedback:{
+    correct:"Right — this is the classic operational complexity challenge: no unified management plane means engineers must context-switch across different consoles, IAM systems, and terminology under pressure, slowing incident response.",
+    wrong:"The answer is A. This isn't about one provider being 'worse' or about security posture — it's specifically about the lack of a single pane of glass across providers, which increases mean-time-to-resolution during incidents.",
+    breakdown:[
+      {icon:"✅", text:"Core multi-cloud challenges: operational complexity, inconsistent IAM/terminology, cost tracking difficulty, skills gap, data egress fees, and network latency between clouds."},
+      {icon:"💡", text:"Solutions include cloud-agnostic observability tools (Datadog, Grafana) that unify logs/metrics across providers into one dashboard."},
+      {icon:"⚠️", text:"Common mistake: blaming a specific provider instead of recognizing the structural challenge of managing three different control planes."}
+    ]
+  }
+},
+{
+  id:3,
+  label:"Scenario 3 — Cloud-Agnostic Tools",
+  title:"Infrastructure as Code — But Which Code?",
+  body:"Your team needs to provision a virtual network, compute instance, and storage bucket identically across AWS, Azure, and GCP for a client demo. Using AWS CloudFormation would only work for AWS, and ARM templates only work for Azure. Your DevOps lead wants ONE tool and ONE codebase that can target all three providers.",
+  concept:"Cloud-Agnostic Tools",
+  conceptEmoji:"🛠️",
+  conceptSub:"Tools that work across all three landlords",
+  question:"Which tool best fits this cloud-agnostic infrastructure-as-code requirement?",
+  options:[
+    "A. AWS CloudFormation, since it is the most mature IaC tool",
+    "B. Terraform, using provider-specific blocks (aws, azurerm, google) within a shared HCL workflow",
+    "C. Azure Resource Manager (ARM) templates, since JSON is a universal format",
+    "D. A custom Bash script with separate CLI calls for each provider's SDK"
+  ],
+  correct:1,
+  feedback:{
+    correct:"Correct — Terraform is the industry-standard cloud-agnostic IaC tool. It uses a single HCL syntax and workflow (plan/apply/destroy) while calling provider-specific resource blocks for AWS, Azure, and GCP.",
+    wrong:"The answer is B, Terraform. CloudFormation and ARM templates are both provider-locked (AWS-only and Azure-only respectively). A custom Bash/SDK script would work but requires far more maintenance and lacks Terraform's state management and plan/apply safety features.",
+    breakdown:[
+      {icon:"✅", text:"Cloud-agnostic tools: Terraform (IaC), Kubernetes (container orchestration), Ansible (config management), Datadog/Grafana (observability)."},
+      {icon:"💡", text:"Terraform doesn't hide provider differences — you still write AWS-specific vs Azure-specific resource blocks, but the workflow and state management are unified."},
+      {icon:"⚠️", text:"Common mistake: assuming JSON-based templates (ARM) are 'universal' just because JSON is a common data format — the schema itself is still provider-specific."}
+    ]
+  }
+},
+{
+  id:4,
+  label:"Scenario 4 — Comparing Equivalent Architectures",
+  title:"Same App, Three Different Landlords",
+  body:"A client wants a 3-tier web application (load balancer → compute → managed database) deployed identically as a proof-of-concept on AWS, Azure, and GCP so they can compare pricing and performance before committing. You need to map out equivalent services for the compute tier.",
+  concept:"Comparing Equivalent Architectures Across Landlords",
+  conceptEmoji:"🏗️",
+  conceptSub:"Matching services for the same architecture pattern",
+  question:"Which set correctly matches the equivalent managed compute (VM) service across the three providers?",
+  options:[
+    "A. AWS EC2 = Azure Virtual Machines = GCP Compute Engine",
+    "B. AWS Lambda = Azure Virtual Machines = GCP App Engine",
+    "C. AWS EC2 = Azure App Service = GCP Cloud Functions",
+    "D. AWS S3 = Azure Blob Storage = GCP Compute Engine"
+  ],
+  correct:0,
+  feedback:{
+    correct:"Correct — EC2, Azure VMs, and Compute Engine are all IaaS virtual machine services, the true equivalents for a compute tier. They share the same service category: raw, configurable virtual servers.",
+    wrong:"The answer is A. Option B mixes a serverless function service (Lambda) with a VM service and a PaaS service — not equivalent tiers. Option C mixes IaaS with PaaS and serverless. Option D compares an object storage service to a VM service entirely.",
+    breakdown:[
+      {icon:"✅", text:"IaaS compute equivalents: AWS EC2 ↔ Azure Virtual Machines ↔ GCP Compute Engine."},
+      {icon:"💡", text:"Serverless equivalents: AWS Lambda ↔ Azure Functions ↔ GCP Cloud Functions. Object storage: AWS S3 ↔ Azure Blob Storage ↔ GCP Cloud Storage."},
+      {icon:"⚠️", text:"Common mistake: matching services by name similarity or marketing rather than by actual service category (IaaS vs PaaS vs serverless)."}
+    ]
+  }
+},
+{
+  id:5,
+  label:"Scenario 5 — Cloud Rosetta Stone Applied",
+  title:"Translating a Managed Database Pattern",
+  body:"Using the 'Cloud Rosetta Stone' concept from class — the idea that most services have a direct translation across providers — your client's architecture diagram calls for a fully-managed relational database with automated backups and read replicas, currently built on AWS RDS. They now want the identical pattern proposed for GCP.",
+  concept:"Cloud Rosetta Stone Applied to Architecture Patterns",
+  conceptEmoji:"🗿",
+  conceptSub:"Translating architecture patterns, not just service names",
+  question:"Which GCP service is the correct Rosetta Stone translation of AWS RDS for this managed relational database pattern?",
+  options:[
+    "A. GCP BigQuery, since it also stores structured data",
+    "B. GCP Cloud SQL, the managed relational database service with equivalent backup/replica features",
+    "C. GCP Cloud Spanner, since it is GCP's flagship database product",
+    "D. GCP Firestore, since it manages data automatically"
+  ],
+  correct:1,
+  feedback:{
+    correct:"Correct — Cloud SQL is GCP's direct managed relational database offering (MySQL/PostgreSQL/SQL Server), matching RDS's category, automated backups, and read replica support pattern-for-pattern.",
+    wrong:"The answer is B, Cloud SQL. BigQuery is an analytics data warehouse (OLAP), not a transactional relational database. Cloud Spanner is a globally-distributed relational database — a step up in scale/cost, not the direct RDS equivalent. Firestore is a NoSQL document database, a different data model entirely.",
+    breakdown:[
+      {icon:"✅", text:"The Rosetta Stone approach: match the ARCHITECTURE PATTERN (managed relational DB with replicas) to its equivalent, not just any service that 'stores data
