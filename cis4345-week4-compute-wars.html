@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Compute Wars ⚔️ Instances, Scaling & the Three Landlords</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--sans); min-width:380px;
+}
+.skip-link{
+  position:absolute; left:-9999px; top:0; background:var(--blue); color:#0f1117;
+  padding:10px 16px; z-index:1000; font-weight:600; border-radius:0 0 8px 0;
+}
+.skip-link:focus{ left:0; }
+
+button:focus-visible, a:focus-visible{
+  outline:3px solid var(--blue); outline-offset:2px;
+}
+
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+  flex-wrap:wrap; gap:10px;
+}
+.logo{ display:flex; align-items:center; gap:10px; }
+.dots{ display:flex; gap:4px; }
+.dot{ width:12px; height:12px; border-radius:50%; }
+.dot.aws{ background:var(--aws); }
+.dot.azure{ background:var(--azure); }
+.dot.gcp{ background:var(--gcp); }
+.logo h1{ font-size:1.05rem; margin:0; font-family:var(--mono); font-weight:600; }
+.pills{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 14px; font-family:var(--mono); font-size:0.85rem; color:var(--text2);
+  white-space:nowrap;
+}
+.pill strong{ color:var(--text); }
+
+.progress-wrap{
+  height:3px; background:var(--surface2); width:100%;
+}
+.progress-bar{
+  height:100%; background:var(--blue); width:0%; transition:width 0.3s ease;
+}
+
+main{
+  max-width:760px; margin:0 auto; padding:24px 16px 60px;
+}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-bottom:20px;
+}
+.round-label{
+  font-family:var(--mono); font-size:0.78rem; color:var(--text2);
+  text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;
+}
+.round-card h2{
+  margin:0 0 12px; font-size:1.35rem; color:var(--text);
+}
+.round-body{
+  font-size:0.98rem; line-height:1.55; color:var(--text2); margin-bottom:16px;
+}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--blue-dim); border:1px solid var(--blue); color:var(--blue);
+  padding:6px 14px; border-radius:20px; font-family:var(--mono); font-size:0.82rem;
+  margin-bottom:18px;
+}
+.concept-badge .sub{ color:var(--text2); font-weight:400; }
+
+.question{
+  font-weight:600; margin-bottom:14px; font-size:1rem;
+}
+
+.options{
+  display:flex; flex-direction:column; gap:10px;
+}
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 16px; border-radius:10px; font-family:var(--sans);
+  font-size:0.95rem; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+  line-height:1.4;
+}
+.opt-btn:hover:not(:disabled){
+  background:var(--surface); border-color:var(--blue);
+}
+.opt-btn:disabled{ cursor:default; }
+.opt-btn.selected{
+  border-color:var(--blue); background:var(--blue-dim);
+}
+.opt-btn.correct{
+  border-color:var(--green); background:var(--green-dim); color:var(--green);
+}
+.opt-btn.wrong{
+  border-color:var(--red); background:var(--red-dim); color:var(--red);
+}
+
+.fb{
+  margin-top:18px; border-radius:12px; padding:18px; border:1px solid var(--border);
+}
+.fb.correct-fb{ background:var(--green-dim); border-color:var(--green); }
+.fb.wrong-fb{ background:var(--red-dim); border-color:var(--red); }
+.fb-head{
+  display:flex; align-items:center; gap:10px; font-weight:600; margin-bottom:10px; font-size:1.05rem;
+}
+.fb-text{ margin-bottom:14px; line-height:1.55; font-size:0.95rem; color:var(--text); }
+.breakdown{ display:flex; flex-direction:column; gap:8px; }
+.breakdown-row{
+  display:flex; gap:10px; align-items:flex-start; font-size:0.9rem; color:var(--text2);
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+}
+.breakdown-row .icon{ flex-shrink:0; }
+
+.next-btn{
+  margin-top:18px; background:var(--blue); color:#0a0f1e; border:none;
+  padding:12px 28px; border-radius:10px; font-weight:600; font-size:0.95rem;
+  cursor:pointer; font-family:var(--sans); width:100%;
+}
+.next-btn:hover{ filter:brightness(1.1); }
+
+.streak-flash{
+  display:inline-block; animation:flashPulse 0.6s ease;
+}
+@keyframes flashPulse{
+  0%{ transform:scale(1); }
+  30%{ transform:scale(1.25); }
+  100%{ transform:scale(1); }
+}
+
+.final-screen{
+  text-align:center; padding:40px 20px;
+}
+.final-score{
+  font-family:var(--mono); font-size:3.2rem; color:var(--green); font-weight:600; margin:10px 0;
+}
+.final-label{ color:var(--text2); font-family:var(--mono); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; }
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin:28px 0;
+}
+.stat-box{
+  background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px;
+}
+.stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--text); }
+.stat-box .lbl{ color:var(--text2); font-size:0.82rem; margin-top:4px; }
+.replay-btn{
+  background:var(--yellow); color:#1a1500; border:none; padding:14px 34px; border-radius:10px;
+  font-weight:600; font-size:1rem; cursor:pointer; font-family:var(--sans);
+}
+.replay-btn:hover{ filter:brightness(1.1); }
+
+@media (max-width:480px){
+  .logo h1{ font-size:0.9rem; }
+  .final-score{ font-size:2.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <h1>CIS 4345 // COMPUTE WARS</h1>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <strong id="round-el">1</strong>/6</div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-el">Score: <strong>0</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-el">Streak: <strong>0</strong></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <h1 style="font-size:1.5rem; margin:22px 0 4px;">Compute Wars <span role="img" aria-label="crossed swords">⚔️</span></h1>
+  <p style="color:var(--text2); margin-top:0; font-size:0.95rem;">Six real situations. One compute decision each. Choose wisely — AWS, Azure, and GCP all do things a little differently.</p>
+
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Instance Types Across Three Landlords",
+    title:"Sizing a New App Server",
+    body:"You're deploying a Node.js API for an internal HR tool. Traffic is light and steady — about 50 requests per minute, no heavy CPU or memory spikes expected. Your manager asks you to pick a cost-effective 'general purpose' virtual machine size to start with, one you can resize later if needed.",
+    concept:"Instance Types Across Three Landlords",
+    conceptEmoji:"🖥️",
+    conceptSub:"Right family for the workload",
+    question:"Which instance family/type category should you choose for this workload?",
+    options:[
+      "A. A general-purpose instance (e.g., AWS t3/m5, Azure B/D-series, GCP e2/n2)",
+      "B. A compute-optimized instance (e.g., AWS c5, Azure F-series, GCP c2)",
+      "C. A memory-optimized instance (e.g., AWS r5, Azure E-series, GCP m1)",
+      "D. A GPU-accelerated instance (e.g., AWS p3, Azure NC-series, GCP A2)"
+    ],
+    correct:0,
+    feedback:{
+      correct:"General-purpose instances balance CPU, memory, and network resources — exactly what a light, steady-traffic API needs. All three landlords offer a 'burstable' or balanced tier (AWS T-series, Azure B-series, GCP E2) that's the cheapest sensible starting point.",
+      wrong:"General-purpose is the right call here. Compute-optimized, memory-optimized, and GPU instances all cost more and target specific bottlenecks (CPU-bound math, huge in-memory datasets, or ML training) that this workload doesn't have.",
+      breakdown:[
+        {icon:"✅", text:"General-purpose families (T/B/E2-style) balance CPU, RAM, and cost for everyday apps."},
+        {icon:"💡", text:"You can always resize/resize-and-reboot later once real usage data comes in — right-sizing is iterative."},
+        {icon:"⚠️", text:"Don't over-provision 'just in case' — compute-optimized and GPU instances can cost 2-10x more for no benefit here."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — AMIs vs Machine Images",
+    title:"Cloning a Golden Server",
+    body:"Your team spent two days hardening a Linux web server: patches applied, security agent installed, custom nginx config baked in. Now you need to launch 8 identical copies of this exact server for a load test next week, without repeating the setup work each time.",
+    concept:"AMIs vs Machine Images",
+    conceptEmoji:"📀",
+    conceptSub:"Snapshot once, launch many",
+    question:"What should you create from your hardened server to launch identical copies quickly?",
+    options:[
+      "A. A snapshot of just the attached data disk/volume",
+      "B. A custom Amazon Machine Image (AMI) or equivalent custom machine image (Azure Managed Image, GCP Custom Image)",
+      "C. A Load Balancer target group pointing at the original server",
+      "D. An Auto Scaling Group launch template with the default public image"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A custom machine image captures the entire boot volume — OS, installed packages, configs, and hardening — as a reusable template. Every landlord has this concept: AWS calls it an AMI, Azure a Managed Image (or Shared Image Gallery), GCP a Custom Image.",
+      wrong:"A data-disk-only snapshot misses the OS and installed software. A load balancer just routes traffic — it doesn't replicate servers. And an Auto Scaling Group with the DEFAULT public image would launch vanilla, unhardened servers, undoing all your hardening work.",
+      breakdown:[
+        {icon:"✅", text:"Custom images/AMIs capture the full boot disk: OS + software + configuration."},
+        {icon:"💡", text:"Auto Scaling Groups and launch templates should reference YOUR custom image, not a stock one, to preserve hardening."},
+        {icon:"⚠️", text:"A volume snapshot alone is not bootable as a full server — it's just data, not a machine image."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Auto Scaling Groups",
+    title:"Black Friday Traffic Spike",
+    body:"You manage compute for an e-commerce site. Traffic is predictable: quiet overnight, moderate during the day, and 10x normal during flash sales. Manually adding and removing servers every time is error-prone and someone always forgets to scale back down, wasting money.",
+    concept:"Auto Scaling Groups",
+    conceptEmoji:"📈",
+    conceptSub:"Elastic capacity, hands-off",
+    question:"What's the best configuration to automatically handle this traffic pattern?",
+    options:[
+      "A. Manually launch extra instances before each known sale and terminate them the next morning",
+      "B. Set up an Auto Scaling Group with a minimum, maximum, and desired capacity, using a scaling policy tied to a metric like CPU utilization or request count",
+      "C. Provision the maximum number of servers you'd ever need, permanently, so you're never caught short",
+      "D. Use only a single large instance sized for peak traffic and leave it running at all times"
+    ],
+    correct:1,
+    feedback:{
+      correct:"An Auto Scaling Group with min/max/desired capacity and a metric-based policy (e.g., 'add an instance when average CPU > 70%') automatically adds capacity during spikes and removes it afterward — no human required, and no wasted spend overnight.",
+      wrong:"Manual scaling is exactly the error-prone process described in the scenario. Permanently running max capacity or a single oversized instance both waste huge amounts of money during the many hours of low traffic — the whole point of the cloud's elasticity is paying only for what you use.",
+      breakdown:[
+        {icon:"✅", text:"Auto Scaling Groups tie capacity to real-time metrics (CPU, requests/sec, queue depth)."},
+        {icon:"💡", text:"Min/max/desired settings put guardrails on cost while still allowing bursts."},
+        {icon:"⚠️", text:"Sizing permanently for peak traffic is one of the most common cloud cost mistakes — it defeats elasticity."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Load Balancers and Health Checks",
+    title:"One Server Silently Dying",
+    body:"Your app runs on 4 identical web servers behind a load balancer. Overnight, one server ran out of disk space and its web service crashed, but the OS and network interface are still technically 'up.' Customers report intermittent errors — about 1 in 4 requests fails.",
+    concept:"Load Balancers and Health Checks",
+    conceptEmoji:"🩺",
+    conceptSub:"Detecting failure, not just presence",
+    question:"What load balancer feature should have caught this and routed traffic away from the broken server?",
+    options:[
+      "A. A basic network-layer ping check that only confirms the server responds to ICMP",
+      "B. A health check that pings the actual application endpoint (e.g., HTTP GET /health) and removes the instance from rotation if it fails",
+      "C. Round-robin routing with no health checks at all",
+      "D. A static DNS entry pointing directly to each server's IP"
+    ],
+    correct:1,
+    feedback:{
+      correct:"An application-level health check (HTTP/HTTPS GET to a health endpoint, checking for a 200 response) verifies the actual service is working, not just that the OS is running. Failing instances get automatically pulled out of rotation until they pass again.",
+      wrong:"An ICMP ping check only proves the OS/network stack is alive — exactly the failure mode in this scenario, where the OS was fine but the web service had crashed. Round-robin with no health checks would keep sending 1-in-4 requests to the broken server, and static DNS bypasses the load balancer entirely, removing any failover capability.",
+      breakdown:[
+        {icon:"✅", text:"Health checks should test the application layer (HTTP response code), not just network reachability."},
+        {icon:"💡", text:"Unhealthy instances are automatically removed from the LB rotation and re-added once they recover."},
+        {icon:"⚠️", text:"'The server pings fine' does not mean 'the application works' — these are different layers."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Elastic IP vs Static IP",
+    title:"The Vanishing IP Address",
+    body:"A junior admin stopped and restarted a cloud VM to apply a patch. After it came back online, the public IP address had changed — and the firewall rule at a partner company (which whitelists by exact IP) broke, cutting off an important data feed. Leadership wants this to never happen again.",
+    concept:"Elastic IP vs Static IP",
+    conceptEmoji:"📍",
+    conceptSub:"Persistent vs ephemeral addressing",
+    question:"What should have been assigned to this VM to prevent the IP from changing on stop/start?",
+    options:[
+      "A. Nothing — public IPs never change on a stop/start, only on termination",
+      "B. A reserved/static public IP (AWS Elastic IP, Azure Static Public IP, GCP Static External IP) allocated to the account and attached to the instance",
+      "C. A larger instance size, since bigger instances get permanent IPs",
+      "D. A second network interface card with a duplicate IP as backup"
+    ],
+    correct:1,
+    feedback:{
+      correct:"By default, dynamically assigned public IPs are ephemeral — they can change when a VM stops and restarts. A reserved static IP (AWS calls it an Elastic IP, Azure a Static Public IP, GCP a Static External IP) is allocated to YOUR account and stays attached to the instance across stop/start cycles, exactly what's needed for IP-whitelisted integrations.",
+      wrong:"Default dynamic public IPs absolutely can and do change on stop/start across all three clouds — that's the built-in behavior this scenario describes. Instance size has nothing to do with IP persistence, and a duplicate IP on a second NIC would cause a network conflict, not solve the problem.",
+      breakdown:[
+        {icon:"✅", text:"Static/Elastic IPs are reserved to your account, not tied to a specific running instance lifecycle."},
+        {icon:"💡", text:"Any system with hardcoded IP whitelisting on the other end needs a static IP on your side."},
+        {icon:"⚠️", text:"Elastic IPs are often billed if allocated but NOT attached to a running instance — release unused ones."}
+      ]
+    }
+  },
+  {
+    id:6,
+    label:"Scenario 6 — Compute Pricing and Right-Sizing",
+    title:"The Monthly Cloud Bill Shock",
+    body:"Finance flags that compute costs jumped 40% this quarter with no new features shipped. You pull utilization reports: most production VMs are averaging 8% CPU utilization and 15% memory usage, yet they're sized as large general-purpose instances running 24/7 on-demand pricing.",
+    concept:"Compute Pricing and Right-
