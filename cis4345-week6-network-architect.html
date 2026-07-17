@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Networking 🏰 Design Your Cloud Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; -webkit-font-smoothing:antialiased;
+}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--blue); color:#fff;
+  padding:10px 16px; z-index:1000; border-radius:0 0 8px 0; font-family:var(--sans); font-weight:600;
+}
+.skip-link:focus{ left:0; }
+
+button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+header.top{
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+.logo-row{ display:flex; align-items:center; gap:12px; }
+.dots{ display:flex; gap:5px; }
+.dot{ width:11px; height:11px; border-radius:50%; }
+.dot.aws{ background:var(--aws); }
+.dot.azure{ background:var(--azure); }
+.dot.gcp{ background:var(--gcp); }
+.brand-title{ font-family:var(--mono); font-weight:600; font-size:15px; color:var(--text); }
+.brand-title span{ color:var(--text2); font-weight:400; }
+
+.pills{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill{
+  font-family:var(--mono); font-size:13px; padding:6px 12px; border-radius:20px;
+  background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{ color:var(--text); }
+
+.progress-wrap{ height:3px; background:var(--surface2); width:100%; }
+.progress-bar{ height:100%; background:var(--blue); transition:width .3s ease; width:0%; }
+
+main{ max-width:760px; margin:0 auto; padding:28px 18px 60px; }
+h1.title{ font-size:22px; margin:0 0 4px; font-family:var(--sans); }
+.sub{ color:var(--text2); font-size:14px; margin-bottom:26px; }
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px 22px 26px; margin-bottom:20px;
+}
+.round-label{ font-family:var(--mono); font-size:12px; color:var(--blue); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+h2.scenario-title{ font-size:20px; margin:0 0 12px; }
+.body-text{ color:var(--text2); font-size:15px; line-height:1.6; margin-bottom:16px; }
+
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:10px; padding:8px 14px; margin-bottom:18px;
+}
+.concept-badge .emoji{ font-size:18px; }
+.concept-badge .lines{ display:flex; flex-direction:column; }
+.concept-badge .main{ font-size:13px; font-weight:600; color:var(--text); }
+.concept-badge .subtitle{ font-size:12px; color:var(--text2); }
+
+.question-text{ font-weight:600; font-size:15px; margin-bottom:14px; }
+
+.options{ display:flex; flex-direction:column; gap:10px; }
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); font-family:var(--sans); font-size:14.5px; padding:14px 16px;
+  border-radius:10px; cursor:pointer; transition:background .15s ease, border-color .15s ease, transform .1s ease;
+}
+.opt-btn:hover:not(:disabled){ background:#282c44; border-color:var(--blue); }
+.opt-btn:active:not(:disabled){ transform:scale(.99); }
+.opt-btn:disabled{ cursor:default; }
+.opt-btn.correct{ background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.opt-btn.wrong{ background:var(--red-dim); border-color:var(--red); color:var(--red); }
+.opt-btn.dim{ opacity:.5; }
+
+.fb{
+  margin-top:18px; padding:18px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.success{ border-color:var(--green); background:var(--green-dim); }
+.fb.error{ border-color:var(--red); background:var(--red-dim); }
+.fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; margin-bottom:8px; }
+.fb-head .icon{ font-size:20px; }
+.fb-text{ font-size:14px; color:var(--text); line-height:1.55; margin-bottom:14px; }
+.fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
+.fb-row{ display:flex; gap:10px; font-size:13.5px; color:var(--text2); align-items:flex-start; }
+.fb-row .fb-icon{ flex-shrink:0; }
+
+.next-btn, .replay-btn{
+  margin-top:20px; background:var(--blue); color:#fff; border:none; font-family:var(--sans);
+  font-weight:600; font-size:15px; padding:13px 22px; border-radius:10px; cursor:pointer; width:100%;
+}
+.next-btn:hover, .replay-btn:hover{ background:#3d7ce0; }
+
+.streak-flash{
+  display:inline-block; animation:flashPulse .6s ease;
+}
+@keyframes flashPulse{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.25); }
+  100%{ transform:scale(1); }
+}
+
+.final-screen{ text-align:center; padding:20px 0; }
+.final-score{ font-family:var(--mono); font-size:56px; font-weight:600; color:var(--blue); margin:10px 0; }
+.final-label{ color:var(--text2); font-size:14px; margin-bottom:24px; }
+.stat-grid{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:20px;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:12px; padding:16px;
+}
+.stat-box .num{ font-family:var(--mono); font-size:24px; font-weight:600; color:var(--text); }
+.stat-box .lbl{ font-size:12.5px; color:var(--text2); margin-top:4px; }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+@media (max-width:480px){
+  .round-card{ padding:18px 16px 22px; }
+  .final-score{ font-size:44px; }
+  header.top{ padding:12px 14px; }
+  .stat-grid{ grid-template-columns:1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="top">
+  <div class="logo-row">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <div class="brand-title">CIS 4345 <span>· Network Architect</span></div>
+  </div>
+  <div class="pills">
+    <div class="pill">Score <strong id="score-el" aria-live="polite" aria-atomic="true">0</strong></div>
+    <div class="pill">Round <strong id="round-el">1/6</strong></div>
+    <div class="pill">Streak <strong id="streak-el" aria-live="polite" aria-atomic="true">0</strong></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <h1 class="title">Network Architect 🏰</h1>
+  <div class="sub">Design your cloud network — one scenario at a time. Every choice reinforces a real-world VPC/VNet decision.</div>
+
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id: 1,
+    label: "Scenario 1 — VPC Fundamentals",
+    title: "Your First Cloud Network",
+    body: "You've been asked to set up an isolated network space in AWS for a new project before any servers are deployed. Your manager says, \"just create the network first, don't worry about instances yet.\"",
+    concept: "VPC Fundamentals",
+    conceptEmoji: "🧱",
+    conceptSub: "Virtual Private Cloud = your own isolated slice of the data center",
+    question: "What should you create first?",
+    options: [
+      "A. An EC2 instance with a public IP address",
+      "B. A VPC with a defined CIDR block",
+      "C. A Security Group with open inbound rules",
+      "D. An Internet Gateway with nothing attached to it"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "A VPC is the foundational network container in the cloud — you must define its IP address range (the CIDR block) before subnets, instances, or gateways can exist inside it.",
+      wrong: "The correct answer is B. A VPC must exist first, with its CIDR block defined, before you can create subnets, launch instances, or attach gateways.",
+      breakdown: [
+        {icon:"✅", text:"A VPC (Virtual Private Cloud) is the isolated network foundation of any cloud architecture."},
+        {icon:"💡", text:"The CIDR block defines your private IP address range, e.g. 10.0.0.0/16."},
+        {icon:"⚠️", text:"An Internet Gateway can't be usefully attached to nothing — it needs a VPC to route traffic into."}
+      ]
+    }
+  },
+  {
+    id: 2,
+    label: "Scenario 2 — Three Landlords of Networking",
+    title: "Speaking Three Languages",
+    body: "You've spent two years working in AWS. Your new employer runs everything on Microsoft Azure. Your new manager asks you to \"set up the network\" for a fresh application deployment.",
+    concept: "Three Landlords of Networking",
+    conceptEmoji: "🏢",
+    conceptSub: "Same networking concept, three different vendor names",
+    question: "What is the Azure equivalent of an AWS VPC?",
+    options: [
+      "A. Virtual Network (VNet)",
+      "B. VPC Network",
+      "C. Resource Group",
+      "D. Subnet"
+    ],
+    correct: 0,
+    feedback: {
+      correct: "Azure calls its isolated network construct a Virtual Network (VNet) — the same underlying concept as an AWS VPC or a GCP VPC Network, just a different name from a different landlord.",
+      wrong: "The correct answer is A, Virtual Network (VNet). AWS = VPC, Azure = VNet, GCP = VPC Network — all three represent the same idea of an isolated private network.",
+      breakdown: [
+        {icon:"✅", text:"AWS calls it a VPC, Azure calls it a VNet, GCP calls it a VPC Network."},
+        {icon:"💡", text:"All three give you an isolated, private IP address space you fully control."},
+        {icon:"⚠️", text:"A Resource Group in Azure is an organizational/billing container, not a network construct."}
+      ]
+    }
+  },
+  {
+    id: 3,
+    label: "Scenario 3 — Security Groups vs NACLs vs NSGs",
+    title: "Layered Defense",
+    body: "A client's AWS web server keeps getting scanned by bots on port 22 (SSH), even though the Security Group only allows port 22 traffic from your office IP address. You want to add an additional layer of protection at the subnet level to explicitly block the offending IP ranges.",
+    concept: "Security Groups vs NACLs vs NSGs",
+    conceptEmoji: "🛡️",
+    conceptSub: "Stateful instance-level filtering vs stateless subnet-level filtering",
+    question: "What should you configure to add this subnet-level layer?",
+    options: [
+      "A. Add another allow rule to the existing Security Group",
+      "B. Configure a Network ACL (NACL) with an explicit deny rule",
+      "C. Delete the Security Group entirely to simplify troubleshooting",
+      "D. Attach a new Elastic IP address to the instance"
+    ],
+    correct: 1,
+    feedback: {
+      correct: "NACLs operate at the subnet level and are stateless, which means they support explicit deny rules for specific IP ranges — something Security Groups can't do since SGs only support allow rules and are stateful.",
+      wrong: "The correct answer is B. Network ACLs work at the subnet level and can explicitly deny traffic from specific IPs, adding a layer Security Groups don't provide on their own.",
+      breakdown: [
+        {icon:"✅", text:"Security Groups are stateful, apply
