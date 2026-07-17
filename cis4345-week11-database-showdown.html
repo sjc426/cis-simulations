@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Database Showdown 🗄️ Pick Your Cloud Data Layer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+    --blue:#4f8ef7; --blue-dim:#1e2d4f;
+    --green:#3ecf8e; --green-dim:#0d2e1f;
+    --red:#f87171; --red-dim:#2e1010;
+    --yellow:#fbbf24; --yellow-dim:#2e2208;
+    --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+    --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+    --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+    --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); min-width:380px;
+  }
+  .skip-link{
+    position:absolute; top:-40px; left:0; background:var(--blue); color:#0f1117;
+    padding:8px 16px; z-index:100; font-family:var(--sans); font-weight:600;
+    text-decoration:none; border-radius:0 0 6px 0;
+  }
+  .skip-link:focus{ top:0; }
+
+  header{
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px; position:sticky; top:0; z-index:10;
+  }
+  .logo-title{ display:flex; align-items:center; gap:12px; }
+  .dots{ display:flex; gap:5px; }
+  .dot{ width:11px; height:11px; border-radius:50%; }
+  .dot.aws{ background:var(--aws); }
+  .dot.azure{ background:var(--azure); }
+  .dot.gcp{ background:var(--gcp); }
+  h1{ font-size:1.05rem; margin:0; font-family:var(--mono); font-weight:600; }
+  h1 span.sub{ color:var(--text2); font-weight:400; font-size:0.85rem; display:block; }
+
+  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+    padding:6px 12px; font-family:var(--mono); font-size:0.8rem; color:var(--text2);
+    display:flex; align-items:center; gap:6px;
+  }
+  .pill strong{ color:var(--text); }
+  #streak-el.flash{ animation:flash 0.6s ease; }
+  @keyframes flash{
+    0%{ background:var(--yellow-dim); color:var(--yellow); }
+    100%{ background:var(--surface2); color:var(--text2); }
+  }
+
+  .progress-wrap{
+    height:3px; background:var(--surface2); width:100%;
+  }
+  .progress-bar{
+    height:100%; background:linear-gradient(90deg,var(--blue),var(--green));
+    width:0%; transition:width 0.4s ease;
+  }
+
+  main{ max-width:760px; margin:0 auto; padding:24px 16px 60px; }
+
+  .round-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:24px; margin-bottom:20px;
+  }
+  .round-label{
+    font-family:var(--mono); font-size:0.78rem; color:var(--text2);
+    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;
+  }
+  h2{ font-size:1.35rem; margin:0 0 12px; color:var(--text); }
+  .body-text{ color:var(--text2); line-height:1.6; margin-bottom:16px; font-size:0.98rem; }
+
+  .concept-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:var(--blue-dim); border:1px solid var(--blue); color:var(--blue);
+    padding:6px 12px; border-radius:20px; font-family:var(--mono); font-size:0.8rem;
+    margin-bottom:18px;
+  }
+
+  .question{ font-weight:600; margin:18px 0 14px; font-size:1rem; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt-btn{
+    background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:14px 16px; border-radius:10px; text-align:left; font-family:var(--sans);
+    font-size:0.95rem; cursor:pointer; transition:border-color 0.15s, background 0.15s;
+    display:flex; align-items:flex-start; gap:10px; width:100%;
+  }
+  .opt-btn:hover:not(:disabled){ border-color:var(--blue); background:#262b42; }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct-answer{ border-color:var(--green); background:var(--green-dim); }
+  .opt-btn.wrong-answer{ border-color:var(--red); background:var(--red-dim); }
+  .opt-icon{ font-family:var(--mono); font-weight:600; color:var(--text2); }
+
+  button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+  a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  .fb{
+    margin-top:20px; padding:18px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface2); display:none;
+  }
+  .fb.show{ display:block; }
+  .fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:1.05rem; margin-bottom:10px; }
+  .fb-head.correct{ color:var(--green); }
+  .fb-head.wrong{ color:var(--red); }
+  .fb-text{ color:var(--text2); line-height:1.6; margin-bottom:14px; font-size:0.95rem; }
+  .breakdown{ display:flex; flex-direction:column; gap:8px; }
+  .breakdown-row{
+    display:flex; gap:10px; align-items:flex-start; font-size:0.9rem;
+    background:var(--surface); padding:10px 12px; border-radius:8px; border:1px solid var(--border);
+  }
+
+  .next-btn, .replay-btn{
+    background:var(--blue); color:#0f1117; border:none; padding:12px 22px;
+    border-radius:8px; font-family:var(--sans); font-weight:600; font-size:0.95rem;
+    cursor:pointer; margin-top:18px; display:inline-flex; align-items:center; gap:8px;
+  }
+  .next-btn:hover, .replay-btn:hover{ filter:brightness(1.1); }
+
+  .final-screen{ text-align:center; padding:30px 10px; }
+  .final-score{
+    font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--green);
+    margin:10px 0;
+  }
+  .stat-boxes{
+    display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin:24px 0;
+  }
+  .stat-box{
+    background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+    padding:16px 20px; min-width:120px;
+  }
+  .stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--text); }
+  .stat-box .lbl{ color:var(--text2); font-size:0.8rem; margin-top:4px; }
+
+  .hidden{ display:none !important; }
+
+  @media (max-width:480px){
+    h1{ font-size:0.95rem; }
+    .round-card{ padding:18px; }
+    .final-score{ font-size:2.4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      transition-duration:0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-title">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <h1>CIS 4345 — Database Showdown <span class="sub">RDS · Azure SQL · Cloud SQL · NoSQL</span></h1>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <strong id="round-el">1</strong>/7</div>
+    <div class="pill" id="score-el" aria-live="polite" aria-atomic="true">Score <strong id="score-num">0</strong></div>
+    <div class="pill" id="streak-el" aria-live="polite" aria-atomic="true">Streak <strong id="streak-num">0</strong></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area"></div>
+
+  <div id="final-area" class="final-screen hidden">
+    <h2>Assessment Complete 🎓</h2>
+    <div class="final-score" id="final-score">0</div>
+    <p class="body-text" id="final-msg"></p>
+    <div class="stat-boxes">
+      <div class="stat-box"><div class="num" id="final-correct">0</div><div class="lbl">Correct</div></div>
+      <div class="stat-box"><div class="num" id="final-wrong">0</div><div class="lbl">Incorrect</div></div>
+      <div class="stat-box"><div class="num" id="final-streak">0</div><div class="lbl">Best Streak</div></div>
+    </div>
+    <button class="replay-btn" id="replay-btn">🔁 Replay Simulation</button>
+  </div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Managed vs Self-Managed Databases",
+    title:"The Midnight Patch Alert",
+    body:"You're the sole DBA at a mid-size logistics company. At 2 AM, your phone buzzes: a critical CVE just dropped for the MySQL version running on your self-managed EC2 instance, and you have to patch it yourself before attackers scan for it. Your manager asks: 'Why didn't we just use a managed database service?'",
+    concept:"Managed vs Self-Managed Databases",
+    conceptEmoji:"🛠️",
+    conceptSub:"Who patches, backs up, and maintains the DB engine?",
+    question:"What is the core tradeoff between a self-managed database (on EC2) and a managed database service (like RDS)?",
+    options:[
+      "A. Self-managed databases are always cheaper because you avoid all vendor markup",
+      "B. Managed services trade some control and customization for the provider handling patching, backups, and failover automatically",
+      "C. Managed databases can only run relational engines, never NoSQL",
+      "D. Self-managed databases automatically scale storage without any configuration"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Exactly — managed services shift operational burden (patching, backups, HA) to the provider in exchange for less low-level control. This is the classic shared responsibility tradeoff applied to databases.",
+      wrong:"The right answer is B. Managed services like RDS handle patching, backups, and failover for you, but you give up OS-level access and some engine tuning flexibility in exchange.",
+      breakdown:[
+        {icon:"✅", text:"Managed = provider handles undifferentiated heavy lifting (patches, backups, failover)."},
+        {icon:"💡", text:"Self-managed gives you full root access but you own every 2 AM patch cycle."},
+        {icon:"⚠️", text:"Managed services are often not cheaper on raw compute — you're paying for the operational labor you didn't do."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Relational vs NoSQL in the Cloud",
+    title:"The Product Catalog Redesign",
+    body:"An e-commerce startup asks you to design storage for two things: (1) customer orders with strict foreign-key relationships to invoices and payments, and (2) a rapidly changing product catalog where each product has wildly different attributes (a shirt has size/color, a laptop has RAM/CPU) and needs to scale to millions of reads per second globally.",
+    concept:"Relational vs NoSQL in the Cloud",
+    conceptEmoji:"🗃️",
+    conceptSub:"Structured schemas vs flexible, horizontally-scaled documents",
+    question:"How should you split these two workloads across database types?",
+    options:[
+      "A. Put both in a single relational database since relational databases can handle any workload equally well",
+      "B. Orders/invoices/payments in a relational (SQL) database for referential integrity; product catalog in a NoSQL document store for flexible schema and horizontal scale",
+      "C. Product catalog in a relational database for strict schema; orders in NoSQL because orders don't need consistency",
+      "D. Both should go in NoSQL since it's always faster than SQL"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct — this is the classic split. Financial/transactional data with relationships needs ACID guarantees and joins (SQL), while the flexible, high-read-scale catalog fits a NoSQL document model far better.",
+      wrong:"The right answer is B. Orders/invoices need relational integrity and transactions (SQL), while the varied-attribute, high-scale catalog is a textbook NoSQL document store use case.",
+      breakdown:[
+        {icon:"✅", text:"SQL excels at relationships, joins, and ACID transactions — perfect for financial data."},
+        {icon:"💡", text:"NoSQL document stores handle flexible/varying schemas and scale horizontally with ease."},
+        {icon:"⚠️", text:"NoSQL isn't universally 'faster' — it's a different consistency/schema tradeoff, not a speed upgrade."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — AWS RDS Deep Dive",
+    title:"Choosing the Right RDS Engine",
+    body:"Your team is migrating an internal HR application off an aging on-prem Oracle server. Leadership wants to cut licensing costs dramatically while keeping full compatibility with existing PostgreSQL-based tooling, and they want AWS to manage patching, backups, and Multi-AZ failover.",
+    concept:"AWS RDS Deep Dive",
+    conceptEmoji:"🟧",
+    conceptSub:"Amazon RDS: engines, Multi-AZ, and managed operations",
+    question:"Which RDS configuration best fits this requirement?",
+    options:[
+      "A. RDS for SQL Server, since it's the AWS default engine",
+      "B. RDS for PostgreSQL with Multi-AZ enabled for automatic failover and managed backups",
+      "C. Launch PostgreSQL manually on EC2 to avoid RDS licensing fees",
+      "D. Amazon Aurora Serverless with the MySQL-compatible engine, since PostgreSQL isn't supported on RDS"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Right — RDS for PostgreSQL gives you the open-source engine compatibility they want, and enabling Multi-AZ gives automatic synchronous replication and failover, fully managed by AWS.",
+      wrong:"The answer is B. RDS supports PostgreSQL directly (and Aurora also has a PostgreSQL-compatible edition), and Multi-AZ is the RDS feature that provides automated failover.",
+      breakdown:[
+        {icon:"✅", text:"RDS supports MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, and Aurora (MySQL/PostgreSQL compatible)."},
+        {icon:"💡", text:"Multi-AZ creates a standby replica in another Availability Zone for automatic failover — it is NOT the same as a read replica."},
+        {icon:"⚠️", text:"RDS is a managed service, not 'no licensing' by default — but open-source engines like PostgreSQL avoid per-core commercial licensing costs."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Azure SQL Database and Cosmos DB",
+    title:"Global Gaming Leaderboard",
+    body:"A gaming company built on Microsoft Azure needs a leaderboard service that must respond in single-digit milliseconds to players across five continents simultaneously, with automatic multi-region write replication. Meanwhile, their billing system needs a traditional SQL Server-compatible relational database with minimal management overhead.",
+    concept:"Azure SQL Database and Cosmos DB",
+    conceptEmoji:"🟦",
+    conceptSub:"Azure SQL DB (relational, managed) vs Cosmos DB (global NoSQL)",
+    question:"Which combination correctly matches Azure's services to these two needs?",
+    options:[
+      "A. Cosmos DB for billing (relational needs) and Azure SQL Database for the leaderboard (needs global low latency)",
+      "B. Azure SQL Database for billing (managed relational/SQL Server-compatible) and Cosmos DB for the leaderboard (multi-region, low-latency NoSQL)",
+      "C. Use Azure SQL Database for both since it now supports global multi-write replication natively",
+      "D. Use Cosmos DB for both since it can emulate a relational SQL Server engine perfectly"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct — Azure SQL Database is the managed, SQL Server-compatible relational engine ideal for billing, while Cosmos DB is purpose-built for globally distributed, low-latency, multi-model NoSQL workloads like leaderboards.",
+      wrong:"The answer is B. Azure SQL Database is the right fit for a relational billing system needing SQL Server compatibility; Cosmos DB is designed exactly for global, low-latency, multi-region NoSQL scenarios like leaderboards.",
+      breakdown:[
+        {icon:"✅", text:"Azure SQL Database = managed, relational, SQL Server T-SQL compatible."},
+        {icon:"💡", text:"Cosmos DB offers turnkey global distribution with tunable consistency levels and single-digit ms latency guarantees (SLA-backed)."},
+        {icon:"⚠️", text:"Cosmos DB is multi-model (document, key-value, graph, column) but it is NOT a drop-in relational SQL Server replacement."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — GCP Cloud SQL and Firestore",
+    title:"Mobile App Real-Time Sync",
+    body:"You're consulting for a startup building a mobile chat app on Google Cloud. They need real-time data sync across devices with offline support, plus a separate back-office reporting system that runs complex SQL joins across normalized tables for monthly analytics reports.",
+    concept:"GCP Cloud SQL and Firestore",
+    conceptEmoji:"🟩",
+    conceptSub:"Cloud SQL (managed relational) vs Firestore (real-time NoSQL)",
+    question:"Which GCP services should power the chat sync feature and the back-office reporting respectively?",
+    options:[
+      "A. Firestore for chat sync (real-time, offline support) and Cloud SQL for back-office reporting (relational joins)",
+      "B. Cloud SQL for chat sync and Firestore for back-office reporting",
+      "C. Firestore for both, since it supports SQL joins natively across collections",
+      "D. Cloud SQL for both, since it has built-in real-time mobile sync SDKs"
+    ],
+    correct:0,
+    feedback:{
+      correct:"Yes — Firestore is purpose-built for real-time listeners and offline-first mobile sync, while Cloud SQL is the managed relational engine (MySQL/PostgreSQL/SQL Server) suited for complex joins in reporting.",
+      wrong:"The answer is A. Firestore provides real-time synchronization and offline caching ideal for mobile chat apps, while Cloud SQL handles the relational joins needed for back-office reporting.",
+      breakdown:[
+        {icon:"✅", text:"Firestore includes native mobile/web SDKs with offline persistence and real-time listeners — no polling required."},
+        {icon:"💡", text:"Cloud SQL is Google's managed relational service (MySQL, PostgreSQL, SQL Server) — best for structured joins and transactions."},
+        {icon:"⚠️", text:"Firestore is a document database — it does not support multi-table relational joins the way SQL does."}
+      ]
+    }
+  },
+  {
+    id:6,
+    label:"Scenario 6 — Read Replicas and Automated Backups",
+    title:"The Reporting Dashboard Slowdown",
+    body:"Your
