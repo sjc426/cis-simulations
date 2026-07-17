@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Serverless & Containers ⚡ The Three Landlords Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; -webkit-font-smoothing:antialiased;
+}
+.skip-link{
+  position:absolute; top:-40px; left:0; background:var(--blue); color:#08101f;
+  padding:8px 16px; z-index:100; font-weight:600; text-decoration:none; border-radius:0 0 6px 0;
+}
+.skip-link:focus{ top:0; }
+
+button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+header.topbar{
+  background:var(--surface); border-bottom:1px solid var(--border);
+  padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:10px; position:sticky; top:0; z-index:10;
+}
+.brand{ display:flex; align-items:center; gap:10px; }
+.dots{ display:flex; gap:4px; }
+.dot{ width:10px; height:10px; border-radius:50%; }
+.dot.aws{background:var(--aws);} .dot.azure{background:var(--azure);} .dot.gcp{background:var(--gcp);}
+.brand h1{ font-size:16px; margin:0; font-family:var(--mono); font-weight:600; letter-spacing:.3px; }
+.pills{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-family:var(--mono); font-size:13px; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{ color:var(--text); }
+.pill.streak-flash{ animation:flash 0.6s ease; }
+@keyframes flash{
+  0%{ background:var(--yellow-dim); border-color:var(--yellow); }
+  100%{ background:var(--surface2); border-color:var(--border); }
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+}
+
+.progress-wrap{ height:3px; background:var(--surface2); width:100%; }
+.progress-bar{ height:100%; background:linear-gradient(90deg,var(--aws),var(--azure),var(--gcp)); width:0%; transition:width .3s ease; }
+
+main{ max-width:760px; margin:0 auto; padding:24px 16px 60px; }
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:24px; margin-bottom:20px;
+}
+.round-label{ font-family:var(--mono); font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+.round-card h2{ font-size:22px; margin:0 0 12px; color:var(--text); }
+.round-body{ font-size:15px; line-height:1.6; color:var(--text2); margin-bottom:16px; }
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--blue-dim);
+  border:1px solid var(--blue); color:var(--blue); border-radius:10px; padding:8px 14px;
+  font-family:var(--mono); font-size:13px; margin-bottom:8px;
+}
+.concept-badge .sub{ color:var(--text2); font-size:12px; }
+
+.question{ font-weight:600; margin:18px 0 12px; font-size:15px; }
+
+.options{ display:flex; flex-direction:column; gap:10px; }
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 16px; border-radius:10px; font-family:var(--sans);
+  font-size:14.5px; cursor:pointer; transition:background .15s,border-color .15s;
+  line-height:1.5;
+}
+.opt-btn:hover:not(:disabled){ background:#282d45; border-color:var(--blue); }
+.opt-btn:disabled{ cursor:default; }
+.opt-btn.selected-correct{ background:var(--green-dim); border-color:var(--green); color:var(--green); }
+.opt-btn.selected-wrong{ background:var(--red-dim); border-color:var(--red); color:var(--red); }
+.opt-btn.reveal-correct{ background:var(--green-dim); border-color:var(--green); color:var(--green); }
+
+.fb{
+  margin-top:18px; border-radius:12px; padding:18px; border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.correct{ border-color:var(--green); background:var(--green-dim); }
+.fb.wrong{ border-color:var(--red); background:var(--red-dim); }
+.fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:16px; margin-bottom:10px; }
+.fb-head.correct-text{ color:var(--green); }
+.fb-head.wrong-text{ color:var(--red); }
+.fb-text{ font-size:14.5px; line-height:1.6; color:var(--text); margin-bottom:14px; }
+.breakdown{ display:flex; flex-direction:column; gap:8px; }
+.breakdown-row{ display:flex; gap:10px; font-size:14px; color:var(--text2); align-items:flex-start; }
+.breakdown-row span.icon{ flex-shrink:0; }
+
+.next-btn, .replay-btn{
+  margin-top:18px; background:var(--blue); color:#08101f; border:none; border-radius:10px;
+  padding:12px 22px; font-family:var(--sans); font-weight:600; font-size:15px; cursor:pointer;
+}
+.next-btn:hover, .replay-btn:hover{ background:#6ba0fb; }
+
+.final-screen{ text-align:center; padding:40px 16px; }
+.final-score{ font-family:var(--mono); font-size:56px; font-weight:600; color:var(--green); margin:10px 0; }
+.final-label{ color:var(--text2); font-size:14px; margin-bottom:24px; }
+.stat-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin:24px 0; }
+.stat-box{ background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px; }
+.stat-box .num{ font-family:var(--mono); font-size:24px; font-weight:600; color:var(--text); }
+.stat-box .lbl{ font-size:12px; color:var(--text2); margin-top:4px; }
+
+.landlord-tag{ font-family:var(--mono); font-size:11px; padding:2px 8px; border-radius:6px; margin-left:6px; }
+.tag-aws{ background:var(--aws-dim); border:1px solid var(--aws-border); color:var(--aws); }
+.tag-azure{ background:var(--azure-dim); border:1px solid var(--azure-border); color:var(--azure); }
+.tag-gcp{ background:var(--gcp-dim); border:1px solid var(--gcp-border); color:var(--gcp); }
+
+@media (max-width:480px){
+  .brand h1{ font-size:13px; }
+  .round-card h2{ font-size:19px; }
+  .final-score{ font-size:44px; }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <h1>CIS 4345 · Serverless &amp; Containers</h1>
+  </div>
+  <div class="pills">
+    <div class="pill" id="score-pill">Score: <strong><span aria-live="polite" aria-atomic="true" id="score-el">0</span></strong></div>
+    <div class="pill">Round: <strong><span id="round-el">1</span>/6</strong></div>
+    <div class="pill" id="streak-pill">Streak: <strong><span aria-live="polite" aria-atomic="true" id="streak-el">0</span></strong></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+{
+  id:1,
+  label:"Scenario 1 — Serverless Computing Fundamentals",
+  title:"The Midnight Report Generator",
+  body:"You work at a mid-size logistics firm. Finance needs a report generated every night at 2 AM that pulls data from cloud storage, formats it into a PDF, and emails it out. The job runs for about 45 seconds and happens exactly once per day. Your manager asks whether IT should spin up a dedicated always-on server to run this nightly task.",
+  concept:"Serverless Computing Fundamentals",
+  conceptEmoji:"⚡",
+  conceptSub:"Pay only for the compute time you actually use",
+  question:"What's the best architecture recommendation?",
+  options:[
+    "A. Provision a small EC2/VM instance and run a cron job on it continuously",
+    "B. Use a serverless function (like AWS Lambda) triggered on a nightly schedule",
+    "C. Set up a full Kubernetes cluster to manage the job",
+    "D. Buy a reserved instance since it's cheaper long-term than on-demand pricing"
+  ],
+  correct:1,
+  feedback:{
+    correct:"A serverless function is ideal here — you're billed only for the ~45 seconds of execution per day instead of paying for 24 hours of idle server time. There's also zero OS patching or server management required.",
+    wrong:"The right answer is a serverless function on a nightly schedule. A dedicated server (EC2/VM) sits idle 23 hours and 59 minutes a day while you still pay for it. Kubernetes is massive overkill for a single 45-second daily job, and a reserved instance still charges for 24/7 uptime — it just discounts the idle waste.",
+    breakdown:[
+      {icon:"✅", text:"Serverless = pay-per-execution, perfect for short, infrequent bursts of work."},
+      {icon:"💡", text:"45 seconds/day of compute costs pennies vs. an EC2 instance running 24/7/365."},
+      {icon:"⚠️", text:"Common mistake: defaulting to 'spin up a server' for every workload, regardless of shape."}
+    ]
+  }
+},
+{
+  id:2,
+  label:"Scenario 2 — The Three Landlords of Serverless",
+  title:"Multi-Cloud Migration Puzzle",
+  body:"Your company is being acquired, and the parent company has standardized on Azure. You currently run a serverless image-processing pipeline on AWS: images are uploaded to S3, which triggers a Lambda function to resize and watermark them. Leadership wants a direct migration plan to Azure's equivalent services.",
+  concept:"The Three Landlords of Serverless",
+  conceptEmoji:"🏠",
+  conceptSub:"Same shape of service, different landlord (AWS / Azure / GCP)",
+  question:"Which pairing correctly matches the AWS services to their Azure equivalents?",
+  options:[
+    "A.
