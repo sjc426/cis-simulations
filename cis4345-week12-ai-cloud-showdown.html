@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>CIS 4345 — AI in the Cloud 🤖 The Three Landlords' AI Showdown</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; line-height:1.5;
+}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--blue); color:#fff;
+  padding:10px 16px; z-index:1000; border-radius:0 0 6px 0; font-family:var(--sans);
+  font-weight:600;
+}
+.skip-link:focus{ left:0; }
+
+button:focus-visible, a:focus-visible{
+  outline:3px solid var(--blue); outline-offset:2px;
+}
+
+header.top{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:14px 20px; background:var(--surface);
+  border-bottom:1px solid var(--border); flex-wrap:wrap;
+}
+.logo-wrap{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:4px;}
+.dot{width:11px;height:11px;border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+h1{font-size:1.05rem; margin:0; font-family:var(--mono); font-weight:600; letter-spacing:0.3px;}
+.pills{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 14px; font-family:var(--mono); font-size:0.82rem; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{color:var(--text); font-weight:600;}
+.pill.streak-flash{animation:flashPulse .6s ease;}
+@keyframes flashPulse{
+  0%{background:var(--yellow-dim); border-color:var(--yellow);}
+  100%{background:var(--surface2); border-color:var(--border);}
+}
+
+.progress-outer{
+  width:100%; height:3px; background:var(--surface2);
+}
+.progress-inner{
+  height:100%; background:var(--blue); transition:width .3s ease; width:0%;
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+}
+
+main{
+  max-width:760px; margin:0 auto; padding:24px 16px 60px;
+}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-bottom:20px;
+}
+.round-label{
+  font-family:var(--mono); color:var(--blue); font-size:0.78rem;
+  letter-spacing:0.5px; text-transform:uppercase; margin-bottom:8px;
+}
+.round-title{
+  font-size:1.35rem; margin:0 0 12px; font-weight:600;
+}
+.round-body{
+  color:var(--text2); font-size:0.98rem; margin-bottom:16px;
+}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:10px 14px; margin-bottom:18px;
+}
+.concept-badge .cb-emoji{font-size:1.3rem;}
+.concept-badge .cb-text{display:flex; flex-direction:column;}
+.concept-badge .cb-main{font-weight:600; font-size:0.92rem;}
+.concept-badge .cb-sub{font-size:0.78rem; color:var(--text2); font-family:var(--mono);}
+
+.question{
+  font-weight:600; margin-bottom:14px; font-size:1.02rem;
+}
+
+.options{
+  display:flex; flex-direction:column; gap:10px;
+}
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 16px; border-radius:10px; font-family:var(--sans);
+  font-size:0.96rem; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+  width:100%;
+}
+.opt-btn:hover:not(:disabled){
+  background:var(--blue-dim); border-color:var(--blue);
+}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.selected-correct{
+  background:var(--green-dim); border-color:var(--green); color:var(--text);
+}
+.opt-btn.selected-wrong{
+  background:var(--red-dim); border-color:var(--red); color:var(--text);
+}
+.opt-btn.reveal-correct{
+  background:var(--green-dim); border-color:var(--green);
+}
+.opt-icon{font-weight:600; margin-right:6px;}
+
+.fb{
+  margin-top:20px; padding:18px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.correct{ border-color:var(--green); background:var(--green-dim); }
+.fb.wrong{ border-color:var(--red); background:var(--red-dim); }
+.fb-title{
+  font-weight:600; font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.fb-text{ color:var(--text); margin-bottom:14px; font-size:0.95rem; }
+.fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
+.fb-row{
+  display:flex; gap:10px; align-items:flex-start; font-size:0.92rem;
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+}
+.fb-row .icon{font-size:1.1rem; flex-shrink:0;}
+
+.next-btn{
+  margin-top:18px; background:var(--blue); color:#fff; border:none; border-radius:10px;
+  padding:14px 20px; font-family:var(--sans); font-weight:600; font-size:1rem;
+  cursor:pointer; width:100%;
+}
+.next-btn:hover{ background:#3d7de0; }
+
+.final-screen{
+  text-align:center; padding:30px 10px;
+}
+.final-score{
+  font-family:var(--mono); font-size:3rem; font-weight:600; color:var(--blue); margin:10px 0;
+}
+.final-label{ color:var(--text2); font-size:0.95rem; margin-bottom:20px; }
+.stat-boxes{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:12px; margin:20px 0;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:16px 10px;
+}
+.stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--green); }
+.stat-box .lbl{ font-size:0.8rem; color:var(--text2); margin-top:4px; }
+.replay-btn{
+  background:var(--surface2); border:1px solid var(--blue); color:var(--blue);
+  padding:14px 24px; border-radius:10px; font-family:var(--sans); font-weight:600;
+  font-size:1rem; cursor:pointer; margin-top:10px;
+}
+.replay-btn:hover{ background:var(--blue-dim); }
+
+.landlord-tag{
+  display:inline-block; font-family:var(--mono); font-size:0.72rem; padding:2px 8px;
+  border-radius:6px; margin-left:6px; vertical-align:middle;
+}
+.landlord-tag.aws{ background:var(--aws-dim); color:var(--aws); border:1px solid var(--aws-border); }
+.landlord-tag.azure{ background:var(--azure-dim); color:var(--azure); border:1px solid var(--azure-border); }
+.landlord-tag.gcp{ background:var(--gcp-dim); color:var(--gcp); border:1px solid var(--gcp-border); }
+
+.sr-only{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="top">
+  <div class="logo-wrap">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <h1>CIS 4345 — AI in the Cloud Showdown</h1>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <span id="round-el"><strong>1</strong>/6</span></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-el">Score: <strong>0</strong></div>
+    <div class="pill" id="streak-pill" aria-live="polite" aria-atomic="true"><span id="streak-el">Streak: 0</span></div>
+  </div>
+</header>
+
+<div class="progress-outer">
+  <div class="progress-inner" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — MLaaS: Pre-trained vs Custom AI APIs",
+    title:"Chatbot for Customer Support — Build or Buy?",
+    body:"You work at a mid-size insurance company. Your manager wants a quick FAQ chatbot that answers common policy questions. Your team has no data scientists on staff and a tight two-week deadline before the pilot launch.",
+    concept:"MLaaS (Machine Learning as a Service)",
+    conceptEmoji:"🧩",
+    conceptSub:"Pre-trained APIs vs custom-trained models",
+    question:"Which approach best fits this situation?",
+    options:[
+      "A. Build a custom ML model from scratch using TensorFlow",
+      "B. Use a pre-trained MLaaS API like Azure AI Language / AWS Comprehend + Lex",
+      "C. Hire a full data science team to train a custom NLP model on company data",
+      "D. Postpone the project until next fiscal year to budget for AI infrastructure"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Pre-trained MLaaS APIs let you deploy conversational AI in days, not months, without ML expertise. This is exactly the build-vs-buy tradeoff cloud providers solved with off-the-shelf AI services.",
+      wrong:"The right call is B — a pre-trained MLaaS API. With no ML staff and a two-week deadline, custom model development isn't realistic, and delaying the project ignores a faster, cheaper option that already exists.",
+      breakdown:[
+        {icon:"✅", text:"Pre-trained MLaaS APIs handle common NLP tasks (FAQ matching, intent detection) out of the box."},
+        {icon:"💡", text:"Custom models are worth building only when pre-trained accuracy is insufficient for a niche domain."},
+        {icon:"⚠️", text:"Building from scratch wastes time and money when an off-the-shelf solution already meets the need."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — AWS SageMaker Ecosystem",
+    title:"Building a Custom Fraud-Detection Pipeline on AWS",
+    body:"You're a cloud engineer at a fintech startup running on AWS. The data science team needs to label historical transaction data, build and train a custom fraud-detection model, and then deploy it to a live production endpoint — all inside one connected workflow.",
+    concept:"AWS SageMaker Ecosystem",
+    conceptEmoji:"🛠️",
+    conceptSub:"Labeling → building → deployment pipeline",
+    question:"Which combination of AWS services covers this workflow end-to-end?",
+    options:[
+      "A. SageMaker Ground Truth (labeling) + SageMaker Studio (build/train) + SageMaker Endpoints (deploy)",
+      "B. Amazon Rekognition + Amazon Polly + Amazon Lex",
+      "C. AWS Lambda + API Gateway + DynamoDB",
+      "D. Amazon Textract + Amazon Comprehend + Amazon Translate"
+    ],
+    correct:0,
+    feedback:{
+      correct:"SageMaker is AWS's full custom-ML platform. Ground Truth handles data labeling, Studio provides the IDE for building and training, and Endpoints hosts the trained model for real-time inference — exactly the pipeline described.",
+      wrong:"The correct combination is A. Options B and D are pre-trained AI services (vision, speech, text) meant for common tasks, not custom model pipelines — they can't be trained on your proprietary fraud data the way SageMaker can.",
+      breakdown:[
+        {icon:"✅", text:"SageMaker Ground Truth = managed data labeling service for training data."},
+        {icon:"💡", text:"SageMaker Studio = the IDE for building, training
