@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Network Architects 🌐 Design Your Cloud Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+    --blue:#4f8ef7; --blue-dim:#1e2d4f;
+    --green:#3ecf8e; --green-dim:#0d2e1f;
+    --red:#f87171; --red-dim:#2e1010;
+    --yellow:#fbbf24; --yellow-dim:#2e2208;
+    --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+    --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+    --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+    --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+    --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  body{min-width:380px;}
+  .skip-link{
+    position:absolute; left:-9999px; top:0; background:var(--blue); color:#0f1117;
+    padding:10px 16px; z-index:1000; font-weight:600; border-radius:0 0 6px 0;
+  }
+  .skip-link:focus{left:0;}
+
+  button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+  a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+  header.app-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+    flex-wrap:wrap; gap:10px;
+  }
+  .logo-wrap{ display:flex; align-items:center; gap:10px; }
+  .dots{ display:flex; gap:4px; }
+  .dot{ width:10px; height:10px; border-radius:50%; }
+  .dot.aws{ background:var(--aws); }
+  .dot.azure{ background:var(--azure); }
+  .dot.gcp{ background:var(--gcp); }
+  .brand-title{ font-family:var(--mono); font-size:1rem; font-weight:600; }
+  .brand-title small{ display:block; color:var(--text2); font-weight:400; font-size:0.7rem; }
+
+  .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+  .pill{
+    font-family:var(--mono); font-size:0.75rem; padding:6px 12px; border-radius:20px;
+    background:var(--surface2); border:1px solid var(--border); color:var(--text2);
+  }
+  .pill strong{ color:var(--text); }
+  .pill.streak-active{
+    background:var(--yellow-dim); border-color:var(--yellow); color:var(--yellow);
+  }
+
+  .progress-track{
+    width:100%; height:3px; background:var(--surface2);
+  }
+  .progress-bar{
+    height:100%; background:var(--blue); transition:width .3s ease;
+  }
+
+  main{ max-width:760px; margin:0 auto; padding:24px 16px 60px; }
+
+  .round-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:22px; margin-bottom:20px;
+  }
+  .round-label{
+    font-family:var(--mono); font-size:0.75rem; color:var(--text2); text-transform:uppercase;
+    letter-spacing:0.05em; margin-bottom:6px;
+  }
+  h1{ font-size:1.3rem; margin:0; }
+  h2.scenario-title{ font-size:1.15rem; margin:4px 0 12px; color:var(--text); }
+  .round-body{ font-size:0.95rem; line-height:1.55; color:var(--text); margin-bottom:14px; }
+
+  .concept-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--blue-dim);
+    border:1px solid var(--blue); color:var(--blue); font-family:var(--mono);
+    font-size:0.78rem; padding:6px 12px; border-radius:8px; margin-bottom:16px;
+  }
+  .concept-badge .sub{ color:var(--text2); font-family:var(--sans); }
+
+  .question-prompt{ font-weight:600; margin-bottom:12px; font-size:0.98rem; }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
+  .opt-btn{
+    text-align:left; background:var(--surface2); border:1px solid var(--border);
+    color:var(--text); font-family:var(--sans); font-size:0.92rem; padding:14px 16px;
+    border-radius:10px; cursor:pointer; transition:background .15s, border-color .15s;
+  }
+  .opt-btn:hover:not(:disabled){ background:#282c44; border-color:var(--blue); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.selected-correct{
+    background:var(--green-dim); border-color:var(--green); color:var(--green);
+  }
+  .opt-btn.selected-wrong{
+    background:var(--red-dim); border-color:var(--red); color:var(--red);
+  }
+  .opt-btn.reveal-correct{
+    background:var(--green-dim); border-color:var(--green); color:var(--green);
+  }
+
+  .fb{
+    margin-top:18px; padding:18px; border-radius:10px; border:1px solid var(--border);
+    background:var(--surface2);
+  }
+  .fb.correct{ border-color:var(--green); background:var(--green-dim); }
+  .fb.wrong{ border-color:var(--red); background:var(--red-dim); }
+  .fb-head{
+    display:flex; align-items:center; gap:8px; font-weight:600; margin-bottom:8px; font-size:1rem;
+  }
+  .fb-text{ font-size:0.9rem; line-height:1.5; margin-bottom:12px; color:var(--text); }
+  .fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
+  .fb-row{
+    display:flex; gap:10px; align-items:flex-start; font-size:0.85rem;
+    background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+  }
+  .fb-row .fic{ flex-shrink:0; }
+
+  .next-btn{
+    margin-top:18px; background:var(--blue); color:#0b0d13; border:none; font-weight:600;
+    font-family:var(--sans); font-size:0.95rem; padding:12px 20px; border-radius:8px;
+    cursor:pointer; width:100%;
+  }
+  .next-btn:hover{ background:#6ba3ff; }
+
+  .streak-flash{
+    animation: flashPop .5s ease;
+  }
+  @keyframes flashPop{
+    0%{ transform:scale(1); }
+    30%{ transform:scale(1.15); }
+    100%{ transform:scale(1); }
+  }
+
+  .final-screen{ text-align:center; padding:20px 10px; }
+  .final-score{
+    font-family:var(--mono); font-size:3rem; font-weight:600; color:var(--blue); margin:10px 0;
+  }
+  .final-stats{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin:24px 0;
+  }
+  .stat-box{
+    background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px;
+  }
+  .stat-box .num{ font-family:var(--mono); font-size:1.5rem; color:var(--text); }
+  .stat-box .lbl{ font-size:0.8rem; color:var(--text2); margin-top:4px; }
+  .replay-btn{
+    background:var(--green); color:#06180f; border:none; font-weight:600; font-size:1rem;
+    padding:14px 28px; border-radius:8px; cursor:pointer; font-family:var(--sans);
+  }
+  .replay-btn:hover{ background:#5ee0a8; }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important; transition-duration:0.01ms !important;
+    }
+  }
+
+  @media (max-width:480px){
+    .pills{ font-size:0.7rem; }
+    .final-score{ font-size:2.2rem; }
+  }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="app-header">
+  <div class="logo-wrap">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <div class="brand-title">CIS 4345 — Week 6
+      <small>Networking: VPC, VNet &amp; Private Networks</small>
+    </div>
+  </div>
+  <div class="pills">
+    <div class="pill" id="round-pill">Scenario <strong id="round-num">1</strong> / 6</div>
+    <div class="pill" id="score-pill">Score <strong id="score-el" aria-live="polite" aria-atomic="true">0</strong></div>
+    <div class="pill" id="streak-pill">Streak <strong id="streak-el" aria-live="polite" aria-atomic="true">0</strong></div>
+  </div>
+</header>
+
+<div class="progress-track">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <h1 class="sr-only" style="position:absolute;left:-9999px;">CIS 4345 Network Architects Simulation</h1>
+  <div id="game-container"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — VPC Fundamentals",
+    title:"Sizing the New VPC",
+    body:"You're setting up a brand-new AWS VPC for a startup that expects to grow from 3 servers to maybe 200 over the next two years. They want room for at least 4 subnets across 2 availability zones, with headroom to spare. Your manager asks: what CIDR block should we give the VPC itself?",
+    concept:"Subnets, CIDRs & Route Tables",
+    conceptEmoji:"🧮",
+    conceptSub:"IP space planning",
+    question:"Which VPC CIDR block gives the best balance of growth room and address efficiency?",
+    options:[
+      "A. 10.0.0.0/28 — just enough for the servers they have today",
+      "B. 10.0.0.0/16 — 65,536 addresses, easily split into multiple /24 subnets across AZs",
+      "C. 0.0.0.0/0 — maximum possible address space, future-proof for any growth",
+      "D. 10.0.0.0/8 — the largest private range, so use the whole thing"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A /16 is the classic 'sweet spot' VPC size — 65,536 addresses split cleanly into multiple /24 subnets (256 addresses each) per AZ, with plenty of room to add more subnets later without re-architecting.",
+      wrong:"The right answer is B — a /16 CIDR (10.0.0.0/16). A /28 (16 addresses) would run out almost immediately. 0.0.0.0/0 isn't a valid VPC CIDR — it's a routing shorthand for 'all traffic.' A /8 is valid but wildly oversized for a startup and wastes address space that can't be reused elsewhere in your network.",
+      breakdown:[
+        {icon:"✅", text:"AWS VPC CIDR blocks commonly range from /16 (large) to /28 (small, 16 IPs)."},
+        {icon:"💡", text:"A /16 split into /24 subnets gives you 256 addresses per subnet across as many AZs as you need."},
+        {icon:"⚠️", text:"0.0.0.0/0 is a route table concept ('default route'), never a valid VPC CIDR — don't confuse the two."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Three Landlords, Three Networks",
+    title:"Translating Terminology Across Clouds",
+    body:"Your company is running workloads in AWS, but a new client wants everything migrated to Google Cloud. You're prepping a terminology cheat-sheet for the team, since AWS calls it a VPC, Azure calls it a VNet, and GCP also calls it a VPC — but they don't all behave the same way under the hood.",
+    concept:"Three Landlords: AWS vs Azure vs GCP",
+    conceptEmoji:"🏢",
+    conceptSub:"Regional vs global network scope",
+    question:"What is the key structural difference your cheat-sheet needs to flag about GCP VPCs?",
+    options:[
+      "A. GCP VPCs are region-scoped, just like AWS VPCs and Azure VNets",
+      "B. GCP VPCs are global by default — a single VPC can span all regions with subnets in each",
+      "C. GCP doesn't support VPCs at all — it uses a flat network model with no isolation",
+      "D. GCP VPCs must be recreated manually in every region, with no shared control plane"
+    ],
+    correct:1,
+    feedback:{
+      correct:"This is the single biggest 'gotcha' when moving between clouds: a GCP VPC is a global resource. One VPC can have subnets in multiple regions worldwide, whereas an AWS VPC or Azure VNet is tied to a single region and needs peering or transit gateways to span regions.",
+      wrong:"The correct answer is B. AWS VPCs and Azure VNets are both region-scoped — you create a separate one per region and connect them. GCP flips this: one VPC, many regional subnets, no peering needed to communicate across regions.",
+      breakdown:[
+        {icon:"✅", text:"AWS VPC = regional. Azure VNet = regional. GCP VPC = global (subnets are regional, but the VPC itself spans regions)."},
+        {icon:"💡", text:"This affects DR and multi-region design: GCP needs less cross-region plumbing for a single application network."},
+        {icon:"⚠️", text:"Don't assume identical terms mean identical architecture — 'VPC' means something different in GCP than in AWS."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Traffic Cops of the Cloud",
+    title:"The Mysterious One-Way Connection",
+    body:"A junior admin configured a Security Group to allow inbound traffic on port 443 from a partner's IP range. The partner can reach the web server fine, but their monitoring tool reports the connection as 'broken' — responses never seem to make it back reliably in testing with a stricter setup. She also added a Network ACL rule allowing inbound 443, but forgot the ACL's outbound rules.",
+    concept:"Security Groups vs NACLs vs NSGs",
+    conceptEmoji:"🚦",
+    conceptSub:"Stateful vs stateless filtering",
+    question:"Why could the missing outbound NACL rule break the connection, even though the Security Group is correctly configured?",
+    options:[
+      "A. It can't break anything — Security Groups always override NACLs completely",
+      "B. NACLs are stateless, so return traffic on ephemeral ports needs its own explicit outbound rule",
+      "C. NACLs are stateful, so the missing outbound rule is irrelevant to return traffic",
+      "D. Security Groups and NACLs use identical rule logic, so this scenario is impossible"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Network ACLs are stateless — they evaluate inbound and outbound traffic independently. Even if inbound port 443 is allowed, the response traffic goes back out on a high, randomly-assigned ephemeral port (e.g., 1024-65535), which needs its own explicit outbound allow rule. Security Groups, by contrast, are stateful and handle return traffic automatically.",
+      wrong:"The answer is B. Security Groups (stateful) auto-allow return traffic once inbound is permitted. NACLs (stateless) do not — every direction needs its own rule, including the ephemeral port range for responses.",
+      breakdown:[
+        {icon:"✅", text:"Security Groups = stateful, operate at the instance/ENI level, allow rules only (no explicit deny)."},
+        {icon:"💡", text:"NACLs = stateless, operate at the subnet level, support both allow and deny rules, and evaluate in numbered order."},
+        {icon:"⚠️", text:"Forgetting the ephemeral port outbound rule on a NACL is one of the most common 'why is my traffic silently dropped' bugs."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Gateways",
+    title:"Patch Day for the Private Subnet",
+    body:"Your database servers live in a private subnet with no public IP addresses — by design, for security. But it's patch day, and they need to reach the internet to download OS updates. Leadership is adamant: 'Under no circumstances do these servers get public IPs or direct internet exposure.'",
+    concept:"Gateways: How Traffic Gets In and Out",
+    conceptEmoji:"🚪",
+    conceptSub:"Internet Gateway vs NAT Gateway vs VPN Gateway",
+    question:"Which gateway solution lets the private servers reach the internet for updates without exposing them to inbound connections?",
+    options:[
+      "A. Attach an Internet Gateway directly to each private server's network interface",
+      "B. Deploy a NAT Gateway in a public subnet and route the private subnet's outbound traffic through it",
+      "C. Assign each server a public IP but block all inbound ports with a Security Group",
+      "D. Set up a VPN Gateway so the servers tunnel out through the corporate office"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A NAT Gateway is the textbook answer here: it lives in a public subnet, has its own Elastic IP, and lets private-subnet instances initiate outbound connections (like pulling updates) while blocking any unsolicited inbound connections from the internet. The servers themselves stay fully private.",
+      wrong:"The correct choice is B. An Internet Gateway attached directly to a private instance would defeat the purpose of being 'private.' Public IPs (even with strict Security Groups) still increase the attack surface leadership wants to avoid. A VPN Gateway solves site-to-site connectivity, not general internet-bound patch traffic.",
+      breakdown:[
+        {icon:"✅", text:"NAT Gateway = outbound-only internet access for private resources. It's the standard pattern for patching/updates."},
+        {icon:"💡", text:"Internet Gateway (IGW) = two-way door for public subnets; needed by the NAT Gateway itself, but not attached to private instances."},
+        {icon:"⚠️", text:"'Private subnet' should mean no public IP AND no direct IGW route — the NAT Gateway is the one exception path."}
+      ]
+    }
+  },
+  {
+    id:5,
