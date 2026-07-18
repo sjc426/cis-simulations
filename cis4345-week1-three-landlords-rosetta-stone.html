@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Cloud Foundations 🏢 The Three Landlords &amp; The Rosetta Stone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; -webkit-font-smoothing:antialiased;
+}
+.skip-link{
+  position:absolute; left:-999px; top:auto;
+  background:var(--blue); color:#0f1117; padding:10px 16px;
+  border-radius:6px; font-weight:600; z-index:1000;
+}
+.skip-link:focus{ left:12px; top:12px; }
+
+button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
+
+header.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:14px 18px; background:var(--surface);
+  border-bottom:1px solid var(--border); flex-wrap:wrap;
+}
+.logo-block{ display:flex; align-items:center; gap:10px; }
+.dots{ display:flex; gap:4px; }
+.dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+.dot.aws{ background:var(--aws); }
+.dot.azure{ background:var(--azure); }
+.dot.gcp{ background:var(--gcp); }
+.logo-title{ font-family:var(--mono); font-weight:600; font-size:14px; color:var(--text2); }
+h1.game-title{
+  font-size:16px; margin:0; font-weight:600; font-family:var(--sans);
+  color:var(--text);
+}
+.pills{ display:flex; gap:8px; flex-wrap:wrap; }
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-family:var(--mono); font-size:13px; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{ color:var(--text); font-weight:600; }
+.pill.streak-active{ border-color:var(--yellow); color:var(--yellow); }
+
+.progress-wrap{ height:3px; background:var(--surface2); width:100%; }
+.progress-bar{ height:100%; background:var(--blue); width:0%; transition:width .3s ease; }
+
+main{ max-width:760px; margin:0 auto; padding:24px 16px 60px; }
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-bottom:20px;
+}
+.round-label{
+  font-family:var(--mono); font-size:12px; color:var(--text2);
+  text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px;
+}
+h2.scenario-title{ font-size:20px; margin:0 0 12px; color:var(--text); }
+.scenario-body{ font-size:15px; line-height:1.6; color:var(--text2); margin-bottom:14px; }
+
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--blue-dim); border:1px solid var(--blue); color:var(--blue);
+  border-radius:8px; padding:8px 12px; font-family:var(--mono); font-size:13px;
+  margin-bottom:16px;
+}
+.concept-badge .sub{ color:var(--text2); font-weight:400; }
+
+.question-text{ font-size:15px; font-weight:600; margin:0 0 14px; color:var(--text); }
+
+.options{ display:flex; flex-direction:column; gap:10px; }
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 16px; border-radius:10px; font-family:var(--sans);
+  font-size:14.5px; cursor:pointer; transition:border-color .15s, background .15s;
+  line-height:1.4;
+}
+.opt-btn:hover:not(:disabled){ border-color:var(--blue); background:#252a42; }
+.opt-btn:disabled{ cursor:default; }
+.opt-btn.selected{ border-color:var(--blue); background:var(--blue-dim); }
+.opt-btn.correct-answer{ border-color:var(--green); background:var(--green-dim); }
+.opt-btn.wrong-answer{ border-color:var(--red); background:var(--red-dim); }
+
+.fb{
+  margin-top:18px; padding:18px; border-radius:12px; border:1px solid var(--border);
+  background:var(--surface2); animation:fadeIn .25s ease;
+}
+.fb.correct{ border-color:var(--green); }
+.fb.wrong{ border-color:var(--red); }
+.fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; margin-bottom:8px; }
+.fb-head.correct{ color:var(--green); }
+.fb-head.wrong{ color:var(--red); }
+.fb-text{ font-size:14.5px; color:var(--text2); line-height:1.55; margin-bottom:12px; }
+.breakdown{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+.breakdown-row{
+  display:flex; gap:10px; align-items:flex-start; font-size:13.5px;
+  color:var(--text2); background:var(--surface); border:1px solid var(--border);
+  border-radius:8px; padding:10px 12px;
+}
+.breakdown-row .icon{ flex-shrink:0; }
+
+@keyframes fadeIn{ from{opacity:0; transform:translateY(-4px);} to{opacity:1; transform:translateY(0);} }
+
+.streak-flash{
+  display:inline-block; animation:flash .6s ease;
+}
+@keyframes flash{
+  0%{ transform:scale(1); }
+  30%{ transform:scale(1.25); color:var(--yellow); }
+  100%{ transform:scale(1); }
+}
+
+.next-btn{
+  margin-top:18px; background:var(--blue); color:#0f1117; border:none;
+  padding:12px 22px; border-radius:10px; font-family:var(--sans); font-weight:600;
+  font-size:14.5px; cursor:pointer; width:100%;
+}
+.next-btn:hover{ background:#6ba1fa; }
+
+.final-screen{ text-align:center; padding:20px 4px; }
+.final-score{
+  font-family:var(--mono); font-size:56px; font-weight:600; color:var(--blue);
+  margin:6px 0;
+}
+.final-sub{ color:var(--text2); font-size:14px; margin-bottom:24px; }
+.stat-grid{
+  display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px;
+}
+@media (max-width:480px){ .stat-grid{ grid-template-columns:1fr; } }
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:12px;
+  padding:16px;
+}
+.stat-box .num{ font-family:var(--mono); font-size:26px; font-weight:600; color:var(--text); }
+.stat-box .lbl{ font-size:12.5px; color:var(--text2); margin-top:4px; }
+.replay-btn{
+  background:var(--green); color:#07160f; border:none; padding:14px 28px;
+  border-radius:10px; font-weight:600; font-size:15px; cursor:pointer;
+}
+.replay-btn:hover{ background:#5edda6; }
+
+.provider-tag{
+  display:inline-block; font-family:var(--mono); font-size:11.5px; padding:2px 8px;
+  border-radius:6px; margin-right:6px; border:1px solid;
+}
+.provider-tag.aws{ color:var(--aws); background:var(--aws-dim); border-color:var(--aws-border); }
+.provider-tag.azure{ color:var(--azure); background:var(--azure-dim); border-color:var(--azure-border); }
+.provider-tag.gcp{ color:var(--gcp); background:var(--gcp-dim); border-color:var(--gcp-border); }
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header class="topbar">
+  <div class="logo-block">
+    <span class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </span>
+    <span class="logo-title">CIS 4345</span>
+    <h1 class="game-title">Cloud Foundations: The Three Landlords</h1>
+  </div>
+  <div class="pills">
+    <div class="pill" id="round-pill">Scenario <strong id="round-num">1</strong>/5</div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-el">Score: <strong id="score-num">0</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-el">Streak: <strong id="streak-num">0</strong></div>
+  </div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <div id="game-area"></div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — The Three Landlords",
+    title:"Your Manager Picks a Provider — By Instinct",
+    body:"Your director says, \"Let's just use Amazon, everyone uses Amazon.\" You're asked to write a one-paragraph justification memo. Before you write anything, you need to explain what actually differentiates the \"Big Three\" cloud landlords — AWS, Microsoft Azure, and Google Cloud Platform (GCP) — beyond brand recognition.",
+    concept:"The Three Landlords",
+    conceptEmoji:"🏢",
+    conceptSub:"AWS, Azure, and GCP are competing landlords renting out compute, storage, and services",
+    question:"Which statement most accurately describes the relationship between AWS, Azure, and GCP?",
+    options:[
+      "A. They are functionally identical — the choice is purely about pricing, so provider selection doesn't matter.",
+      "B. They are three separate \"landlords\" renting similar categories of infrastructure (compute, storage, networking) but with different service names, ecosystems, pricing models, and strengths.",
+      "C. AWS is for startups, Azure is for enterprises, and GCP is only used for machine learning — there is no overlap.",
+      "D. Only one provider should ever be used per company; using more than one is against industry best practice."
+    ],
+    correct:1,
+    feedback:{
+      correct:"AWS, Azure, and GCP all rent the same broad categories of \"real estate\" — compute, storage, networking, databases — but each has its own naming conventions, console design, pricing quirks, and areas of strength (e.g., Azure's tight Microsoft/Active Directory integration, GCP's data analytics/ML heritage, AWS's market maturity and service breadth).",
+      wrong:"The correct framing is that AWS, Azure, and GCP are three competing landlords offering overlapping but not identical service catalogs. There is real overlap between them (all three support ML workloads, all three serve enterprises and startups), and many companies deliberately use more than one provider (multi-cloud) for redundancy, cost leverage, or best-of-breed features.",
+      breakdown:[
+        {icon:"✅", text:"Think of AWS, Azure, and GCP as landlords renting similar 'apartments' (compute/storage/networking) with different floor plans and lease terms."},
+        {icon:"💡", text:"Azure's biggest edge is tight integration with Windows Server, Active Directory, and Office 365 — a huge draw for enterprises already on Microsoft."},
+        {icon:"⚠️", text:"Common mistake: assuming provider choice is 'set and forget.' Many orgs run multi-cloud deliberately to avoid vendor lock-in."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — The Cloud Rosetta Stone",
+    title:"Translating a Vendor Proposal",
+    body:"A vendor sends your team a proposal written entirely in Azure terminology: \"We recommend Azure Blob Storage behind an Azure Virtual Network, using Azure Virtual Machines and Azure SQL Database.\" Your team currently runs everything on AWS. Leadership asks you to translate this proposal into AWS terms so they can compare apples to apples.",
+    concept:"The Cloud Rosetta Stone",
+    conceptEmoji:"🗿",
+    conceptSub:"Mapping equivalent services across providers using different vocabulary for the same concept",
+    question:"Using the Cloud Rosetta Stone approach, which AWS service set correctly corresponds to the Azure services listed?",
+    options:[
+      "A. Azure Blob Storage → Amazon S3; Azure Virtual Network → Amazon VPC; Azure Virtual Machines → Amazon EC2; Azure SQL Database → Amazon RDS",
+      "B. Azure Blob Storage → Amazon EBS; Azure Virtual Network → Amazon Route 53; Azure Virtual Machines → AWS Lambda; Azure SQL Database → Amazon DynamoDB",
+      "C. Azure Blob Storage → Amazon Glacier only; Azure Virtual Network → Amazon CloudFront; Azure Virtual Machines → Amazon ECS; Azure SQL Database → Amazon Aurora Serverless",
+      "D. There is no reliable equivalent — Azure and AWS services cannot be meaningfully compared."
+    ],
+    correct:0,
+    feedback:{
+      correct:"This is the Cloud Rosetta Stone in action: object storage (Blob Storage ↔ S3), isolated virtual networking (VNet ↔ VPC), virtual machines (Azure VMs ↔ EC2), and managed relational databases (Azure SQL Database ↔ RDS) are conceptually equivalent even though the brand names differ completely.",
+      wrong:"The correct mappings are: Blob Storage↔S3 (object storage), Virtual Network↔VPC (isolated networking), Virtual Machines↔EC2 (compute instances), and SQL Database↔RDS (managed relational database). Option B mismatches categories entirely (e.g., pairing storage with a serverless compute service), and option C mixes archival storage and container services incorrectly.",
+      breakdown:[
+        {icon:"✅", text:"The Rosetta Stone skill: identify the underlying category first (storage, network, compute, database), then find that category's name in the other provider."},
+        {icon:"💡", text:"EC2 = Elastic Compute Cloud = VMs; RDS = Relational Database Service = managed SQL databases — memorize by category, not by acronym."},
+        {icon:"⚠️", text:"Common mistake: matching services by how 'important-sounding' the name is rather than by actual function."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — The Three-Layer Framework",
+    title:"Choosing How Much to Manage Yourself",
+    body:"Your company's e-commerce app needs a new checkout feature. The dev lead says, \"We just want to write code and push it — we don't want to manage servers, OS patches, or runtime updates. We just need infrastructure that automatically scales when traffic spikes.\" You need to recommend the right layer of the cloud stack.",
+    concept:"The Three-Layer Framework (IaaS, PaaS, SaaS)",
+    conceptEmoji:"🧱",
+    conceptSub:"IaaS = raw infrastructure, PaaS = managed platform, SaaS = finished software",
+    question:"Given the dev lead's requirements, which layer of the cloud stack should you recommend?",
+    options:[
+      "A. IaaS (Infrastructure as a Service) — they should provision raw virtual machines and manage the OS and runtime themselves for maximum control.",
+      "B. PaaS (Platform as a Service) — a managed platform (like AWS Elastic Beanstalk, Azure App Service, or Google App Engine) handles the OS, runtime, and scaling so the team can just deploy code.",
+      "C. SaaS (Software as a Service) — they should subscribe to a pre-built checkout software product and not write any custom code at all.",
+      "D. None of these — cloud computing does not offer any layer that abstracts away server management."
+    ],
+    correct:1,
+    feedback:{
+      correct:"PaaS is exactly the right fit: platforms like Elastic Beanstalk, Azure App Service, or App Engine let developers deploy code directly while the provider manages the underlying OS, patching, runtime, and auto-scaling — matching the dev lead's explicit request to avoid server management.",
+      wrong:"IaaS (option A) would require the team to manage the OS and runtime themselves — the opposite of what they asked for. SaaS (option C) would mean giving up custom checkout logic entirely, which isn't appropriate since they want a custom feature, not an off-the-shelf product. The three layers form a spectrum of increasing abstraction: IaaS gives you the building (bare walls, wiring), PaaS gives you a furnished office (you bring your business), and SaaS gives you a finished, ready-to-use service (like Gmail or Salesforce).",
+      breakdown:[
+        {icon:"✅", text:"IaaS = you manage OS/runtime/apps (e.g., EC2, Azure VMs, Compute Engine). PaaS = provider manages OS/runtime, you manage code (e.g., Elastic Beanstalk, App Service, App Engine). SaaS = provider manages everything, including the app (e.g., Office 365, Gmail, Salesforce)."},
+        {icon:"💡", text:"A helpful mental model: IaaS = rent the land, PaaS = rent a furnished apartment, SaaS = stay in a hotel with room service."},
+        {icon:"⚠️", text:"Common mistake: assuming 'more control' is always better — more control also means more operational burden (patching, scaling, security)."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Cloud Deployment Models",
+    title:"A Hospital's Sensitive Data Dilemma",
+    body:"You're consulting for a regional hospital network. They want the cost savings and scalability of public cloud for their patient portal, but strict HIPAA compliance requirements mean certain patient records must stay on infrastructure they fully control, isolated from other tenants. They ask you to recommend a deployment model.",
+    concept:"Cloud Deployment Models",
+    conceptEmoji:"🏥",
+    conceptSub:"Public, private, hybrid, and community cloud each balance cost, control, and compliance differently",
+    question:"Which deployment model best fits the hospital's requirements?",
+    options:[
+      "A. Public cloud only — since public cloud providers are HIPAA-compliant, there is no need to isolate any workloads.",
+      "B. Private cloud only — abandon the patient portal's public cloud plans entirely and host everything internally for maximum control.",
+      "C. Hybrid cloud — use public cloud for the scalable, less-sensitive patient portal front end, and private cloud (on-prem or dedicated) for the sensitive patient records requiring full isolation and control.",
+      "D. Community cloud — join a shared cloud environment with other hospitals since they all have similar compliance needs, regardless of data isolation requirements."
+    ],
+    correct:2,
+    feedback:{
+      correct:"Hybrid cloud is the right call: it lets the hospital keep the scalable, cost-efficient public cloud for the customer-facing portal while keeping the most sensitive, regulated data on private infrastructure they fully control — getting the benefits of both models where each fits best.",
+      wrong:"Public cloud alone (A) ignores the requirement for full isolation and control over certain records — HIPAA-eligible services exist, but 'HIPAA-compliant provider' doesn't automatically satisfy every organization's isolation policy. Private cloud alone (B) throws away the cost/scalability benefits they explicitly wanted for the portal. Community cloud (D) might suit a specific consortium use case, but it doesn't address the requirement for full isolation of sensitive records described
