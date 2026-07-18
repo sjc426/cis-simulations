@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIS 4345 — Storage Wars ☁️ Object, Block & File Battle Royale</title>
+<title>CIS 4345 — Storage Wars 📦 Pick Your Cloud Storage Wisely</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -23,16 +23,12 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    min-width:380px;
-    line-height:1.5;
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-width:380px; -webkit-text-size-adjust:100%;
   }
   .skip-link{
-    position:absolute; left:-9999px; top:0;
-    background:var(--blue); color:#0f1117; padding:10px 16px;
-    z-index:1000; font-weight:600; border-radius:0 0 6px 0;
+    position:absolute; left:-9999px; top:0; background:var(--blue); color:#0f1117;
+    padding:10px 16px; z-index:1000; font-weight:600; border-radius:0 0 8px 0;
   }
   .skip-link:focus{ left:0; }
 
@@ -40,332 +36,298 @@
     outline:3px solid var(--blue); outline-offset:2px;
   }
 
-  header.topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    flex-wrap:wrap; gap:12px;
-    padding:14px 20px;
-    background:var(--surface);
-    border-bottom:1px solid var(--border);
-    position:sticky; top:0; z-index:50;
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      transition-duration:0.01ms !important;
+    }
   }
-  .logo-wrap{ display:flex; align-items:center; gap:12px; }
+
+  main{ max-width:840px; margin:0 auto; padding:16px 16px 60px; }
+
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:14px 0; flex-wrap:wrap; border-bottom:1px solid var(--border);
+    margin-bottom:20px;
+  }
+  .logo-row{ display:flex; align-items:center; gap:10px; }
   .dots{ display:flex; gap:4px; }
-  .dot{ width:12px; height:12px; border-radius:50%; }
+  .dot{ width:11px; height:11px; border-radius:50%; }
   .dot.aws{ background:var(--aws); }
   .dot.azure{ background:var(--azure); }
   .dot.gcp{ background:var(--gcp); }
-  .brand-title{
-    font-family:var(--mono); font-weight:600; font-size:1.05rem;
-    color:var(--text);
-  }
-  .brand-sub{ font-size:.75rem; color:var(--text2); }
-
+  h1{ font-size:1.15rem; margin:0; font-family:var(--mono); font-weight:600; letter-spacing:0.3px; }
   .pills{ display:flex; gap:8px; flex-wrap:wrap; }
   .pill{
-    font-family:var(--mono); font-size:.8rem;
-    background:var(--surface2); border:1px solid var(--border);
-    padding:6px 12px; border-radius:20px;
-    color:var(--text2); display:flex; align-items:center; gap:6px;
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:6px 12px; font-family:var(--mono); font-size:0.8rem; color:var(--text2);
+    display:flex; align-items:center; gap:6px;
   }
-  .pill strong{ color:var(--text); }
+  .pill strong{ color:var(--text); font-weight:600; }
 
-  .progress-outer{
-    width:100%; height:3px; background:var(--surface2);
-    position:relative;
+  .progress-wrap{
+    width:100%; height:3px; background:var(--surface2); border-radius:3px; margin-bottom:26px; overflow:hidden;
   }
-  .progress-inner{
-    height:100%; background:linear-gradient(90deg,var(--blue),var(--green));
-    width:0%; transition:width .4s ease;
-  }
-  @media (prefers-reduced-motion: reduce){
-    *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
-  }
-
-  main{
-    max-width:820px; margin:0 auto; padding:24px 16px 60px;
+  .progress-bar{
+    height:100%; background:linear-gradient(90deg,var(--aws),var(--azure),var(--gcp));
+    width:0%; transition:width 0.4s ease;
   }
 
   .round-card{
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:12px; padding:24px; margin-bottom:20px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:22px; margin-bottom:20px;
   }
   .round-label{
-    font-family:var(--mono); font-size:.8rem; color:var(--blue);
-    text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px;
+    font-family:var(--mono); font-size:0.78rem; color:var(--text2); text-transform:uppercase;
+    letter-spacing:1px; margin-bottom:8px;
   }
-  .round-title{
-    font-size:1.4rem; margin:0 0 12px; color:var(--text);
-  }
-  .round-body{
-    color:var(--text2); font-size:1rem; margin-bottom:16px;
-  }
-  .concept-badge{
-    display:inline-flex; align-items:center; gap:8px;
-    background:var(--surface2); border:1px solid var(--border);
-    padding:8px 14px; border-radius:8px; margin-bottom:18px;
-  }
-  .concept-badge .cb-title{ font-weight:600; color:var(--yellow); }
-  .concept-badge .cb-sub{ color:var(--text2); font-size:.85rem; }
+  h2.round-title{ font-size:1.3rem; margin:0 0 12px; color:var(--text); font-weight:600; }
+  .round-body{ color:var(--text2); line-height:1.6; margin-bottom:14px; font-size:0.98rem; }
 
-  .question{
-    font-weight:600; margin:0 0 14px; font-size:1.05rem;
+  .badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--surface2);
+    border:1px solid var(--border); border-radius:10px; padding:8px 14px; margin-bottom:18px;
   }
+  .badge .emoji{ font-size:1.2rem; }
+  .badge-text{ display:flex; flex-direction:column; }
+  .badge-title{ font-family:var(--mono); font-weight:600; font-size:0.85rem; color:var(--text); }
+  .badge-sub{ font-size:0.75rem; color:var(--text3); }
 
-  .options{
-    display:flex; flex-direction:column; gap:10px;
-  }
+  .question{ font-weight:600; margin:16px 0 14px; font-size:1rem; color:var(--text); }
+
+  .options{ display:flex; flex-direction:column; gap:10px; }
   .opt-btn{
-    text-align:left; width:100%;
-    background:var(--surface2); color:var(--text);
-    border:1px solid var(--border); border-radius:8px;
-    padding:14px 16px; font-family:var(--sans); font-size:.98rem;
-    cursor:pointer; transition:background .15s,border-color .15s,transform .1s;
+    display:block; width:100%; text-align:left; background:var(--surface2);
+    border:1px solid var(--border); color:var(--text); border-radius:10px;
+    padding:14px 16px; font-family:var(--sans); font-size:0.95rem; cursor:pointer;
+    transition:background 0.15s,border-color 0.15s,transform 0.1s;
+    line-height:1.4;
   }
-  .opt-btn:hover:not(:disabled){
-    background:var(--blue-dim); border-color:var(--blue);
-  }
+  .opt-btn:hover:not(:disabled){ background:var(--blue-dim); border-color:var(--blue); }
+  .opt-btn:active:not(:disabled){ transform:scale(0.99); }
   .opt-btn:disabled{ cursor:default; }
-  .opt-btn.selected-correct{
-    background:var(--green-dim); border-color:var(--green); color:var(--green);
-  }
-  .opt-btn.selected-wrong{
-    background:var(--red-dim); border-color:var(--red); color:var(--red);
-  }
-  .opt-btn.reveal-correct{
-    border-color:var(--green); box-shadow:inset 0 0 0 1px var(--green);
-  }
+  .opt-btn.correct-answer{ background:var(--green-dim); border-color:var(--green); }
+  .opt-btn.wrong-answer{ background:var(--red-dim); border-color:var(--red); }
+  .opt-btn .tag{ font-family:var(--mono); font-weight:600; margin-right:6px; }
 
   .fb{
-    margin-top:20px; padding:18px; border-radius:10px;
-    border:1px solid var(--border); background:var(--surface2);
+    margin-top:18px; padding:18px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface2);
   }
   .fb.correct{ border-color:var(--green); background:var(--green-dim); }
   .fb.wrong{ border-color:var(--red); background:var(--red-dim); }
-  .fb-head{
-    display:flex; align-items:center; gap:10px; font-weight:600;
-    font-size:1.05rem; margin-bottom:8px;
-  }
-  .fb-text{ color:var(--text); margin-bottom:12px; }
-  .fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
-  .fb-row{
-    display:flex; gap:10px; align-items:flex-start;
-    background:var(--surface); padding:8px 12px; border-radius:6px;
-    border:1px solid var(--border); font-size:.92rem; color:var(--text2);
-  }
-  .fb-row .icon{ flex-shrink:0; }
-
-  .next-btn{
-    margin-top:20px; background:var(--blue); color:#0f1117;
-    border:none; padding:12px 24px; border-radius:8px;
-    font-family:var(--mono); font-weight:600; font-size:.95rem;
-    cursor:pointer; display:block; width:100%;
-  }
-  .next-btn:hover{ background:#6da3ff; }
+  .fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:1.05rem; margin-bottom:10px; }
+  .fb-head.correct-text{ color:var(--green); }
+  .fb-head.wrong-text{ color:var(--red); }
+  .fb-body{ color:var(--text); line-height:1.55; margin-bottom:14px; font-size:0.94rem; }
+  .breakdown{ display:flex; flex-direction:column; gap:8px; }
+  .brow{ display:flex; gap:10px; align-items:flex-start; font-size:0.9rem; color:var(--text2); }
+  .brow .icon{ flex-shrink:0; }
 
   .streak-flash{
-    display:inline-block; animation:flashPulse 0.6s ease;
+    display:inline-block; margin-left:8px; color:var(--yellow); font-family:var(--mono);
+    font-weight:600; animation:flashPulse 0.6s ease-in-out;
   }
   @keyframes flashPulse{
-    0%{ transform:scale(1); }
-    40%{ transform:scale(1.25); color:var(--yellow); }
-    100%{ transform:scale(1); }
+    0%{ transform:scale(0.8); opacity:0; }
+    50%{ transform:scale(1.15); opacity:1; }
+    100%{ transform:scale(1); opacity:1; }
   }
+
+  .next-btn{
+    margin-top:18px; background:var(--blue); color:#0b0d13; border:none; border-radius:10px;
+    padding:13px 22px; font-family:var(--mono); font-weight:600; font-size:0.95rem;
+    cursor:pointer; width:100%;
+  }
+  .next-btn:hover{ background:#6ba1ff; }
 
   .final-screen{
-    text-align:center; padding:40px 20px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:34px 24px; text-align:center;
   }
   .final-score{
-    font-family:var(--mono); font-size:3.4rem; font-weight:600;
-    color:var(--green); margin:10px 0;
+    font-family:var(--mono); font-size:3rem; font-weight:600; color:var(--yellow); margin:10px 0;
   }
-  .final-label{ color:var(--text2); font-size:1rem; margin-bottom:24px; }
+  .final-label{ color:var(--text2); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px; }
   .stat-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:14px; margin:24px 0;
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:24px 0;
   }
   .stat-box{
-    background:var(--surface2); border:1px solid var(--border);
-    border-radius:10px; padding:16px;
+    background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px;
   }
-  .stat-box .num{ font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--blue); }
-  .stat-box .lbl{ color:var(--text2); font-size:.82rem; margin-top:4px; }
+  .stat-box .num{ font-family:var(--mono); font-size:1.5rem; font-weight:600; color:var(--text); }
+  .stat-box .lbl{ font-size:0.78rem; color:var(--text2); margin-top:4px; }
   .replay-btn{
-    background:var(--green); color:#08120c; border:none;
-    padding:14px 30px; border-radius:8px; font-family:var(--mono);
-    font-weight:600; font-size:1rem; cursor:pointer; margin-top:10px;
+    background:var(--green); color:#0b0d13; border:none; border-radius:10px; padding:14px 26px;
+    font-family:var(--mono); font-weight:600; font-size:1rem; cursor:pointer; margin-top:10px;
   }
-  .replay-btn:hover{ background:#5be0a8; }
+  .replay-btn:hover{ background:#5cddaa; }
+
+  .provider-tag{
+    display:inline-block; font-family:var(--mono); font-size:0.72rem; font-weight:600;
+    padding:3px 8px; border-radius:6px; margin-left:8px;
+  }
+  .provider-tag.aws{ background:var(--aws-dim); color:var(--aws); border:1px solid var(--aws-border); }
+  .provider-tag.azure{ background:var(--azure-dim); color:var(--azure); border:1px solid var(--azure-border); }
+  .provider-tag.gcp{ background:var(--gcp-dim); color:var(--gcp); border:1px solid var(--gcp-border); }
 
   @media (max-width:480px){
-    .brand-sub{ display:none; }
-    .round-title{ font-size:1.2rem; }
-    header.topbar{ padding:10px 12px; }
+    h1{ font-size:1rem; }
+    .final-score{ font-size:2.2rem; }
+    .round-card{ padding:16px; }
   }
 </style>
 </head>
 <body>
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
-<header class="topbar">
-  <div class="logo-wrap">
-    <div class="dots" aria-hidden="true">
-      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
-    </div>
-    <div>
-      <div class="brand-title">CIS 4345</div>
-      <div class="brand-sub">Storage Wars — Week 5</div>
-    </div>
-  </div>
-  <div class="pills">
-    <div class="pill">Round <strong id="round-el">1</strong>/7</div>
-    <div class="pill">Score <div aria-live="polite" aria-atomic="true" id="score-el" style="display:inline;color:var(--text);font-weight:600;">0</div></div>
-    <div class="pill">Streak <div aria-live="polite" aria-atomic="true" id="streak-el" style="display:inline;color:var(--text);font-weight:600;">0</div></div>
-  </div>
-</header>
-
-<div class="progress-outer">
-  <div class="progress-inner" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
-</div>
-
 <main id="main-content">
-  <h1 style="position:absolute;left:-9999px;">CIS 4345 — Storage Wars: Object, Block, and File Battle Royale</h1>
-  <div id="game-root"></div>
+  <header class="topbar">
+    <div class="logo-row">
+      <div class="dots" aria-hidden="true">
+        <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+      </div>
+      <h1>CIS 4345 — Storage Wars <span role="img" aria-label="package box">📦</span></h1>
+    </div>
+    <div class="pills">
+      <div class="pill">Round <strong id="round-el">1/6</strong></div>
+      <div class="pill" aria-live="polite" aria-atomic="true" id="score-pill">Score <strong id="score-el">0</strong></div>
+      <div class="pill" aria-live="polite" aria-atomic="true" id="streak-pill">Streak <strong id="streak-el">0</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+  </div>
+
+  <div id="game-area"></div>
 </main>
 
 <script>
-const scenarios = [
-  {
-    id:1,
-    label:"Scenario 1 — Object vs Block vs File Storage",
-    title:"The Landlord's Storage Closet",
-    body:"You're consulting for a small law firm migrating to the cloud. They need storage for their production PostgreSQL database's data files, which requires low-latency random read/write access and must behave like a locally attached disk. A junior admin suggests using an object storage bucket to save money.",
-    concept:"Object vs Block vs File Storage",
-    conceptEmoji:"🗄️",
-    conceptSub:"Choosing the right storage type for the workload",
-    question:"What should you tell the junior admin?",
-    options:[
-      "A. Object storage is fine — it's the cheapest option and databases don't care about storage type.",
-      "B. Use block storage (like AWS EBS or Azure Managed Disk) — databases need low-latency, POSIX-like random I/O that block storage provides.",
-      "C. Use file storage (like EFS or Azure Files) since it supports multiple simultaneous connections.",
-      "D. Object storage works as long as you enable versioning."
-    ],
-    correct:1,
-    feedback:{
-      correct:"Block storage is designed exactly for this use case — it's presented to the OS as a raw volume, supports low-latency random-access reads/writes, and is what databases expect underneath their file system. Object storage is optimized for durability and scale, not transactional I/O.",
-      wrong:"The correct choice is block storage. Databases need to perform frequent random reads/writes with low latency, and block storage (EBS, Managed Disks, Persistent Disk) attaches like a raw disk volume the OS can format and use directly — object storage simply cannot deliver that performance profile.",
-      breakdown:[
-        {icon:"✅", text:"Block storage = raw volumes attached to a VM, ideal for databases and OS disks."},
-        {icon:"💡", text:"Object storage = flat namespace of immutable objects accessed via API/HTTP, great for backups, media, and static assets."},
-        {icon:"⚠️", text:"Common mistake: choosing storage based only on cost, ignoring latency and access-pattern requirements."}
-      ]
-    }
-  },
-  {
-    id:2,
-    label:"Scenario 2 — S3 Buckets & Key Concepts",
-    title:"The Bucket That Went Public",
-    body:"A client's marketing team uploaded thousands of product images to an S3 bucket for their website. During a security review, you discover the bucket has public read access enabled at the bucket policy level, and object keys follow a predictable pattern like /assets/2024/product-0001.jpg.",
-    concept:"S3 Buckets & Key Concepts",
-    conceptEmoji:"🪣",
-    conceptSub:"Bucket policies, object keys, and public access risk",
-    question:"What is the most accurate security concern here?",
-    options:[
-      "A. There is no risk — public read access is required for any website to load images.",
-      "B. The predictable key naming pattern alone is a critical vulnerability that must be fixed immediately.",
-      "C. Public read access is appropriate for public marketing assets, but the team should verify no sensitive files (like unpublished contracts) share the bucket, and enable S3 Block Public Access at the account level as a guardrail.",
-      "D. S3 buckets cannot be made public, so this scenario is impossible."
-    ],
-    correct:2,
-    feedback:{
-      correct:"Public marketing images are a legitimate use case for public read access — the real risk is bucket sprawl, where sensitive files end up in the same publicly-readable bucket. Using S3 Block Public Access settings and separate buckets per sensitivity level is the standard mitigation.",
-      wrong:"Public read for marketing images isn't inherently wrong — many legitimate websites serve static assets this way. The real concern is ensuring sensitive data never lands in a public bucket, and enabling account-level Block Public Access settings as a safety net for other buckets.",
-      breakdown:[
-        {icon:"✅", text:"S3 bucket policies and ACLs control access at the bucket or object level."},
-        {icon:"💡", text:"Object keys are just string names (not real folders) — predictable naming is a UX/organization concern, not a critical vuln by itself."},
-        {icon:"⚠️", text:"Common mistake: assuming any public bucket is automatically a breach — context and content matter most."}
-      ]
-    }
-  },
-  {
-    id:3,
-    label:"Scenario 3 — Azure Blob Storage Tiers",
-    title:"The Compliance Archive Nobody Reads",
-    body:"A healthcare client must retain patient record backups for 7 years to meet compliance, per policy. These records are almost never accessed — maybe once every few years during an audit — but must remain retrievable within a reasonable timeframe (not instantly).",
-    concept:"Azure Blob Storage Tiers",
-    conceptEmoji:"🧊",
-    conceptSub:"Hot, Cool, and Archive access tiers",
-    question:"Which Azure Blob Storage tier best fits this requirement?",
-    options:[
-      "A. Hot tier — ensures instant access at all times regardless of cost.",
-      "B. Cool tier — balances moderate storage discounts with frequent access needs.",
-      "C. Archive tier — lowest storage cost, designed for rarely accessed data with retrieval latency measured in hours.",
-      "D. Premium tier — best for high-transaction workloads like databases."
-    ],
-    correct:2,
-    feedback:{
-      correct:"Archive tier is purpose-built for this exact scenario: data accessed rarely (less than once a year), where you can tolerate hours of retrieval latency in exchange for the lowest possible storage cost — ideal for compliance archives.",
-      wrong:"Archive tier is correct. It offers the cheapest per-GB storage cost of Azure's Blob tiers specifically because retrieval isn't instant — it can take hours, which is acceptable for compliance data accessed only during audits.",
-      breakdown:[
-        {icon:"✅", text:"Hot = frequently accessed data, highest storage cost, lowest access cost."},
-        {icon:"💡", text:"Cool = infrequent access (30+ days), lower storage cost but higher access/retrieval cost than Hot."},
-        {icon:"⚠️", text:"Common mistake: forgetting that Archive tier has rehydration delays — don't use it for anything you might need urgently."}
-      ]
-    }
-  },
-  {
-    id:4,
-    label:"Scenario 4 — GCP Cloud Storage Classes",
-    title:"The Quarterly Reports Problem",
-    body:"Your company generates quarterly financial reports that are accessed heavily for about 90 days after release (for audits and reviews), then almost never touched again until the following year. You're evaluating GCP Cloud Storage classes to minimize cost without complicating operations.",
-    concept:"GCP Cloud Storage Classes",
-    conceptEmoji:"📦",
-    conceptSub:"Standard, Nearline, Coldline, and Archive classes",
-    question:"Which approach best matches this access pattern?",
-    options:[
-      "A. Store everything in Standard class permanently since it's the default and simplest option.",
-      "B. Use Standard class initially, then apply a lifecycle rule to transition objects to Nearline or Coldline after ~90 days of low access.",
-      "C. Use Archive class from day one to guarantee the lowest possible cost regardless of early access patterns.",
-      "D. Manually move each file to a cheaper class every quarter using the console."
-    ],
-    correct:1,
-    feedback:{
-      correct:"This is a textbook lifecycle management case: keep data in Standard while access is frequent, then automatically transition to Nearline (30+ day access pattern) or Coldline (90+ day) once usage drops — saving money without manual intervention.",
-      wrong:"The best answer uses lifecycle rules to automatically transition objects from Standard to Nearline/Coldline after the predictable 90-day access drop-off. Archive from day one would penalize you with early-access retrieval fees, and manual moves don't scale.",
-      breakdown:[
-        {icon:"✅", text:"Standard = frequent access; Nearline = ~30 day access pattern; Coldline = ~90 day; Archive = yearly or less."},
-        {icon:"💡", text:"Lifecycle rules automate class transitions and deletions based on object age or conditions."},
-        {icon:"⚠️", text:"Common mistake: picking the cheapest storage class upfront without accounting for early access/retrieval costs that can outweigh savings."}
-      ]
-    }
-  },
-  {
-    id:5,
-    label:"Scenario 5 — Storage Lifecycle Policies & Durability",
-    title:"The Accidental Deletion Incident",
-    body:"An intern accidentally deleted a folder of critical project files from an S3 bucket. The team panics, assuming the data is gone forever. Meanwhile, your manager reminds everyone that S3 offers '11 nines' of durability and asks why that didn't prevent this.",
-    concept:"Storage Lifecycle Policies & Durability",
-    conceptEmoji:"♻️",
-    conceptSub:"Durability guarantees vs. accidental deletion protection",
-    question:"How do you explain this to your manager?",
-    options:[
-      "A. 11 nines of durability means files can never be deleted, so this must be a bug in AWS.",
-      "B. Durability (11 nines) refers to protection against data loss from hardware/infrastructure failure, not protection from human error like accidental deletion — that requires versioning and MFA delete.",
-      "C. Durability only applies to Glacier storage, not standard S3.",
-      "D. The intern's deletion doesn't count against durability because interns aren't authorized users."
-    ],
-    correct:1,
-    feedback:{
-      correct:"Durability describes AWS's engineering guarantee that your object's underlying data won't be corrupted or lost due to disk failure, and 11 nines means a vanishingly small chance of that happening across trillions of objects. It says nothing about protecting you from someone deliberately or accidentally deleting an object via the API — that's a separate concern solved by versioning and MFA delete.",
-      wrong:"Durability (11 nines) is about infrastructure-level data integrity — AWS's promise that your bytes won't silently corrupt or vanish due to hardware failure. It does NOT protect against a user or intern deleting an object on purpose or by accident. That protection comes from enabling S3 Versioning (keeps old versions) and MFA Delete (requires multi-factor auth to permanently delete).",
-      breakdown:[
-        {icon:"✅", text:"11 nines durability = astronomically low chance of losing data due to disk/hardware failure."},
-        {icon:"💡", text:"Versioning + lifecycle policies let you recover previous object versions after accidental deletion."},
-        {icon:"⚠️", text:"Common mistake: confusing 'durability' (data integrity) with 'availability' (uptime) or 'deletion protection' — they are three different things."}
-      ]
-    }
-  },
-  {
-    id:6,
-    label:"Scenario 6 — Replication & CDN Integration",
-    title:"The Slow Website in Singapore",
-    body:"Your company's e-commerce site stores all product images in a single S3 bucket in us-east-1. Customers in Singapore complain about slow page loads, while customers in Vir
+(function(){
+  "use strict";
+
+  const scenarios = [
+    {
+      id:1,
+      label:"Scenario 1 — Object vs Block vs File Storage",
+      title:"The New Hire's Storage Mix-Up",
+      body:"You're onboarding a junior sysadmin who needs to host a company's static website images, run a high-performance SQL database, and share documents across a team's mapped network drive. She wants to use ONE storage type for all three to 'keep it simple.' Your job: explain why that won't work.",
+      concept:"Object vs Block vs File Storage",
+      conceptEmoji:"🗄️",
+      conceptSub:"Choosing the right storage architecture for the workload",
+      question:"Which pairing correctly matches workload to storage type?",
+      options:[
+        "A. Database → Object storage, Images → Block storage, Shared drive → File storage",
+        "B. Database → Block storage, Images → Object storage, Shared drive → File storage",
+        "C. Database → File storage, Images → Block storage, Shared drive → Object storage",
+        "D. All three should use Object storage since it's cheapest"
+      ],
+      correct:1,
+      feedback:{
+        correct:"Databases need low-latency, high-IOPS Block storage (like AWS EBS or Azure Managed Disks) because they perform constant small read/writes. Static images are perfect for Object storage (S3/Blob) since they're accessed as whole files via HTTP, and shared drives need File storage (EFS/Azure Files) for hierarchical folder structures and simultaneous multi-user access.",
+        wrong:"The correct match is: Database → Block storage, Images → Object storage, Shared drive → File storage. Block storage gives databases the raw disk performance they need. Object storage is ideal for static, immutable files accessed by URL. File storage supports the folder/directory structure and concurrent access that network drives require.",
+        breakdown:[
+          {icon:"✅", text:"Block storage = low-latency raw volumes for databases and OS disks."},
+          {icon:"💡", text:"Object storage = flat key-value store, perfect for images, backups, static web content."},
+          {icon:"⚠️", text:"Common mistake: using Object storage for a database — it lacks the random read/write performance databases require."}
+        ]
+      }
+    },
+    {
+      id:2,
+      label:"Scenario 2 — AWS S3 Buckets & Key Concepts",
+      title:"The Public Bucket Incident",
+      body:"A client's AWS S3 bucket named 'acme-customer-invoices' was found publicly accessible by a security researcher, exposing thousands of PDF invoices. Leadership asks you to explain how bucket permissions work and what should have prevented this before it hits the news.",
+      concept:"AWS S3 Buckets & Key Concepts",
+      conceptEmoji:"🪣",
+      conceptSub:"Bucket policies, ACLs, and the Block Public Access setting",
+      question:"What AWS feature, if properly configured, would have prevented this exposure by default?",
+      options:[
+        "A. Enabling S3 Transfer Acceleration",
+        "B. Enabling S3 Versioning",
+        "C. S3 Block Public Access setting at the account or bucket level",
+        "D. Switching the bucket's storage class to Glacier"
+      ],
+      correct:2,
+      feedback:{
+        correct:"S3 Block Public Access is a safeguard that overrides any bucket policy or ACL attempting to grant public access — it should be enabled by default on all buckets unless there's a specific, reviewed business need (like hosting a public static website).",
+        wrong:"The correct answer is S3 Block Public Access. This account/bucket-level setting acts as a guardrail that blocks public bucket policies and ACLs even if someone accidentally misconfigures them. Versioning protects against accidental deletion/overwrite, not public exposure. Transfer Acceleration speeds up uploads. Glacier is a storage class for archival, unrelated to access control.",
+        breakdown:[
+          {icon:"✅", text:"Block Public Access is a security guardrail — enable it by default, disable only with justification."},
+          {icon:"💡", text:"S3 access is controlled by IAM policies, bucket policies, and ACLs — multiple layers can conflict."},
+          {icon:"⚠️", text:"Common mistake: assuming a private bucket stays private forever — a single misapplied policy can expose it."}
+        ]
+      }
+    },
+    {
+      id:3,
+      label:"Scenario 3 — Azure Blob Storage Containers & Tiers",
+      title:"The Cost Report Surprise",
+      body:"Your company's finance team is shocked by a rising Azure bill. Digging in, you find a Blob container full of old customer support screenshots — accessed maybe twice a year — sitting in the Hot access tier since it was created two years ago. Nobody ever revisited the tier setting.",
+      concept:"Azure Blob Storage Containers & Tiers",
+      conceptEmoji:"🔷",
+      conceptSub:"Hot, Cool, and Archive access tiers",
+      question:"What should you recommend to reduce cost for this rarely-accessed data?",
+      options:[
+        "A. Delete the container entirely to save money",
+        "B. Move the blobs to the Archive access tier since they're rarely accessed",
+        "C. Move the blobs to Premium tier for faster future access",
+        "D. Keep them in Hot tier but enable soft delete"
+      ],
+      correct:1,
+      feedback:{
+        correct:"The Archive tier offers the lowest storage cost for data accessed rarely (less than once a year), which fits this use case perfectly. Retrieval takes hours, but that's an acceptable tradeoff for infrequent, non-urgent access — and it dramatically cuts storage costs versus Hot tier.",
+        wrong:"The correct move is Archive tier. Hot tier is optimized for frequently accessed data and costs the most per GB stored. Cool tier fits data accessed monthly. Archive tier is cheapest for data accessed less than once a year, exactly matching this scenario — twice-a-year access. Deleting risks losing needed records, and Premium tier is even more expensive, the opposite of what's needed.",
+        breakdown:[
+          {icon:"✅", text:"Hot = frequent access, highest storage cost, lowest access cost."},
+          {icon:"💡", text:"Cool = infrequent (30+ days) access; Archive = rare (180+ days), lowest storage cost, slow rehydration."},
+          {icon:"⚠️", text:"Common mistake: forgetting Archive retrieval isn't instant — plan ahead if data might be needed urgently."}
+        ]
+      }
+    },
+    {
+      id:4,
+      label:"Scenario 4 — GCP Cloud Storage Classes",
+      title:"Backup Strategy for a Startup",
+      body:"A startup asks you to design their GCP backup strategy. They need: (1) nightly database dumps accessed occasionally during the first month for restores, then almost never after, and (2) a long-term compliance archive they're required to keep for 7 years but will likely never touch.",
+      concept:"GCP Cloud Storage Classes",
+      conceptEmoji:"☁️",
+      conceptSub:"Standard, Nearline, Coldline, and Archive classes",
+      question:"Which GCP storage class combination best fits these two needs?",
+      options:[
+        "A. Standard for both — simplest to manage",
+        "B. Nearline for the nightly dumps, Archive for the 7-year compliance data",
+        "C. Coldline for the nightly dumps, Standard for the compliance data",
+        "D. Archive for both since they're both backups"
+      ],
+      correct:1,
+      feedback:{
+        correct:"Nearline is designed for data accessed less than once a month — a good match for backups that might be restored occasionally in the first 30 days. Archive class is GCP's cheapest tier, built for data accessed less than once a year, perfect for the 7-year compliance requirement that's rarely, if ever, touched.",
+        wrong:"The best fit is Nearline for the nightly dumps and Archive for the compliance data. Standard is for frequently accessed hot data and would waste money on both use cases here. Coldline (accessed roughly once a quarter) doesn't fit the 'occasional first month' pattern as well as Nearline, and using Archive for near-term restorable backups risks slow retrieval when you need them soon.",
+        breakdown:[
+          {icon:"✅", text:"Nearline = access < once/month; Coldline = access < once/quarter; Archive = access < once/year."},
+          {icon:"💡", text:"All GCP classes share the same low-latency, high-durability API — only price and minimum storage duration differ."},
+          {icon:"⚠️", text:"Common mistake: picking Archive for data you might need again soon — early deletion/retrieval fees apply."}
+        ]
+      }
+    },
+    {
+      id:5,
+      label:"Scenario 5 — Lifecycle Policies, Durability & Replication",
+      title:"Automating the Cleanup Nobody Has Time For",
+      body:"Your team manually deletes old log files every quarter — a task everyone forgets until storage costs spike. Meanwhile, a stakeholder asks: 'If a data center burns down, do we lose our S3 data?' You need to answer both the automation question and the durability question in the same meeting.",
+      concept:"Storage Lifecycle Policies, Durability & Replication",
+      conceptEmoji:"♻️",
+      conceptSub:"Automated tiering/expiration and 11 nines durability via replication",
+      question:"What combination of features addresses both concerns?",
+      options:[
+        "A. A cron job to manually delete files, plus hoping the data center has good insurance",
+        "B. A lifecycle policy to auto-transition/expire old logs, plus S3's built-in multi-AZ replication for durability",
+        "C. Increasing the EC2 instance size to handle more log storage locally",
+        "D. Switching to Block storage since it's inherently more durable than Object storage"
+      ],
+      correct:1,
+      feedback:{
+        correct:"A Lifecycle Policy automates transitioning objects to cheaper tiers (or deleting them) after a defined number of days, removing the manual quarterly cleanup entirely. S3's 99.999999999% (11 nines) durability comes from automatically replicating data across multiple Availability Zones within a region — so a single data center failure doesn't mean data loss.",
+        wrong:"The correct combination is a Lifecycle Policy for automation and S3's built-in multi-AZ replication for durability. Manual cron jobs are exactly the error-prone process causing the problem today. Larger EC2 instances don't affect S3 durability. Block storage isn't in
