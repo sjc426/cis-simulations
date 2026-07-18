@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Billing Safety Showdown 💸 Secure the Three Landlords</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; line-height:1.5;
+}
+.skip-link{
+  position:absolute; left:-999px; top:auto;
+  background:var(--blue); color:#fff; padding:10px 16px; z-index:1000;
+  border-radius:6px; font-family:var(--sans); font-weight:600;
+}
+.skip-link:focus{
+  left:12px; top:12px;
+}
+main{max-width:820px; margin:0 auto; padding:16px 14px 60px;}
+
+header.app-header{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:10px; padding:14px 4px; border-bottom:1px solid var(--border); margin-bottom:18px;
+}
+.logo-wrap{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:4px;}
+.dot{width:12px; height:12px; border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+h1{font-size:1.05rem; margin:0; font-family:var(--sans); font-weight:600; letter-spacing:.2px;}
+.subtitle{font-size:.75rem; color:var(--text2); margin-top:2px;}
+.pills{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-family:var(--mono); font-size:.78rem; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{color:var(--text); font-weight:600;}
+.pill.streak-active{border-color:var(--yellow); color:var(--yellow); background:var(--yellow-dim);}
+
+.progress-wrap{
+  height:3px; background:var(--surface2); border-radius:3px; overflow:hidden; margin-bottom:24px;
+}
+.progress-bar{
+  height:100%; background:var(--blue); transition:width .3s ease; width:0%;
+}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px 20px; margin-bottom:18px;
+}
+.round-label{
+  font-family:var(--mono); font-size:.72rem; color:var(--text2); text-transform:uppercase;
+  letter-spacing:.08em; margin-bottom:8px;
+}
+.round-card h2{
+  font-size:1.25rem; margin:0 0 12px; font-family:var(--sans); font-weight:600;
+}
+.round-body{color:var(--text2); font-size:.95rem; margin-bottom:16px;}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--blue-dim);
+  border:1px solid var(--blue); color:var(--blue); padding:8px 14px; border-radius:10px;
+  font-family:var(--mono); font-size:.8rem; margin-bottom:6px;
+}
+.concept-badge .sub{color:var(--text2); font-size:.72rem; display:block; margin-top:2px; font-family:var(--sans);}
+
+.options{display:flex; flex-direction:column; gap:10px; margin-top:18px;}
+.opt-btn{
+  background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  padding:14px 16px; border-radius:10px; text-align:left; font-family:var(--sans);
+  font-size:.92rem; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+  width:100%;
+}
+.opt-btn:hover:not(:disabled){background:#282c44; border-color:var(--blue);}
+.opt-btn:active:not(:disabled){transform:scale(.99);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct-answer{background:var(--green-dim); border-color:var(--green); color:var(--green);}
+.opt-btn.wrong-answer{background:var(--red-dim); border-color:var(--red); color:var(--red);}
+.opt-btn.neutral-disabled{opacity:.5;}
+button:focus-visible, a:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+
+.fb{
+  margin-top:18px; border-radius:12px; padding:18px; border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.correct{border-color:var(--green); background:var(--green-dim);}
+.fb.wrong{border-color:var(--red); background:var(--red-dim);}
+.fb-head{display:flex; align-items:center; gap:10px; font-weight:600; font-size:1.02rem; margin-bottom:8px;}
+.fb-head.correct-text{color:var(--green);}
+.fb-head.wrong-text{color:var(--red);}
+.fb-explain{font-size:.9rem; color:var(--text); margin-bottom:14px;}
+.breakdown{display:flex; flex-direction:column; gap:8px; margin-bottom:6px;}
+.breakdown-row{
+  display:flex; gap:10px; align-items:flex-start; font-size:.85rem; color:var(--text2);
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:10px 12px;
+}
+.breakdown-row .icon{flex-shrink:0;}
+
+.next-btn, .replay-btn{
+  margin-top:16px; background:var(--blue); color:#fff; border:none; border-radius:10px;
+  padding:13px 20px; font-family:var(--sans); font-weight:600; font-size:.95rem;
+  cursor:pointer; width:100%; transition:background .15s;
+}
+.next-btn:hover, .replay-btn:hover{background:#3f78d8;}
+
+.streak-flash{
+  animation:flashPulse .6s ease;
+}
+@keyframes flashPulse{
+  0%{transform:scale(1);}
+  30%{transform:scale(1.08);}
+  60%{transform:scale(1);}
+  100%{transform:scale(1);}
+}
+
+.final-screen{text-align:center; padding:30px 10px;}
+.final-screen h2{font-size:1.4rem; margin-bottom:6px;}
+.big-score{
+  font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--blue);
+  margin:14px 0;
+}
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin:22px 0;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:14px;
+}
+.stat-box .num{font-family:var(--mono); font-size:1.4rem; font-weight:600; color:var(--text);}
+.stat-box .lbl{font-size:.75rem; color:var(--text2); margin-top:4px;}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+}
+@media (max-width:480px){
+  h1{font-size:.95rem;}
+  .round-card{padding:18px 14px;}
+  .pills{gap:6px;}
+  .pill{font-size:.7rem; padding:5px 9px;}
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<main id="main-content">
+  <header class="app-header">
+    <div class="logo-wrap">
+      <div class="dots" aria-hidden="true">
+        <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+      </div>
+      <div>
+        <h1>Billing Safety Showdown</h1>
+        <div class="subtitle">CIS 4345 — Secure the Three Landlords</div>
+      </div>
+    </div>
+    <div class="pills">
+      <div class="pill" id="score-pill">Score: <strong id="score-el" aria-live="polite" aria-atomic="true">0</strong></div>
+      <div class="pill" id="round-pill">Round: <strong id="round-el">1/5</strong></div>
+      <div class="pill" id="streak-pill">Streak: <strong id="streak-el" aria-live="polite" aria-atomic="true">0</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+  </div>
+
+  <div id="game-area"></div>
+
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Billing Alerts and Budget Thresholds",
+    title:"The $4,000 Surprise",
+    body:"You spun up a GPU instance on AWS last month to test a machine learning model, then forgot to shut it down before leaving for a two-week vacation. You return to find a bill nearly ten times your usual monthly spend. Your manager asks: what should have been in place to catch this before it became a crisis?",
+    concept:"Billing Alerts & Budget Thresholds",
+    conceptEmoji:"💸",
+    conceptSub:"Proactive cost monitoring across all three landlords",
+    question:"What is the BEST safeguard that would have caught this early?",
+    options:[
+      "A. Check the billing dashboard manually once a month",
+      "B. Set a budget alert/threshold (e.g., AWS Budgets, Azure Cost Alerts, GCP Budget Alerts) that emails you at 50%, 80%, and 100% of expected spend",
+      "C. Ask a coworker to keep an eye on your account while you're away",
+      "D. Delete the AWS account and create a new one each month to reset spending"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Budget alerts are automated, proactive, and don't rely on human memory or manual checking. All three landlords offer this as a free, built-in service.",
+      wrong:"The best answer is setting an automated budget alert. Manual dashboard checks fail exactly when you're distracted or away — which is precisely when runaway costs happen.",
+      breakdown:[
+        {icon:"✅", text:"AWS Budgets, Azure Cost Management alerts, and GCP Budget Alerts all support threshold-based email/SMS notifications and can even trigger automated actions."},
+        {icon:"💡", text:"Set alerts at multiple thresholds (50%, 80%, 100%, 120%) so you get early warning, not just a final bill shock."},
+        {icon:"⚠️", text:"Common mistake: assuming 'I'll remember to check' is a substitute for automation. It never is — that's exactly how this scenario happened."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Principle of Least Privilege",
+    title:"The Intern's IAM Request",
+    body:"A new intern joins your cloud team and needs to upload files to a single Azure Blob Storage container for a reporting project. Your team lead asks you to set up their access. The fastest option in the portal is to assign them the built-in 'Contributor' role at the subscription level.",
+    concept:"Principle of Least Privilege",
+    conceptEmoji:"🔑",
+    conceptSub:"Grant only the access needed for the task at hand",
+    question:"What access should you actually grant the intern?",
+    options:[
+      "A. Subscription-level Contributor, since it's fastest and they'll probably need more access eventually",
+      "B. Owner role on the resource group, so they can manage everything without asking you again",
+      "C. A scoped role (like Storage Blob Data Contributor) applied only to that specific container",
+      "D. Global Administrator, so IT never has to touch their permissions again"
+    ],
+    correct:2,
+    feedback:{
+      correct:"This follows least privilege exactly: the minimum access needed to do the job, scoped to the specific resource, nothing more. If the intern's account is ever compromised, the blast radius is limited to one container.",
+      wrong:"The correct approach is a scoped role limited to that one container. Broad roles like Contributor or Owner grant far more access than the task requires and create unnecessary risk.",
+      breakdown:[
+        {icon:"✅", text:"Least privilege means matching permissions to the specific task — not the person's potential future needs or your convenience."},
+        {icon:"💡", text:"Scoping to the resource level (one container) instead of subscription or resource-group level limits what a compromised or careless account can affect."},
+        {icon:"⚠️", text:"Common mistake: granting broad access 'just in case they need it later.' Permissions can always be expanded later — but over-permissioning by default is a standing risk every single day it exists."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Over-Permissioned Defaults vs Task-Scoped Roles",
+    title:"The Convenient Root Key",
+    body:"You're helping a small business set up their first AWS account. To save time getting their web app deployed, you consider generating access keys directly for the AWS account's root user and using those keys in the application's deployment scripts.",
+    concept:"Over-Permissioned Defaults vs Task-Scoped Roles",
+    conceptEmoji:"⚖️",
+    conceptSub:"Default 'god-mode' access vs. purpose-built roles",
+    question:"What should you do instead?",
+    options:[
+      "A. Use the root access keys — it's the fastest way to guarantee the deployment won't fail from a permissions error",
+      "B. Create an IAM user or role with only the specific permissions the deployment script needs (e.g., S3 and EC2 access), and never generate root access keys at all",
+      "C. Use root keys temporarily, then rotate them to a regular IAM user after the app is stable",
+      "D. Share the root account password with the deployment team so everyone can fix issues as they arise"
+    ],
+    correct:1,
+    feedback:{
+      correct:"The root user has unrestricted access to everything in the account, including billing and account closure — it should never be used for daily operations or embedded in scripts. A task-scoped IAM role with only the needed permissions is the correct, industry-standard approach.",
+      wrong:"Root access keys should never be created or used for routine tasks. The right move is a task-scoped IAM role or user with only the specific permissions the deployment needs.",
+      breakdown:[
+        {icon:"✅", text:"AWS itself recommends locking away root credentials and using IAM roles/users for all daily tasks — root is for account-level emergencies only."},
+        {icon:"💡", text:"Over-permissioned defaults (root, Owner, Global Admin) are 'god-mode' access — convenient, but catastrophic if leaked, since there's no ceiling on what an attacker could do."},
+        {icon:"⚠️", text:"Common mistake: 'temporarily' using powerful credentials to save setup time. Temporary shortcuts around access control tend to become permanent — and permanent risk."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Multi-Factor Authentication as a Second Layer",
+    title:"The Phished Password",
+    body:"A phishing email successfully tricks a coworker into typing their Google Cloud Platform console password into a fake login page. The attacker now has a valid username and password combination for a real GCP account with project-level access.",
+    concept:"Multi-Factor Authentication as a Second Layer",
+    conceptEmoji:"🛡️",
+    conceptSub:"A second, independent factor stops stolen passwords from being enough",
+    question:"What single security control would most likely have prevented the attacker from actually logging in, even with the correct password?",
+    options:[
+      "A. A longer, more complex password policy",
+      "B. Multi-factor authentication (MFA) requiring a second factor like an authenticator app code or hardware key",
+      "C. Changing the password every 30 days",
+      "D. Restricting the account to a specific IP address range only"
+    ],
+    correct:1,
+    feedback:{
+      correct:"MFA adds a second, independent factor (something you have, like a phone or hardware key) beyond the password (something you know). Even with a stolen password, the attacker is blocked without that second factor.",
+      wrong:"MFA is the control that specifically defeats this exact attack. A complex or frequently-changed password can still be phished in full — it doesn't matter how strong it is if the user just typed it into a fake page.",
+      breakdown:[
+        {icon:"✅", text:"MFA works because it requires something the attacker doesn't have access to, even after successfully stealing a password — like a time-based code or push notification to a registered device."},
+        {icon:"💡", text:"All three landlords (AWS MFA, Azure MFA/Conditional Access, GCP 2-Step Verification) support MFA at no extra cost for standard use."},
+        {icon:"⚠️", text:"Common mistake: believing a strong password alone is 'good enough' security. Password strength does nothing against phishing — the user handed over the exact correct password."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Three Landlords Applied to Account Safety",
+    title:"The Multi-Cloud Security Review",
+    body:"Your company uses AWS for production workloads, Azure for internal business apps, and GCP for a data analytics pilot. Leadership asks you to write a short account-safety policy that applies consistently across all three 'landlords' rather than treating each cloud provider as a completely separate problem.",
+    concept:"Three Landlords Applied to Account Safety",
+    conceptEmoji:"🏢",
+    conceptSub:"Consistent safety principles apply no matter which provider you rent from",
+    question:"Which policy statement best reflects sound account safety principles across ALL THREE providers?",
+    options:[
+      "A. Each provider has completely different security models, so no consistent policy is possible — handle each cloud independently with no shared standards",
+      "B. Since AWS is the most popular provider, focus all security effort there and treat Azure and GCP as lower priority",
+      "C. Every account, regardless of provider, must enforce MFA, use budget alerts, and grant only task-scoped least-privilege roles — never root/global-admin credentials for routine work",
+      "D. Only enforce these safety controls on accounts that hold production data; internal or pilot projects can use looser settings"
+    ],
+    correct:2,
+    feedback:{
+      correct:"The 'three landlords' framing means AWS, Azure, and GCP are different buildings you rent space in, but the tenant safety rules — lock your door (MFA), watch your spending (budget alerts), don't hand out master keys (least privilege) — apply the same way in every building.",
+      wrong:"The correct policy applies the same core safety principles — MFA, budget alerts, least privilege — consistently across all three providers, regardless of which one is 'production' or 'most popular.'",
+      breakdown:[
+        {icon:"✅", text:"AWS, Azure, and GCP each implement these features with different names and interfaces, but the underlying safety principles (MFA, budgets, least privilege) are provider-agnostic and should be policy-mandated everywhere."},
+        {icon:"💡", text:"Treating 'pilot' or 'internal' projects as lower priority is a common way breaches start — attackers often pivot from a loosely-secured pilot project into more critical systems."},
+        {icon:"⚠️", text:"Common mistake: assuming security only matters for your 'main' cloud provider. A misconfigured secondary account is still a real entry point for an attacker."}
+      ]
+    }
+  }
+];
+
+let currentIndex = 0;
+let score = 0;
+let streak = 0;
+let answered = false;
+
+const gameArea = document.getElementById('game-area');
+const scoreEl = document.getElementById('score-el');
+const roundEl = document.getElementById('round-el');
+const streakEl = document.getElementById('streak-el');
+const streakPill = document.getElementById('streak-pill');
+const progressBar = document.getElementById('progress-bar');
+
+function updateHeader(){
+  scoreEl.textContent = score;
+  roundEl.textContent = Math.min(currentIndex+1, scenarios.length) + "/" + scenarios.length;
+  streakEl.textContent = streak;
+  if(streak >= 3){
+    streakPill.classList.add('streak-active');
+  } else {
+    streakPill.classList.remove('streak-active');
+  }
+  const pct = Math.round((currentIndex/scenarios.length)*100);
+  progressBar.style.width = pct + "%";
+  progressBar.setAttribute('aria-valuenow', pct);
+}
+
+function renderScenario(){
+  answered = false;
+  const s = scenarios[currentIndex];
+  updateHeader();
+
+  const optionsHtml = s.options.map((opt, idx) => `
+    <button class="opt-btn" data-idx="${idx}" aria-pressed="false" id="opt-${idx}">${opt}</button>
+  `).join('');
+
+  gameArea.innerHTML = `
+    <section class="round-card" aria-labelledby="scenario-title-${s.id}">
+      <div class="round-label">${s.label}</div>
+      <h2 id="scenario-title-${s.id}">${s.title}</h2>
+      <p class="round-body">${s.body}</p>
+      <div class="concept-badge">
+        <span role="img" aria-label="${s.concept} icon">${s.conce
