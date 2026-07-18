@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Azure Deep Dive 🏛️ Azure Empire Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; line-height:1.5;
+}
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--blue); color:#fff;
+  padding:10px 16px; z-index:1000; border-radius:0 0 6px 0; font-weight:600;
+}
+.skip-link:focus{ left:0; }
+
+button:focus-visible, a:focus-visible{
+  outline:3px solid var(--blue); outline-offset:2px;
+}
+
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+  flex-wrap:wrap; gap:10px;
+}
+.logo-wrap{display:flex; align-items:center; gap:10px;}
+.dots{display:flex; gap:4px;}
+.dot{width:10px; height:10px; border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+.logo-title{font-family:var(--mono); font-weight:600; font-size:15px; color:var(--text);}
+.logo-title small{display:block; font-size:11px; color:var(--text2); font-weight:400;}
+
+.pills{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 14px; font-family:var(--mono); font-size:13px; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{color:var(--text); font-weight:600;}
+
+.progress-outer{
+  height:3px; background:var(--surface2); width:100%;
+}
+.progress-inner{
+  height:100%; background:linear-gradient(90deg,var(--azure),var(--blue));
+  transition:width .3s ease;
+}
+
+main{
+  max-width:760px; margin:0 auto; padding:24px 16px 60px;
+}
+
+h1{font-size:1.4rem; margin:0;}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  padding:22px; margin-top:20px;
+}
+.round-label{
+  font-family:var(--mono); font-size:12px; color:var(--azure); text-transform:uppercase;
+  letter-spacing:.06em; margin-bottom:8px;
+}
+.round-card h2{
+  font-size:1.3rem; margin:0 0 12px 0; color:var(--text);
+}
+.round-body{
+  color:var(--text2); font-size:15px; margin-bottom:16px;
+}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--azure-dim); border:1px solid var(--azure-border);
+  color:var(--text); padding:8px 14px; border-radius:8px; font-size:13px;
+  margin-bottom:18px;
+}
+.concept-badge .sub{color:var(--text2); font-size:12px; display:block;}
+
+.question{
+  font-weight:600; margin-bottom:14px; font-size:15px;
+}
+
+.options{
+  display:grid; gap:10px;
+}
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); padding:14px 16px; border-radius:8px; font-family:var(--sans);
+  font-size:14.5px; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+  width:100%;
+}
+.opt-btn:hover:not(:disabled){
+  background:var(--blue-dim); border-color:var(--blue);
+}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.selected-correct{
+  background:var(--green-dim); border-color:var(--green); color:var(--text);
+}
+.opt-btn.selected-wrong{
+  background:var(--red-dim); border-color:var(--red);
+}
+.opt-btn.reveal-correct{
+  background:var(--green-dim); border-color:var(--green);
+}
+
+.fb{
+  margin-top:18px; padding:18px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.correct{border-color:var(--green); background:var(--green-dim);}
+.fb.wrong{border-color:var(--red); background:var(--red-dim);}
+.fb-head{
+  display:flex; align-items:center; gap:10px; font-weight:600; font-size:16px; margin-bottom:8px;
+}
+.fb-text{color:var(--text); font-size:14.5px; margin-bottom:14px;}
+.breakdown{list-style:none; margin:0; padding:0; display:grid; gap:8px;}
+.breakdown li{
+  display:flex; gap:10px; font-size:13.5px; color:var(--text2); align-items:flex-start;
+}
+.breakdown li span.icon{flex-shrink:0;}
+
+.next-btn, .replay-btn{
+  margin-top:18px; background:var(--blue); color:#fff; border:none; padding:12px 22px;
+  border-radius:8px; font-family:var(--sans); font-weight:600; font-size:14.5px; cursor:pointer;
+}
+.next-btn:hover, .replay-btn:hover{background:#3d7ae0;}
+
+.streak-flash{
+  animation: flash 0.6s ease;
+}
+@keyframes flash{
+  0%{transform:scale(1);}
+  30%{transform:scale(1.15); color:var(--yellow);}
+  100%{transform:scale(1);}
+}
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:0.01ms !important;
+    transition-duration:0.01ms !important;
+  }
+}
+
+.final-screen{
+  text-align:center; padding:30px 10px;
+}
+.final-score{
+  font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--azure);
+  margin:10px 0;
+}
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px; margin:24px 0;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px;
+  padding:16px;
+}
+.stat-box .num{font-family:var(--mono); font-size:1.6rem; font-weight:600; color:var(--text);}
+.stat-box .lbl{font-size:12px; color:var(--text2); margin-top:4px;}
+
+.hidden{display:none !important;}
+
+footer.note{
+  text-align:center; color:var(--text3); font-size:12px; padding:20px; font-family:var(--mono);
+}
+
+@media (max-width:480px){
+  .logo-title{font-size:13px;}
+  .final-score{font-size:2.4rem;}
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<header>
+  <div class="logo-wrap">
+    <div class="dots" aria-hidden="true">
+      <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+    </div>
+    <div class="logo-title">CIS 4345 — Cloud Computing
+      <small>Azure Deep Dive: Empire Builder</small>
+    </div>
+  </div>
+  <div class="pills">
+    <div class="pill">Round <strong id="round-el">1/7</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-pill">Score <strong id="score-el">0</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-pill">Streak <strong id="streak-el">0</strong></div>
+  </div>
+</header>
+
+<div class="progress-outer">
+  <div class="progress-inner" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
+</div>
+
+<main id="main-content">
+  <h1 class="hidden">Azure Empire Builder — CIS 4345 Week 9 Simulation</h1>
+
+  <section id="game-area"></section>
+
+  <section id="final-area" class="hidden"></section>
+</main>
+
+<footer class="note">CIS 4345 — Introduction to Cloud Computing | Temple University | Prof. Sonny Chang</footer>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Resource Groups & ARM Templates",
+    title:"The Messy Subscription Cleanup",
+    body:"You just joined a company as a cloud engineer. Their Azure subscription has VMs, storage accounts, and virtual networks scattered with no organization. Your manager wants the dev environment to be redeployed consistently every time a new developer joins, and wants the ability to delete an entire project's resources in one click when it's decommissioned.",
+    concept:"Resource Groups & ARM Templates",
+    conceptEmoji:"📦",
+    conceptSub:"Organize & automate Azure deployments",
+    question:"What should you implement?",
+    options:[
+      "A. Create a naming convention only, and keep all resources in one giant resource group",
+      "B. Create a resource group per project/environment, and define an ARM (or Bicep) template to deploy consistently",
+      "C. Manually recreate resources through the Portal each time, documenting the steps in a wiki",
+      "D. Use Azure CLI scripts with hardcoded resource names, skipping resource groups entirely"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Resource groups act as the lifecycle boundary — delete the group, delete everything inside it. ARM/Bicep templates give you Infrastructure-as-Code repeatability, exactly what's needed for consistent multi-environment deployments.",
+      wrong:"The right move is B: a resource group per project/environment paired with an ARM/Bicep template. This gives you one-click cleanup and repeatable, error-free deployments.",
+      breakdown:[
+        {icon:"✅", text:"Resource groups are the deletion/lifecycle boundary in Azure — delete the group to remove everything inside it."},
+        {icon:"💡", text:"ARM/Bicep templates are declarative Infrastructure-as-Code — redeploy the same environment reliably, every time."},
+        {icon:"⚠️", text:"Common mistake: dumping everything into one giant resource group makes selective cleanup risky and messy."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Entra ID & RBAC",
+    title:"The Intern Access Request",
+    body:"A new intern needs
