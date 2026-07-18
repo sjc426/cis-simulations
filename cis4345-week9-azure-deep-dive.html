@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIS 4345 — Azure Deep Dive ☁️ Master the Landlord's Toolkit</title>
+<title>CIS 4345 — Azure Deep Dive ☁️ Master the Second Landlord</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
@@ -21,135 +21,144 @@
     --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
   }
   *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
   body{
-    margin:0; background:var(--bg); color:var(--text);
-    font-family:var(--sans); min-width:380px;
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-width:380px; line-height:1.5;
   }
   .skip-link{
-    position:absolute; left:-999px; top:0; background:var(--blue); color:#fff;
-    padding:10px 16px; z-index:1000; border-radius:0 0 8px 0; font-family:var(--sans);
+    position:absolute; left:-9999px; top:0; background:var(--blue); color:#0f1117;
+    padding:10px 16px; z-index:1000; font-weight:600; border-radius:0 0 8px 0;
   }
   .skip-link:focus{ left:0; }
-
-  header{
-    background:var(--surface); border-bottom:1px solid var(--border);
-    padding:14px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-    position:sticky; top:0; z-index:50;
-  }
-  .logo{ display:flex; align-items:center; gap:8px; font-family:var(--mono); font-weight:600; }
-  .dots{ display:flex; gap:4px; }
-  .dot{ width:10px; height:10px; border-radius:50%; }
-  .dot.aws{ background:var(--aws); }
-  .dot.azure{ background:var(--azure); }
-  .dot.gcp{ background:var(--gcp); }
-  .title-block{ display:flex; flex-direction:column; }
-  .title-block h1{ font-size:1.05rem; margin:0; font-weight:600; }
-  .title-block .subtitle{ font-size:0.75rem; color:var(--text2); font-family:var(--mono); }
-  .pills{ display:flex; gap:8px; margin-left:auto; flex-wrap:wrap; }
-  .pill{
-    background:var(--surface2); border:1px solid var(--border); border-radius:999px;
-    padding:6px 14px; font-family:var(--mono); font-size:0.8rem; display:flex; gap:6px; align-items:center;
-  }
-  .pill .label{ color:var(--text2); }
-  .pill .val{ color:var(--text); font-weight:600; }
-  .pill.streak-hot{ border-color:var(--yellow); }
-
-  .progress-wrap{ background:var(--surface); }
-  .progress-bar-bg{ height:3px; background:var(--border); width:100%; }
-  .progress-bar-fill{ height:3px; background:var(--blue); transition:width 0.3s ease; }
-
-  main{ max-width:760px; margin:0 auto; padding:24px 16px 60px; }
-
-  .round-card{
-    background:var(--surface); border:1px solid var(--border); border-radius:12px;
-    padding:24px; margin-bottom:20px;
-  }
-  .round-label{ font-family:var(--mono); color:var(--text2); font-size:0.8rem; margin-bottom:6px; }
-  .round-card h2{ font-size:1.3rem; margin:0 0 14px; line-height:1.35; }
-  .round-body{ color:var(--text); line-height:1.6; margin-bottom:16px; font-size:0.98rem; }
-  .concept-badge{
-    display:inline-flex; align-items:center; gap:8px; background:var(--azure-dim);
-    border:1px solid var(--azure-border); color:var(--text); border-radius:8px;
-    padding:8px 12px; font-family:var(--mono); font-size:0.82rem; margin-bottom:18px;
-  }
-  .concept-badge .sub{ color:var(--text2); }
-
-  .question{ font-weight:600; margin:14px 0; font-size:1rem; }
-
-  .options{ display:flex; flex-direction:column; gap:10px; }
-  .opt-btn{
-    display:flex; gap:10px; align-items:flex-start; text-align:left;
-    background:var(--surface2); border:1px solid var(--border); color:var(--text);
-    border-radius:10px; padding:14px 16px; font-family:var(--sans); font-size:0.95rem;
-    cursor:pointer; transition:background 0.15s, border-color 0.15s, transform 0.1s;
-    width:100%;
-  }
-  .opt-btn:hover:not(:disabled){ background:var(--blue-dim); border-color:var(--blue); }
-  .opt-btn:active:not(:disabled){ transform:scale(0.995); }
-  .opt-btn:disabled{ cursor:default; }
-  .opt-letter{
-    font-family:var(--mono); font-weight:600; color:var(--blue); min-width:22px;
-  }
-  .opt-btn.correct-answer{ background:var(--green-dim); border-color:var(--green); }
-  .opt-btn.wrong-answer{ background:var(--red-dim); border-color:var(--red); }
-  .opt-btn.correct-answer .opt-letter{ color:var(--green); }
-  .opt-btn.wrong-answer .opt-letter{ color:var(--red); }
 
   button:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
   a:focus-visible{ outline:3px solid var(--blue); outline-offset:2px; }
 
-  .fb{
-    margin-top:20px; border-radius:12px; padding:18px 20px;
-    border:1px solid var(--border); background:var(--surface2);
+  header{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    gap:12px; padding:16px 20px; background:var(--surface); border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:10;
   }
-  .fb.correct{ border-color:var(--green); background:var(--green-dim); }
-  .fb.wrong{ border-color:var(--red); background:var(--red-dim); }
-  .fb-head{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:1.05rem; margin-bottom:8px; }
-  .fb-text{ line-height:1.55; margin-bottom:14px; }
-  .fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
-  .fb-row{ display:flex; gap:10px; align-items:flex-start; font-size:0.92rem; line-height:1.5; }
-  .fb-row .icon{ flex-shrink:0; }
+  .logo-wrap{display:flex; align-items:center; gap:12px;}
+  .dots{display:flex; gap:5px;}
+  .dot{width:12px;height:12px;border-radius:50%;}
+  .dot.aws{background:var(--aws);}
+  .dot.azure{background:var(--azure);}
+  .dot.gcp{background:var(--gcp);}
+  header h1{font-size:1.05rem; margin:0; font-family:var(--mono); font-weight:600; color:var(--text);}
+  header h1 small{display:block; font-size:0.7rem; color:var(--text2); font-weight:400; margin-top:2px;}
 
-  .btn-row{ display:flex; justify-content:flex-end; margin-top:20px; }
-  .next-btn, .replay-btn{
-    background:var(--blue); color:#fff; border:none; border-radius:8px;
-    padding:12px 24px; font-family:var(--sans); font-weight:600; font-size:0.95rem;
-    cursor:pointer;
+  .pills{display:flex; gap:8px; flex-wrap:wrap;}
+  .pill{
+    background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+    padding:6px 14px; font-family:var(--mono); font-size:0.8rem; color:var(--text2);
+    display:flex; align-items:center; gap:6px;
   }
-  .next-btn:hover, .replay-btn:hover{ background:#3d7de0; }
+  .pill strong{color:var(--text);}
+  .pill.streak-flash{ animation: flashPop 0.6s ease; }
+  @keyframes flashPop{
+    0%{background:var(--yellow-dim); border-color:var(--yellow); transform:scale(1);}
+    50%{background:var(--yellow-dim); border-color:var(--yellow); transform:scale(1.08);}
+    100%{background:var(--surface2); border-color:var(--border); transform:scale(1);}
+  }
+
+  .progress-track{
+    height:3px; background:var(--surface2); width:100%;
+  }
+  .progress-fill{
+    height:3px; background:var(--blue); width:0%; transition:width 0.4s ease;
+  }
+
+  main{max-width:720px; margin:0 auto; padding:24px 16px 60px;}
+
+  .round-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:24px; margin-bottom:20px;
+  }
+  .round-label{
+    font-family:var(--mono); font-size:0.75rem; color:var(--azure); text-transform:uppercase;
+    letter-spacing:0.06em; margin-bottom:8px;
+  }
+  .round-card h2{font-size:1.3rem; margin:0 0 12px; color:var(--text);}
+  .round-body{color:var(--text2); margin-bottom:16px; font-size:0.98rem;}
+
+  .concept-badge{
+    display:inline-flex; align-items:center; gap:8px; background:var(--azure-dim);
+    border:1px solid var(--azure-border); border-radius:10px; padding:8px 14px;
+    margin-bottom:18px; font-size:0.85rem;
+  }
+  .concept-badge .cb-main{font-weight:600; color:var(--text);}
+  .concept-badge .cb-sub{color:var(--text2); font-size:0.78rem; display:block;}
+
+  .question-text{font-weight:600; margin:0 0 14px; font-size:1.02rem;}
+
+  .options{display:flex; flex-direction:column; gap:10px; margin-bottom:6px;}
+  .opt-btn{
+    text-align:left; background:var(--surface2); border:1px solid var(--border);
+    color:var(--text); padding:14px 16px; border-radius:10px; font-family:var(--sans);
+    font-size:0.95rem; cursor:pointer; transition:background 0.15s, border-color 0.15s;
+    width:100%;
+  }
+  .opt-btn:hover:not(:disabled){ background:var(--blue-dim); border-color:var(--blue); }
+  .opt-btn:disabled{ cursor:default; }
+  .opt-btn.correct-answer{ background:var(--green-dim); border-color:var(--green); }
+  .opt-btn.wrong-answer{ background:var(--red-dim); border-color:var(--red); }
+  .opt-btn .icon-tag{ font-weight:700; margin-right:6px; }
+
+  .fb{
+    margin-top:18px; padding:18px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface2);
+  }
+  .fb.success{ border-color:var(--green); background:var(--green-dim); }
+  .fb.error{ border-color:var(--red); background:var(--red-dim); }
+  .fb-title{ font-weight:600; font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:8px;}
+  .fb-text{ color:var(--text); margin-bottom:14px; font-size:0.95rem;}
+  .fb-breakdown{ display:flex; flex-direction:column; gap:8px; }
+  .fb-row{ display:flex; gap:8px; align-items:flex-start; font-size:0.9rem; color:var(--text2);}
+  .fb-row .fb-icon{ flex-shrink:0; }
+
+  .next-btn{
+    margin-top:20px; background:var(--blue); color:#0a0d16; border:none; border-radius:10px;
+    padding:14px 24px; font-family:var(--mono); font-weight:600; font-size:0.95rem;
+    cursor:pointer; width:100%;
+  }
+  .next-btn:hover{ background:#6ba3ff; }
 
   .final-screen{ text-align:center; padding:20px 0; }
-  .final-screen h2{ font-size:1.6rem; margin-bottom:4px; }
   .final-score{
-    font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--blue); margin:14px 0;
+    font-family:var(--mono); font-size:3.2rem; font-weight:600; color:var(--azure); margin:10px 0;
   }
+  .final-label{ color:var(--text2); font-size:0.9rem; text-transform:uppercase; letter-spacing:0.06em;}
   .stat-grid{
-    display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:12px; margin:24px 0;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:26px 0;
   }
   .stat-box{
-    background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px;
+    background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px 8px;
   }
   .stat-box .num{ font-family:var(--mono); font-size:1.5rem; font-weight:600; color:var(--text); }
-  .stat-box .label{ color:var(--text2); font-size:0.8rem; margin-top:4px; }
+  .stat-box .lbl{ font-size:0.75rem; color:var(--text2); margin-top:4px;}
+  .replay-btn{
+    background:var(--azure); color:#fff; border:none; border-radius:10px; padding:14px 28px;
+    font-family:var(--mono); font-weight:600; font-size:1rem; cursor:pointer;
+  }
+  .replay-btn:hover{ background:#2b93e0; }
 
-  .streak-flash{
-    animation:flash 0.6s ease;
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
   }
-  @keyframes flash{
-    0%{ box-shadow:0 0 0 0 rgba(251,191,36,0.6); }
-    50%{ box-shadow:0 0 0 8px rgba(251,191,36,0.15); }
-    100%{ box-shadow:0 0 0 0 rgba(251,191,36,0); }
-  }
+
   @media (prefers-reduced-motion: reduce){
-    *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+    *, *::before, *::after{
+      animation-duration:0.01ms !important; transition-duration:0.01ms !important;
+    }
   }
 
   @media (max-width:480px){
-    .pills{ gap:6px; }
-    .pill{ padding:5px 10px; font-size:0.72rem; }
-    .round-card{ padding:18px; }
-    header{ padding:12px 14px; }
+    header h1{font-size:0.9rem;}
+    .final-score{font-size:2.4rem;}
+    .stat-grid{grid-template-columns:repeat(3,1fr); gap:8px;}
   }
 </style>
 </head>
@@ -157,27 +166,21 @@
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <header>
-  <div class="logo">
+  <div class="logo-wrap">
     <div class="dots" aria-hidden="true">
       <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
     </div>
-    <div class="title-block">
-      <h1>CIS 4345 — Azure Deep Dive</h1>
-      <span class="subtitle">☁️ Master the Landlord's Toolkit</span>
-    </div>
+    <h1>CIS 4345 — Azure Deep Dive<small>VMs · Blob Storage · Entra ID</small></h1>
   </div>
   <div class="pills">
-    <div class="pill"><span class="label">Score</span> <div id="score-el" class="val" aria-live="polite" aria-atomic="true">0</div></div>
-    <div class="pill"><span class="label">Round</span> <span class="val" id="round-el">1/7</span></div>
-    <div class="pill" id="streak-pill"><span class="label">Streak</span> <div id="streak-el" class="val" aria-live="polite" aria-atomic="true">0</div></div>
+    <div class="pill">Round <strong id="round-el">1/7</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="score-pill">Score <strong id="score-el">0</strong></div>
+    <div class="pill" aria-live="polite" aria-atomic="true" id="streak-pill">Streak <strong id="streak-el">0</strong></div>
   </div>
 </header>
 
-<div class="progress-wrap">
-  <div class="progress-bar-bg">
-    <div class="progress-bar-fill" id="progress-fill" style="width:0%"
-      role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
-  </div>
+<div class="progress-track">
+  <div class="progress-fill" id="progress-fill" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress"></div>
 </div>
 
 <main id="main-content">
@@ -189,5 +192,118 @@ const scenarios = [
   {
     id:1,
     label:"Scenario 1 — Azure Resource Groups & Subscriptions",
-    title:"Organizing the Sprawl",
-    body:"You
+    title:"Organizing a Client's First Azure Project",
+    body:"You've just been hired to set up Azure for a mid-size accounting firm. They want their web app, database, and storage account managed together for billing and lifecycle purposes, but they also have a separate dev team running experimental workloads under a different budget.",
+    concept:"Resource Groups & Subscriptions",
+    conceptEmoji:"🗂️",
+    conceptSub:"Organizational hierarchy in Azure",
+    question:"How should you structure this to keep billing clean and lifecycle management simple?",
+    options:[
+      "A. Put everything — production and dev — into one Resource Group under one subscription to simplify management",
+      "B. Create one subscription with two Resource Groups: one for production workloads, one for dev experiments",
+      "C. Create a separate Azure tenant for the dev team so they can't see production resources at all",
+      "D. Use Azure Blueprints instead of Resource Groups since RGs are being deprecated"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A Resource Group is a logical container for resources that share a lifecycle — you deploy, manage, and delete them together. Separating production and dev into their own Resource Groups (under the same subscription, since billing consolidation isn't a concern here) keeps management clean without the overhead of a new tenant.",
+      wrong:"The right move is Option B — separate Resource Groups for production and dev under one subscription. Mixing unrelated workloads in a single Resource Group makes it hard to manage lifecycle and permissions independently, and spinning up a new tenant is overkill for an internal team split.",
+      breakdown:[
+        {icon:"✅", text:"Resource Groups are the primary organizational and lifecycle boundary in Azure — resources in the same RG are usually deployed/deleted together."},
+        {icon:"💡", text:"Subscriptions are the billing and access boundary; you can have many Resource Groups per subscription."},
+        {icon:"⚠️", text:"Resource Groups are not deprecated — Azure Blueprints solve a different problem (governance templates), not organizational structure."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Azure Resource Manager (ARM) Templates",
+    title:"Rebuilding a Dev Environment After a Crash",
+    body:"Your team's dev environment in Azure got accidentally deleted during a cleanup script gone wrong. Leadership wants it rebuilt exactly as it was — same VM sizes, same network config, same storage settings — with zero guesswork, and they want it repeatable for the next three environments too.",
+    concept:"ARM Templates",
+    conceptEmoji:"📄",
+    conceptSub:"Infrastructure as Code in Azure",
+    question:"What's the best approach to guarantee an identical, repeatable rebuild?",
+    options:[
+      "A. Manually recreate each resource in the Azure Portal, carefully matching the screenshots from before",
+      "B. Ask a teammate who remembers the config to walk you through it over a call",
+      "C. Define the environment in an ARM (or Bicep) template and deploy it via CLI or Portal for consistent, repeatable infrastructure",
+      "D. Restore from an Azure Backup vault, since ARM templates can't recreate deleted resources"
+    ],
+    correct:2,
+    feedback:{
+      correct:"ARM templates (or their more readable cousin, Bicep) declare your entire environment as code — VM sizes, networking, storage, all of it — in a JSON/Bicep file. Deploying that same template three more times gives you three identical environments with zero manual guesswork or drift.",
+      wrong:"The correct answer is Option C. ARM templates turn your infrastructure into code, so rebuilding — or replicating — an environment is just a redeploy, not a manual re-creation. Manual rebuilds (A) and tribal knowledge (B) both introduce human error and aren't repeatable at scale.",
+      breakdown:[
+        {icon:"✅", text:"ARM templates are declarative JSON files (or Bicep, a simpler DSL that compiles to ARM) describing exactly what infrastructure should exist."},
+        {icon:"💡", text:"Templates are idempotent and repeatable — deploy the same template to create identical environments for dev, test, staging, etc."},
+        {icon:"⚠️", text:"Manual Portal recreation is slow and error-prone; it's fine for learning, but not for production-grade repeatability."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Azure Entra ID and RBAC",
+    title:"Onboarding a New Contractor",
+    body:"A short-term contractor joins your team for six weeks to help troubleshoot VM performance issues. They need to be able to view and restart VMs in one specific Resource Group but should not be able to delete resources, change network settings, or see billing information for the subscription.",
+    concept:"Entra ID & RBAC",
+    conceptEmoji:"🔐",
+    conceptSub:"Identity and role-based access control",
+    question:"How do you grant access following the principle of least privilege?",
+    options:[
+      "A. Give the contractor the Owner role at the subscription level so they have full access during their contract",
+      "B. Assign the contractor the Contributor role scoped to the subscription so they can manage everything except billing",
+      "C. Assign a built-in role like Virtual Machine Contributor scoped only to that specific Resource Group",
+      "D. Share your own admin credentials temporarily since creating a new account takes too long"
+    ],
+    correct:2,
+    feedback:{
+      correct:"RBAC in Entra ID lets you assign a role at a specific scope — in this case, the Virtual Machine Contributor role (which allows managing VMs but not networking or storage) scoped to just that one Resource Group. This satisfies least privilege perfectly: they get exactly what they need, nothing more.",
+      wrong:"Option C is correct. Least privilege means matching the role AND the scope to the actual job. Subscription-level Contributor or Owner roles (A, B) grant far more access than needed, and sharing credentials (D) is a serious security violation that also destroys audit trails.",
+      breakdown:[
+        {icon:"✅", text:"RBAC combines a role definition (what actions are allowed) with a scope (where those actions apply) — management group, subscription, resource group, or single resource."},
+        {icon:"💡", text:"Built-in roles like Virtual Machine Contributor exist precisely for scenarios like this — task-specific access without full Contributor rights."},
+        {icon:"⚠️", text:"Never share personal credentials for access control — it breaks auditability and violates almost every compliance framework (SOC 2, HIPAA, etc.)."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Azure VM Deployment Options",
+    title:"Choosing How to Deploy 40 Web Servers",
+    body:"Your company needs to deploy 40 identical web server VMs behind a load balancer for a product launch, and the config must scale up or down automatically based on traffic over the next few months. Manually clicking through the Portal 40 times isn't realistic, and the fleet size will change weekly.",
+    concept:"VM Deployment Options",
+    conceptEmoji:"🖥️",
+    conceptSub:"Choosing the right deployment model",
+    question:"Which Azure VM deployment approach fits this requirement best?",
+    options:[
+      "A. Deploy 40 individual standalone VMs manually through the Azure Portal, one at a time",
+      "B. Use a Virtual Machine Scale Set (VMSS) so the fleet can automatically scale in and out based on demand",
+      "C. Deploy a single large VM and rely on it handling all traffic to avoid managing multiple servers",
+      "D. Use Azure Container Instances since VMs cannot be scaled automatically"
+    ],
+    correct:1,
+    feedback:{
+      correct:"A Virtual Machine Scale Set (VMSS) is designed exactly for this: it manages a group of identical, load-balanced VMs and can automatically add or remove instances based on CPU, memory, or schedule-based rules. It's the standard pattern for elastic, high-availability web tiers in Azure.",
+      wrong:"The answer is Option B — Virtual Machine Scale Sets. Manually managing 40 standalone VMs (A) doesn't scale operationally, a single large VM (C) is a single point of failure with no elasticity, and VMs absolutely CAN autoscale via VMSS — Option D is a common but false claim.",
+      breakdown:[
+        {icon:"✅", text:"VMSS automatically creates/removes VM instances from a single template, based on autoscale rules you define (CPU%, queue length, schedule)."},
+        {icon:"💡", text:"VMSS integrates natively with Azure Load Balancer or Application Gateway to distribute traffic across the fleet."},
+        {icon:"⚠️", text:"Don't confuse 'VMs can't autoscale' — that's a myth; autoscaling is a native VMSS feature, not exclusive to containers."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Azure Blob Storage Access Tiers",
+    title:"Seven Years of Compliance Records",
+    body:"A healthcare client must retain patient billing records for 7 years per regulation, but records are almost never accessed after the first 90 days — maybe once or twice a year for an audit. They currently store everything in the Hot tier and their storage bill keeps climbing every month.",
+    concept:"Blob Storage Access Tiers",
+    conceptEmoji:"🧊",
+    conceptSub:"Hot, Cool, Cold, and Archive tiers",
+    question:"What's the most cost-effective tiering strategy for these records?",
+    options:[
+      "A. Keep everything in Hot tier since compliance data must always be instantly available",
+      "B. Move records to Cool tier after 90 days, and consider Archive tier for records older than a year, given rare access",
+      "C. Delete the records after 90 days since they're rarely accessed and compliance rules are usually flexible",
+      "D. Move everything to Archive tier immediately, including the
