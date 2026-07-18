@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Multi-Cloud Architecture 🌐 Three Landlords Side by Side</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+.skip-link{position:absolute;top:-40px;left:0;background:var(--blue);color:#fff;padding:8px 16px;z-index:1000;text-decoration:none;border-radius:0 0 6px 0;}
+.skip-link:focus{top:0;}
+button{font-family:inherit;}
+button:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+a:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
+}
+
+.wrap{max-width:820px;margin:0 auto;padding:16px;}
+
+header.top{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:10px;padding:14px 0;border-bottom:1px solid var(--border);margin-bottom:16px;
+}
+.logo-block{display:flex;align-items:center;gap:10px;}
+.dots{display:flex;gap:4px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+.title-block h1{font-size:1.05rem;margin:0;line-height:1.2;font-family:var(--mono);}
+.title-block p{margin:2px 0 0;font-size:0.75rem;color:var(--text2);}
+
+.pills{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{
+  background:var(--surface2);border:1px solid var(--border);border-radius:20px;
+  padding:6px 12px;font-family:var(--mono);font-size:0.8rem;display:flex;gap:6px;align-items:center;
+}
+.pill .lbl{color:var(--text2);}
+.pill.streak-flash{animation:flashStreak 0.6s ease;}
+@keyframes flashStreak{
+  0%{background:var(--yellow-dim);border-color:var(--yellow);}
+  100%{background:var(--surface2);border-color:var(--border);}
+}
+
+.progress-outer{
+  height:3px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:20px;
+}
+.progress-inner{height:100%;background:linear-gradient(90deg,var(--aws),var(--azure),var(--gcp));transition:width 0.3s ease;}
+
+.round-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin-bottom:16px;
+}
+.round-label{font-family:var(--mono);font-size:0.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;}
+.round-card h2{margin:0 0 10px;font-size:1.25rem;color:var(--text);}
+.round-body{font-size:0.95rem;line-height:1.55;color:var(--text);margin-bottom:14px;}
+.concept-badge{
+  display:inline-flex;align-items:center;gap:8px;background:var(--blue-dim);
+  border:1px solid var(--blue);color:var(--blue);border-radius:8px;padding:8px 12px;
+  font-family:var(--mono);font-size:0.8rem;margin-bottom:16px;
+}
+.concept-badge .sub{color:var(--text2);font-family:var(--sans);font-size:0.75rem;}
+
+.question-text{font-weight:600;margin-bottom:12px;font-size:1rem;}
+
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt-btn{
+  text-align:left;background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  border-radius:8px;padding:12px 14px;font-size:0.9rem;cursor:pointer;line-height:1.4;
+  transition:background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+.opt-btn:hover:not(:disabled){background:var(--surface);border-color:var(--blue);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct-answer{background:var(--green-dim);border-color:var(--green);color:var(--text);}
+.opt-btn.wrong-answer{background:var(--red-dim);border-color:var(--red);color:var(--text);}
+.opt-btn.dim-choice{opacity:0.55;}
+
+.fb{
+  margin-top:18px;border-radius:10px;padding:16px;border:1px solid var(--border);
+  background:var(--surface2);
+}
+.fb.success{border-color:var(--green);background:var(--green-dim);}
+.fb.error{border-color:var(--red);background:var(--red-dim);}
+.fb-head{display:flex;align-items:center;gap:8px;font-weight:600;font-size:1rem;margin-bottom:8px;}
+.fb-text{font-size:0.9rem;line-height:1.5;margin-bottom:12px;}
+.fb-row{display:flex;gap:8px;align-items:flex-start;font-size:0.85rem;margin-bottom:6px;line-height:1.4;}
+.fb-row .icon{flex-shrink:0;}
+
+.next-btn, .replay-btn{
+  margin-top:16px;background:var(--blue);color:#fff;border:none;border-radius:8px;
+  padding:12px 20px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:var(--mono);
+}
+.next-btn:hover, .replay-btn:hover{background:#3f7de0;}
+
+.final-screen{text-align:center;padding:30px 16px;}
+.final-score{font-family:var(--mono);font-size:3rem;color:var(--yellow);margin:10px 0;}
+.final-label{color:var(--text2);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em;}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0;}
+.stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.stat-box .num{font-family:var(--mono);font-size:1.4rem;color:var(--text);}
+.stat-box .lab{font-size:0.75rem;color:var(--text2);margin-top:4px;}
+
+.cloud-tag{display:inline-block;font-family:var(--mono);font-size:0.7rem;padding:2px 8px;border-radius:4px;margin-right:6px;}
+.tag-aws{background:var(--aws-dim);border:1px solid var(--aws-border);color:var(--aws);}
+.tag-azure{background:var(--azure-dim);border:1px solid var(--azure-border);color:var(--azure);}
+.tag-gcp{background:var(--gcp-dim);border:1px solid var(--gcp-border);color:var(--gcp);}
+
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr;}
+  .final-score{font-size:2.2rem;}
+  header.top{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div class="wrap">
+  <header class="top">
+    <div class="logo-block">
+      <div class="dots" aria-hidden="true">
+        <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+      </div>
+      <div class="title-block">
+        <h1>CIS 4345 — Multi-Cloud Architecture Wars</h1>
+        <p>Week 14 · Three Landlords Side by Side</p>
+      </div>
+    </div>
+    <div class="pills">
+      <div class="pill" id="round-pill"><span class="lbl">Round</span> <span id="round-el">1/7</span></div>
+      <div class="pill" id="score-pill"><span class="lbl">Score</span> <div aria-live="polite" aria-atomic="true" id="score-el">0</div></div>
+      <div class="pill" id="streak-pill"><span class="lbl">Streak</span> <div aria-live="polite" aria-atomic="true" id="streak-el">0</div></div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="progress-outer">
+      <div class="progress-inner" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress" style="width:0%"></div>
+    </div>
+
+    <div id="game-area"></div>
+  </main>
+</div>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Multi-Cloud Strategy Rationale",
+    title:"Why Even Bother With Three Landlords?",
+    body:"You're a cloud architect at a mid-size fintech company that currently runs everything on AWS. Leadership asks: 'Why would we ever add Azure or GCP into the mix? Isn't that just more complexity and more bills?' You need to give a business-driven answer, not just a technical one.",
+    concept:"Multi-Cloud Strategy Rationale",
+    conceptEmoji:"🏢",
+    conceptSub:"Why organizations adopt more than one cloud provider",
+    question:"What is the strongest legitimate business reason to justify a multi-cloud strategy here?",
+    options:[
+      "A. It looks impressive on the company website to say you use 'three clouds'",
+      "B. Avoiding vendor lock-in, leveraging best-of-breed services (e.g., GCP's BigQuery for analytics), and meeting regulatory or redundancy requirements",
+      "C. Multi-cloud always cuts your total cloud bill in half",
+      "D. Every engineer should learn all three platforms for fun"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Exactly — multi-cloud is a business decision, not a technical hobby. Real drivers include avoiding lock-in, picking the best tool for a specific job, disaster recovery across providers, and sometimes contractual/regulatory requirements (like data residency or client demands).",
+      wrong:"The real answer is B. Multi-cloud is justified by avoiding vendor lock-in, using best-of-breed services, and meeting resilience or compliance needs — not marketing, cost-halving myths, or engineer preference.",
+      breakdown:[
+        {icon:"✅", text:"Vendor lock-in avoidance and best-of-breed services are the #1 cited reasons in industry surveys."},
+        {icon:"💡", text:"Regulatory requirements (data residency, client mandates) often force multi-cloud even when it's inconvenient."},
+        {icon:"⚠️", text:"Multi-cloud usually costs MORE upfront due to duplicated tooling and staffing — it is not a guaranteed cost saver."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — Multi-Cloud Challenges",
+    title:"The Bill Nobody Can Explain",
+    body:"Six months into your multi-cloud rollout, the finance team is frustrated: AWS costs are tracked in Cost Explorer, Azure costs live in Cost Management, and GCP costs sit in a totally different billing console. Nobody can produce one unified spending report, and your two junior engineers only know AWS IAM — Azure AD and GCP IAM confuse them constantly.",
+    concept:"Multi-Cloud Challenges",
+    conceptEmoji:"⚠️",
+    conceptSub:"The real costs of running three landlords at once",
+    question:"Which pair of challenges is this scenario demonstrating?",
+    options:[
+      "A. Network latency and DNS propagation delays",
+      "B. Increased operational complexity (fragmented cost/billing visibility) and the skills gap (staff must learn multiple IAM/security models)",
+      "C. Cloud providers refusing to let you use more than one region",
+      "D. Data encryption becoming impossible across providers"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. Two of the most cited real-world multi-cloud pains are operational complexity (fragmented billing, monitoring, and tooling across consoles) and the skills gap (engineers need to master IAM, networking, and security models that differ per provider).",
+      wrong:"The answer is B. The scenario describes fragmented billing visibility (operational complexity) and staff struggling with different IAM models (the skills gap) — not latency, region restrictions, or encryption impossibility.",
+      breakdown:[
+        {icon:"✅", text:"Unified cost visibility often requires third-party tools like CloudHealth, Spot.io, or a custom FinOps dashboard."},
+        {icon:"💡", text:"IAM concepts translate across clouds (roles, policies, service accounts) but syntax and console UX differ enough to slow teams down."},
+        {icon:"⚠️", text:"Don't assume 'multi-cloud' means the providers technically block you — the challenge is human/operational, not technical restriction."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Cloud-Agnostic Tools",
+    title:"One Config File to Rule Them All",
+    body:"Your team is tired of writing separate deployment scripts for AWS CloudFormation, Azure Resource Manager templates, and GCP Deployment Manager. You want a single infrastructure-as-code tool and a single container orchestration tool that both work identically no matter which of the three landlords is hosting the workload.",
+    concept:"Cloud-Agnostic Tools",
+    conceptEmoji:"🧰",
+    conceptSub:"Tools that abstract away provider-specific differences",
+    question:"Which combination gives you true cloud-agnostic infrastructure provisioning AND container orchestration?",
+    options:[
+      "A. AWS CloudFormation for provisioning, Amazon ECS for orchestration",
+      "B. Terraform for provisioning, Kubernetes for orchestration",
+      "C. Azure Bicep for provisioning, Azure Container Instances for orchestration",
+      "D. GCP Deployment Manager for provisioning, Cloud Run for orchestration"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Right — Terraform (HashiCorp) supports providers for AWS, Azure, GCP, and dozens more using the same HCL syntax, and Kubernetes runs identically as a managed service (EKS, AKS, GKE) or self-hosted on any of the three. These are the industry-standard cloud-agnostic pair.",
+      wrong:"The answer is B. Options A, C, and D are all provider-locked tools (CloudFormation/ECS are AWS-only, Bicep/ACI are Azure-only, Deployment Manager/Cloud Run are GCP-only). Terraform + Kubernetes is the standard cloud-agnostic combo.",
+      breakdown:[
+        {icon:"✅", text:"Terraform uses 'providers' as plugins — swapping aws for azurerm or google changes almost nothing else in your workflow."},
+        {icon:"💡", text:"Kubernetes was originally built by Google but is now a CNCF open-source standard, runnable anywhere."},
+        {icon:"⚠️", text:"Native IaC tools (CloudFormation, ARM/Bicep, Deployment Manager) are excellent but lock you into a single provider's ecosystem."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Comparing Equivalent Architectures Across Clouds",
+    title:"The Migration Spec Sheet",
+    body:"A client wants a lift-and-shift proposal that includes their compute service running the same on all three clouds, in case they switch providers later. You need to fill in the equivalent virtual machine compute service for each landlord in your proposal document.",
+    concept:"Comparing Equivalent Architectures Across Clouds",
+    conceptEmoji:"🔁",
+    conceptSub:"Matching core services across AWS, Azure, and GCP",
+    question:"Which row correctly matches the equivalent virtual machine compute services?",
+    options:[
+      "A. AWS: Lambda | Azure: Virtual Machines | GCP: Compute Engine",
+      "B. AWS: EC2 | Azure: Virtual Machines | GCP: Compute Engine",
+      "C. AWS: EC2 | Azure: App Service | GCP: Cloud Functions",
+      "D. AWS: S3 | Azure: Blob Storage | GCP: Compute Engine"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Correct. EC2 (AWS), Virtual Machines (Azure), and Compute Engine (GCP) are the three core IaaS virtual machine offerings — same underlying concept (rent a VM, choose CPU/RAM/disk), different branding.",
+      wrong:"The answer is B. Lambda, App Service, Cloud Functions, S3, and Blob Storage are NOT virtual machine services — Lambda/Cloud Functions are serverless functions, App Service is PaaS, and S3/Blob Storage are object storage.",
+      breakdown:[
+        {icon:"✅", text:"EC2 = Virtual Machines = Compute Engine — this is the most commonly tested cross-cloud equivalency."},
+        {icon:"💡", text:"Recognizing this pattern (same concept, different name) is the core skill of 'speaking' multi-cloud."},
+        {icon:"⚠️", text:"Don't confuse serverless (Lambda/Functions/Cloud Functions) with IaaS VMs — they solve different problems."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Cloud Rosetta Stone for Architecture Patterns",
+    title:"Translating an Architecture Diagram",
+    body:"Your team built a reference architecture on AWS: an S3 bucket for object storage, a VPC for networking isolation, and IAM roles for access control. The client's Azure team asks for the exact same diagram translated into Azure terminology so their ops team can review it without learning AWS vocabulary first.",
+    concept:"Cloud Rosetta Stone for Architecture Patterns",
+    conceptEmoji:"📜",
+    conceptSub:"Translating architecture patterns between provider vocabularies",
+    question:"Which translation correctly maps the AWS pattern into Azure equivalents?",
+    options:[
+      "A. S3 → Azure Blob Storage | VPC → Virtual Network (VNet) | IAM → Azure Active Directory / RBAC",
+      "B. S3 → Azure SQL Database | VPC → Azure Functions | IAM → Azure Monitor",
+      "C. S3 → Azure Blob Storage | VPC → Azure Kubernetes Service | IAM → Azure DevOps",
+      "D. S3 → Azure Data Lake | VPC → Resource Group | IAM → Azure Backup"
+    ],
+    correct:0,
+    feedback:{
+      correct:"Correct. This is the classic 'Rosetta Stone' translation: S3 (object storage) → Blob Storage, VPC (network isol
