@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CIS 4345 — Serverless & Containers Showdown 🚀 Pick Your Compute Weapon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1117; --surface:#1a1d27; --surface2:#22263a; --border:#2e3350;
+  --blue:#4f8ef7; --blue-dim:#1e2d4f;
+  --green:#3ecf8e; --green-dim:#0d2e1f;
+  --red:#f87171; --red-dim:#2e1010;
+  --yellow:#fbbf24; --yellow-dim:#2e2208;
+  --aws:#FF9900; --aws-dim:#2e1c00; --aws-border:#6b3f00;
+  --azure:#0078D4; --azure-dim:#001e3c; --azure-border:#004080;
+  --gcp:#34A853; --gcp-dim:#0a2410; --gcp-border:#1a5c2a;
+  --text:#e8eaf6; --text2:#8b92b8; --text3:#4a5080;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  min-width:380px; line-height:1.5;
+}
+.skip-link{
+  position:absolute; top:-40px; left:0; background:var(--blue); color:#fff;
+  padding:8px 16px; z-index:100; transition:top .2s;
+}
+.skip-link:focus{top:0;}
+
+button:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+a:focus-visible{outline:3px solid var(--blue); outline-offset:2px;}
+
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{ animation-duration:0.01ms !important; transition-duration:0.01ms !important; }
+}
+
+.wrap{max-width:800px; margin:0 auto; padding:16px;}
+
+header.appbar{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:12px; padding:14px 16px; background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; margin-bottom:14px;
+}
+.logo{display:flex; align-items:center; gap:10px; font-family:var(--mono); font-weight:600; font-size:15px;}
+.dots{display:flex; gap:4px;}
+.dot{width:10px; height:10px; border-radius:50%;}
+.dot.aws{background:var(--aws);}
+.dot.azure{background:var(--azure);}
+.dot.gcp{background:var(--gcp);}
+h1{font-size:16px; margin:0; font-weight:600; color:var(--text);}
+.pills{display:flex; gap:8px; flex-wrap:wrap;}
+.pill{
+  background:var(--surface2); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-family:var(--mono); font-size:13px; color:var(--text2);
+  display:flex; align-items:center; gap:6px;
+}
+.pill strong{color:var(--text); font-weight:600;}
+
+.progress-outer{
+  height:3px; background:var(--surface2); border-radius:2px; overflow:hidden; margin-bottom:20px;
+}
+.progress-inner{height:100%; background:var(--blue); transition:width .3s ease;}
+
+.round-card{
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:22px; margin-bottom:16px;
+}
+.round-label{
+  font-family:var(--mono); font-size:12px; color:var(--text2); text-transform:uppercase;
+  letter-spacing:.06em; margin-bottom:8px;
+}
+h2.round-title{font-size:20px; margin:0 0 12px 0; color:var(--text);}
+.round-body{color:var(--text2); font-size:15px; margin-bottom:16px;}
+.concept-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--blue-dim);
+  border:1px solid var(--blue); border-radius:10px; padding:8px 14px; margin-bottom:18px;
+}
+.concept-badge .cb-title{font-weight:600; font-size:13px; color:var(--text);}
+.concept-badge .cb-sub{font-size:12px; color:var(--text2); display:block;}
+
+.question{font-weight:600; font-size:15px; margin-bottom:14px;}
+
+.options{display:flex; flex-direction:column; gap:10px;}
+.opt-btn{
+  text-align:left; background:var(--surface2); border:1px solid var(--border);
+  color:var(--text); border-radius:10px; padding:14px 16px; font-family:var(--sans);
+  font-size:14.5px; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+}
+.opt-btn:hover:not(:disabled){background:#282c44; border-color:var(--blue);}
+.opt-btn:active:not(:disabled){transform:scale(0.99);}
+.opt-btn:disabled{cursor:default;}
+.opt-btn.correct{background:var(--green-dim); border-color:var(--green); color:var(--text);}
+.opt-btn.wrong{background:var(--red-dim); border-color:var(--red); color:var(--text);}
+.opt-btn.dim{opacity:.5;}
+
+.fb{
+  margin-top:18px; border-radius:12px; padding:18px; border:1px solid var(--border);
+}
+.fb.correct{background:var(--green-dim); border-color:var(--green);}
+.fb.wrong{background:var(--red-dim); border-color:var(--red);}
+.fb-head{display:flex; align-items:center; gap:10px; font-weight:600; font-size:16px; margin-bottom:8px;}
+.fb-text{color:var(--text); font-size:14.5px; margin-bottom:12px;}
+.fb-breakdown{display:flex; flex-direction:column; gap:8px;}
+.fb-row{display:flex; gap:10px; align-items:flex-start; font-size:13.5px; color:var(--text2);}
+.fb-row .icon{flex-shrink:0;}
+
+.streak-flash{
+  display:inline-block; animation:flash 0.6s ease;
+}
+@keyframes flash{
+  0%{transform:scale(1);}
+  40%{transform:scale(1.3); color:var(--yellow);}
+  100%{transform:scale(1);}
+}
+
+.next-btn, .replay-btn{
+  margin-top:18px; background:var(--blue); color:#fff; border:none; border-radius:10px;
+  padding:13px 22px; font-family:var(--sans); font-weight:600; font-size:14.5px; cursor:pointer;
+  transition:background .15s;
+}
+.next-btn:hover, .replay-btn:hover{background:#3d7de0;}
+
+.final-screen{text-align:center; padding:20px 10px;}
+.final-score{
+  font-family:var(--mono); font-size:56px; font-weight:600; color:var(--blue); margin:10px 0;
+}
+.final-sub{color:var(--text2); font-size:15px; margin-bottom:24px;}
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;
+}
+.stat-box{
+  background:var(--surface2); border:1px solid var(--border); border-radius:10px; padding:16px;
+}
+.stat-box .num{font-family:var(--mono); font-size:24px; font-weight:600; color:var(--text);}
+.stat-box .label{font-size:12.5px; color:var(--text2); margin-top:4px;}
+
+footer.note{
+  text-align:center; color:var(--text3); font-size:12px; margin:20px 0; font-family:var(--mono);
+}
+
+@media (max-width:480px){
+  h1{font-size:14px;}
+  .final-score{font-size:44px;}
+  .round-card{padding:16px;}
+}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<main id="main-content">
+<div class="wrap">
+  <header class="appbar">
+    <div class="logo">
+      <div class="dots" aria-hidden="true">
+        <span class="dot aws"></span><span class="dot azure"></span><span class="dot gcp"></span>
+      </div>
+      <h1>CIS 4345 — Serverless &amp; Containers Showdown</h1>
+    </div>
+    <div class="pills">
+      <div class="pill">Score: <strong id="score-el" aria-live="polite" aria-atomic="true">0</strong></div>
+      <div class="pill">Round: <strong id="round-el">1/6</strong></div>
+      <div class="pill">Streak: <strong id="streak-el" aria-live="polite" aria-atomic="true">0</strong></div>
+    </div>
+  </header>
+
+  <div class="progress-outer">
+    <div class="progress-inner" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Quiz progress" style="width:0%"></div>
+  </div>
+
+  <div id="game-area"></div>
+
+  <footer class="note">CIS 4345 — Introduction to Cloud Computing · Temple University · Week 7</footer>
+</div>
+</main>
+
+<script>
+const scenarios = [
+  {
+    id:1,
+    label:"Scenario 1 — Serverless Computing Model",
+    title:"The Overnight Image Resizer",
+    body:"You're building a feature where users upload profile photos, and the system needs to automatically generate three thumbnail sizes. Uploads happen randomly — sometimes 2 per hour, sometimes 200 in five minutes during a marketing push. You don't want to pay for idle servers between uploads.",
+    concept:"Serverless Computing Model",
+    conceptEmoji:"⚡",
+    conceptSub:"Event-driven compute with no server management",
+    question:"What's the best architectural fit for this workload?",
+    options:[
+      "A. A single always-on EC2/VM instance sized for peak load, running 24/7",
+      "B. A serverless function (e.g., AWS Lambda) triggered by each upload event, billed per execution",
+      "C. A container running in a Kubernetes cluster with a fixed 3-pod minimum",
+      "D. A dedicated on-premises server in the office closet"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Serverless is built exactly for this — bursty, event-driven, unpredictable traffic. You pay only for the milliseconds of compute actually used per upload, and it scales automatically from 0 to 200 concurrent executions without you provisioning anything.",
+      wrong:"The right answer is a serverless function (B). Serverless computing charges per invocation/execution time, not for idle capacity, which is ideal when demand is spiky and unpredictable like this photo upload feature.",
+      breakdown:[
+        {icon:"✅", text:"Serverless = no idle cost, automatic scaling, event-triggered execution."},
+        {icon:"💡", text:"An always-on VM (A) wastes money during the 2-upload-per-hour lulls."},
+        {icon:"⚠️", text:"Common mistake: assuming 'containers' are always cheaper — orchestration overhead adds cost/complexity for simple bursty tasks like this."}
+      ]
+    }
+  },
+  {
+    id:2,
+    label:"Scenario 2 — AWS Lambda vs Azure Functions vs GCP Cloud Functions",
+    title:"The Multi-Cloud Client Meeting",
+    body:"Your consulting firm just landed three clients: one is all-in on AWS, one runs their entire stack on Azure AD and Office 365, and one is a startup built on Google's BigQuery and Firebase. Each wants a serverless function for their event pipeline, and they ask you which 'Big 3' landlord's serverless tool matches their existing ecosystem.",
+    concept:"AWS Lambda vs Azure Functions vs GCP Cloud Functions",
+    conceptEmoji:"☁️",
+    conceptSub:"The Three Landlords of serverless FaaS",
+    question:"Which pairing correctly matches client to native serverless service?",
+    options:[
+      "A. AWS client → Azure Functions; Azure client → Lambda; GCP client → Cloud Functions",
+      "B. AWS client → Lambda; Azure client → Azure Functions; GCP client → Cloud Functions",
+      "C. All three should use AWS Lambda since it's the most popular FaaS",
+      "D. Serverless products are interchangeable — the vendor doesn't matter"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Each cloud landlord has its own native Function-as-a-Service product tightly integrated with its ecosystem: Lambda ties into S3/DynamoDB/API Gateway, Azure Functions ties into Azure AD/Blob Storage/Event Grid, and Cloud Functions ties into Firebase/Pub/Sub/BigQuery triggers.",
+      wrong:"The correct pairing is B: AWS→Lambda, Azure→Azure Functions, GCP→Cloud Functions. Using an out-of-ecosystem FaaS (like forcing Lambda onto an Azure AD shop) adds unnecessary cross-cloud networking, auth complexity, and egress cost.",
+      breakdown:[
+        {icon:"✅", text:"Lambda, Azure Functions, and Cloud Functions are functionally similar but ecosystem-locked to their native triggers and IAM."},
+        {icon:"💡", text:"Matching the FaaS to the client's existing identity/storage stack minimizes integration friction."},
+        {icon:"⚠️", text:"Common mistake: treating 'most popular' as 'best fit' — popularity doesn't override existing infrastructure investment."}
+      ]
+    }
+  },
+  {
+    id:3,
+    label:"Scenario 3 — Triggers, Cold Starts, and Execution Limits",
+    title:"The Slow First Request",
+    body:"Your company deployed a serverless function to handle real-time payment fraud checks — it must respond in under 200ms. QA reports that the very first request after a period of inactivity takes 2.5 seconds, but subsequent requests within a few minutes are fast (under 100ms). Leadership is panicking about the fraud-check SLA.",
+    concept:"Triggers, Cold Starts, and Execution Limits",
+    conceptEmoji:"❄️",
+    conceptSub:"Why the first invocation is always the slowest",
+    question:"What is happening, and what's a valid mitigation?",
+    options:[
+      "A. This is a 'cold start' — the platform must spin up a new execution environment; mitigate with provisioned concurrency or a scheduled 'warming' trigger",
+      "B. The function has a memory leak that must be fixed in code before it can run again",
+      "C. This is normal network latency and cannot be improved with any serverless configuration",
+      "D. The execution time limit was exceeded, causing a timeout retry"
+    ],
+    correct:0,
+    feedback:{
+      correct:"A cold start happens when the cloud provider has to provision a new container/runtime for your function because no warm instance was available (e.g., after idle time). Provisioned concurrency (AWS) or Premium/pre-warmed plans (Azure) keep instances ready, and a scheduled ping/trigger every few minutes can also keep it warm.",
+      wrong:"The correct diagnosis is a cold start (A). It's a structural characteristic of serverless — not a bug — caused by on-demand environment provisioning after idle periods, and it's mitigated via provisioned concurrency, minimum instance settings, or warming pings.",
+      breakdown:[
+        {icon:"✅", text:"Cold start = time to allocate + initialize a new runtime container before your code even runs."},
+        {icon:"💡", text:"Provisioned concurrency (AWS Lambda) or 'Always Ready' instances (Azure Premium plan) trade some idle cost for guaranteed low latency."},
+        {icon:"⚠️", text:"Common mistake: confusing cold starts with execution time limits — those are two completely different constraints (startup latency vs. max runtime duration)."}
+      ]
+    }
+  },
+  {
+    id:4,
+    label:"Scenario 4 — Container Basics: Images, Containers, Registries",
+    title:"The Confused New Hire",
+    body:"A junior developer on your team says: 'I pushed my container to Docker Hub, then I ran the container, and now I have three containers running from the same image.' Your manager asks you to clarify the terminology for the team's onboarding doc before the next sprint.",
+    concept:"Container Basics — Images, Containers, Registries",
+    conceptEmoji:"📦",
+    conceptSub:"Image = blueprint, Container = running instance, Registry = storage/distribution hub",
+    question:"Which explanation correctly defines the three terms?",
+    options:[
+      "A. An image is a running process; a container is the stored file; a registry is the network connecting them",
+      "B. An image is a read-only template/blueprint; a container is a running (or stopped) instance of that image; a registry (like Docker Hub or ECR) is where images are stored and distributed from",
+      "C. Images and containers are the same thing, just different names used by different cloud vendors",
+      "D. A registry is a type of container used only for storing logs"
+    ],
+    correct:1,
+    feedback:{
+      correct:"An image is the immutable, read-only blueprint containing the app code, runtime, libraries, and dependencies. A container is a live, running instance created from that image — you can spin up many containers from one image. A registry (Docker Hub, Amazon ECR, Azure Container Registry, Google Artifact Registry) is where images are pushed, versioned, and pulled from.",
+      wrong:"The correct definitions are in B. Think of it like a class vs. an object in programming: the image is the class definition, and each container is an instantiated object. The registry is simply the library/warehouse where the class definitions (images) live.",
+      breakdown:[
+        {icon:"✅", text:"One image → many containers. Each container has its own writable layer and running state."},
+        {icon:"💡", text:"Registries can be public (Docker Hub) or private (ECR, ACR, Artifact Registry) — private is standard for production workloads."},
+        {icon:"⚠️", text:"Common mistake: saying 'I deployed my container to the registry' — you push and pull images to/from a registry, not containers."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Container Orchestration: ECS/EKS vs Azure Container Apps vs Cloud Run",
+    title:"The Kubernetes Skills Gap",
+    body:"Your startup has 4 microservices packaged as Docker images. Nobody on the 3-person engineering team has deep Kubernetes experience, and you need production traffic routing, auto-scaling, and zero-downtime deploys live within two weeks — all on Google Cloud, since that's where your data warehouse already lives.",
+    concept:"Container Orchestration — ECS/EKS vs Azure Container Apps vs Cloud Run",
+    conceptEmoji:"🎛️",
+    conceptSub:"Choosing the right level of orchestration abstraction",
+    question:"Which orchestration option best fits this team's constraints?",
+    options:[
+      "A. Deploy GKE (Google Kubernetes Engine) and have the team learn full Kubernetes administration in the two-week window",
+      "B. Use Cloud Run — a fully managed, serverless container platform on GCP that handles scaling and routing without requiring Kubernetes expertise",
+      "C. Migrate to AWS ECS/EKS since it's the industry standard, regardless of existing GCP investment",
+      "D. Manually run 'docker run' commands on a single VM and load-balance with a shell script"
+    ],
+    correct:1,
+    feedback:{
+      correct:"Cloud Run is GCP's fully managed container platform — you give it an image, and it handles scaling (including scale-to-zero), traffic routing, and zero-downtime rollouts without requiring Kubernetes cluster management. It's the right abstraction level for a small team with a tight deadline and no K8s expertise, and it keeps the workload on GCP alongside the data warehouse.",
+      wrong:"Cloud Run (B) is the right fit here. Full Kubernetes (GKE, option A) gives more control but demands real operational expertise the team doesn't have yet — a two-week ramp-up on K8s administration is unrealistic. Switching clouds (C) ignores the existing GCP data warehouse investment and adds unnecessary migration risk.",
+      breakdown:[
+        {icon:"✅", text:"Cloud Run, Azure Container Apps, and AWS Fargate/App Runner are the 'serverless containers' tier — less control, far less operational overhead than raw Kubernetes."},
+        {icon:"💡", text:"ECS/EKS and GKE (raw Kubernetes) offer maximum flexibility but require dedicated ops expertise and time investment."},
+        {icon:"⚠️", text:"Common mistake: choosing the 'industry standard' tool over the tool that fits your team's actual skills and timeline."}
+      ]
+    }
+  },
+  {
+    id:6,
+    label:"Scenario 6 — Choosing Serverless vs Containers vs VMs",
+    title:"The Legacy ERP Migration",
+    body:"Your company is migrating a 15-year-old on-premises ERP system to the cloud. It requires a specific outdated Linux kernel version, has hardcoded file-system paths, runs continuously 24/7 processing scheduled batch
