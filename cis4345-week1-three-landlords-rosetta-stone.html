@@ -298,4 +298,177 @@ const scenarios = [
     correct:2,
     feedback:{
       correct:"Hybrid cloud is the right call: it lets the hospital keep the scalable, cost-efficient public cloud for the customer-facing portal while keeping the most sensitive, regulated data on private infrastructure they fully control — getting the benefits of both models where each fits best.",
-      wrong:"Public cloud alone (A) ignores the requirement for full isolation and control over certain records — HIPAA-eligible services exist, but 'HIPAA-compliant provider' doesn't automatically satisfy every organization's isolation policy. Private cloud alone (B) throws away the cost/scalability benefits they explicitly wanted for the portal. Community cloud (D) might suit a specific consortium use case, but it doesn't address the requirement for full isolation of sensitive records described
+      wrong:"Public cloud alone (A) is not automatically safe just because a provider offers HIPAA-eligible services — the hospital's isolation requirements still need to be met through architecture choices, not just a compliance checkbox. Private cloud alone (B) throws away the cost and scalability benefits they explicitly wanted for the patient portal. Community cloud (D) might suit a specific multi-hospital consortium, but it doesn't address the requirement for full isolation and control of the most sensitive records — which is exactly what hybrid cloud is designed to solve.",
+      breakdown:[
+        {icon:"✅", text:"Hybrid cloud lets you put each workload where it fits best: elastic, public-facing pieces on public cloud; regulated, sensitive data on private infrastructure."},
+        {icon:"💡", text:"This is a very common real-world pattern in healthcare, finance, and government — not a niche edge case."},
+        {icon:"⚠️", text:"Common mistake: assuming any 'HIPAA-compliant' cloud provider automatically satisfies every organization's own isolation and control policies — compliance certifications and architecture decisions are two separate things."}
+      ]
+    }
+  },
+  {
+    id:5,
+    label:"Scenario 5 — Vendor Lock-In & Multi-Cloud Strategy",
+    title:"The CFO Asks About Switching Costs",
+    body:"Eighteen months into building entirely on one provider's proprietary services, your company's CFO asks a hard question: \"What would it cost us, in time and money, to move to a different cloud provider if we needed to?\" The engineering team realizes the honest answer is \"a lot\" — and that this was a foreseeable risk.",
+    concept:"Vendor Lock-In",
+    conceptEmoji:"🔒",
+    conceptSub:"A situation where switching providers becomes so expensive or difficult that an organization feels stuck",
+    question:"Which practice BEST reduces the risk of costly vendor lock-in going forward?",
+    options:[
+      "A. Use only the newest, most advanced proprietary features from your chosen provider as fast as possible, regardless of portability.",
+      "B. Favor open standards, containerization, and the vendor-agnostic vocabulary from the Cloud Rosetta Stone approach when designing new systems, so core concepts and workloads could realistically move to another provider if needed.",
+      "C. Sign a longer contract with the current provider to lock in pricing — this eliminates lock-in risk entirely.",
+      "D. Vendor lock-in is not a real business risk; it only matters for very large enterprises, not typical companies."
+    ],
+    correct:1,
+    feedback:{
+      correct:"Designing around portable, vendor-agnostic patterns — containers, open standards, and thinking in Rosetta Stone terms (concepts first, vendor names second) — keeps switching costs manageable even if you never actually switch. It's an insurance policy, not a guarantee you'll leave.",
+      wrong:"Option A actively increases lock-in risk by maximizing dependence on one provider's proprietary features. Option C addresses pricing, not architectural dependence — you can lock in a price and still be functionally stuck. Option D is simply wrong: vendor lock-in is a well-documented business risk at companies of every size, which is exactly why the Rosetta Stone framework exists in the first place.",
+      breakdown:[
+        {icon:"✅", text:"Portability doesn't mean 'never use provider-specific features' — it means knowing which parts of your system are portable and which are a deliberate, informed tradeoff."},
+        {icon:"💡", text:"Containers (Docker/Kubernetes) are one of the most common practical tools for reducing compute-layer lock-in specifically."},
+        {icon:"⚠️", text:"Common mistake: treating vendor lock-in as purely a technical problem — it's also a negotiating-leverage and budget problem, which is exactly why the CFO is asking."}
+      ]
+    }
+  }
+];
+
+let current = 0;
+let score = 0;
+let streak = 0;
+let answered = false;
+
+const gameArea = document.getElementById('game-area');
+const roundNum = document.getElementById('round-num');
+const scoreNum = document.getElementById('score-num');
+const streakNum = document.getElementById('streak-num');
+const progressBar = document.getElementById('progress-bar');
+const streakPill = document.getElementById('streak-el');
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function updateHeader(){
+  roundNum.textContent = Math.min(current + 1, scenarios.length);
+  scoreNum.textContent = score;
+  streakNum.textContent = streak;
+  const pct = Math.round((current / scenarios.length) * 100);
+  progressBar.style.width = pct + '%';
+  progressBar.setAttribute('aria-valuenow', String(pct));
+  if(streak >= 2){
+    streakPill.classList.add('streak-active');
+  } else {
+    streakPill.classList.remove('streak-active');
+  }
+}
+
+function renderRound(){
+  answered = false;
+  updateHeader();
+  const s = scenarios[current];
+  const optionsHtml = s.options.map((opt, i) =>
+    '<button class="opt-btn" type="button" data-index="' + i + '" onclick="selectAnswer(' + i + ')">' + escapeHtml(opt) + '</button>'
+  ).join('');
+
+  gameArea.innerHTML =
+    '<div class="round-card">' +
+      '<div class="round-label">' + escapeHtml(s.label) + '</div>' +
+      '<h2 class="scenario-title">' + escapeHtml(s.title) + '</h2>' +
+      '<div class="scenario-body">' + escapeHtml(s.body) + '</div>' +
+      '<div class="concept-badge">' +
+        '<span aria-hidden="true">' + s.conceptEmoji + '</span>' +
+        '<span>' + escapeHtml(s.concept) + ' — <span class="sub">' + escapeHtml(s.conceptSub) + '</span></span>' +
+      '</div>' +
+      '<p class="question-text">' + escapeHtml(s.question) + '</p>' +
+      '<div class="options" id="options-wrap">' + optionsHtml + '</div>' +
+      '<div id="feedback-slot"></div>' +
+    '</div>';
+}
+
+function selectAnswer(i){
+  if(answered) return;
+  answered = true;
+  const s = scenarios[current];
+  const correctIdx = s.correct;
+  const isCorrect = (i === correctIdx);
+  const buttons = document.querySelectorAll('#options-wrap .opt-btn');
+  buttons.forEach((btn, idx) => {
+    btn.disabled = true;
+    if(idx === correctIdx) btn.classList.add('correct-answer');
+    if(idx === i && !isCorrect) btn.classList.add('wrong-answer');
+    if(idx === i) btn.classList.add('selected');
+  });
+
+  if(isCorrect){
+    score += 1;
+    streak += 1;
+  } else {
+    streak = 0;
+  }
+  updateHeader();
+
+  const breakdownHtml = (s.feedback.breakdown || []).map(b =>
+    '<div class="breakdown-row"><span class="icon" aria-hidden="true">' + b.icon + '</span><span>' + escapeHtml(b.text) + '</span></div>'
+  ).join('');
+
+  const isLast = (current === scenarios.length - 1);
+
+  document.getElementById('feedback-slot').innerHTML =
+    '<div class="fb ' + (isCorrect ? 'correct' : 'wrong') + '" role="status">' +
+      '<div class="fb-head ' + (isCorrect ? 'correct' : 'wrong') + '">' +
+        '<span aria-hidden="true">' + (isCorrect ? '✅' : '❌') + '</span>' +
+        '<span>' + (isCorrect ? 'Correct!' : 'Not quite') + '</span>' +
+      '</div>' +
+      '<div class="fb-text">' + escapeHtml(isCorrect ? s.feedback.correct : s.feedback.wrong) + '</div>' +
+      '<div class="breakdown">' + breakdownHtml + '</div>' +
+      '<button class="next-btn" type="button" onclick="nextRound()">' + (isLast ? 'See Results' : 'Next Scenario →') + '</button>' +
+    '</div>';
+}
+
+function nextRound(){
+  current += 1;
+  if(current >= scenarios.length){
+    renderFinal();
+  } else {
+    renderRound();
+  }
+}
+
+function renderFinal(){
+  progressBar.style.width = '100%';
+  progressBar.setAttribute('aria-valuenow', '100');
+  roundNum.textContent = scenarios.length;
+  const pct = Math.round((score / scenarios.length) * 100);
+  let msg = "Nice work — review the breakdowns above for anything you missed.";
+  if(pct === 100) msg = "Perfect score! You've got the Three Landlords and the Rosetta Stone down cold.";
+  else if(pct >= 80) msg = "Strong showing — you clearly did the reading.";
+  else if(pct < 50) msg = "Worth another pass through the Week 1 Overview and Reading & Resources pages before Lab 01.";
+
+  gameArea.innerHTML =
+    '<div class="round-card final-screen">' +
+      '<div class="round-label">Complete</div>' +
+      '<div class="final-score">' + score + '/' + scenarios.length + '</div>' +
+      '<div class="final-sub">' + escapeHtml(msg) + '</div>' +
+      '<div class="stat-grid">' +
+        '<div class="stat-box"><div class="num">' + score + '</div><div class="lbl">Correct</div></div>' +
+        '<div class="stat-box"><div class="num">' + (scenarios.length - score) + '</div><div class="lbl">Missed</div></div>' +
+      '</div>' +
+      '<button class="replay-btn" type="button" onclick="restartGame()">Play Again</button>' +
+    '</div>';
+}
+
+function restartGame(){
+  current = 0;
+  score = 0;
+  streak = 0;
+  renderRound();
+}
+
+renderRound();
+</script>
+</body>
+</html>
