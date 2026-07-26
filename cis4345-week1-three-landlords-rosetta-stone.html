@@ -172,6 +172,17 @@ h2.scenario-title{ font-size:20px; margin:0 0 12px; color:var(--text); }
     transition-duration:0.01ms !important;
   }
 }
+
+.code-box{
+  margin-top:18px; background:var(--surface2); border:1px solid var(--blue);
+  border-radius:12px; padding:18px; text-align:center;
+}
+.code-box-label{ font-size:13px; color:var(--text2); margin-bottom:10px; }
+.code-box-value{
+  font-family:var(--mono); font-size:20px; font-weight:600; color:var(--blue);
+  background:var(--surface); border:1px solid var(--border); border-radius:8px;
+  padding:12px; margin-bottom:12px; letter-spacing:.03em; word-break:break-all;
+}
 </style>
 </head>
 <body>
@@ -438,6 +449,47 @@ function nextRound(){
   }
 }
 
+function simpleHash(str){
+  let h = 2166136261;
+  for(let i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36).toUpperCase();
+}
+
+function generateCompletionCode(finalScore, total){
+  const salt = 'CIS4345-W1-ROSETTA-2026';
+  const raw = finalScore + '-' + total + '-' + salt;
+  const hash = simpleHash(raw).padStart(4, '0').slice(0, 4);
+  return 'CIS4345-W1-' + finalScore + 'OF' + total + '-' + hash;
+}
+
+function copyCode(code, btn){
+  const done = () => {
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(done).catch(() => fallbackCopy(code, done));
+  } else {
+    fallbackCopy(code, done);
+  }
+}
+
+function fallbackCopy(code, cb){
+  const ta = document.createElement('textarea');
+  ta.value = code;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch(e) {}
+  document.body.removeChild(ta);
+  if(cb) cb();
+}
+
 function renderFinal(){
   progressBar.style.width = '100%';
   progressBar.setAttribute('aria-valuenow', '100');
@@ -448,6 +500,8 @@ function renderFinal(){
   else if(pct >= 80) msg = "Strong showing — you clearly did the reading.";
   else if(pct < 50) msg = "Worth another pass through the Week 1 Overview and Reading & Resources pages before Lab 01.";
 
+  const code = generateCompletionCode(score, scenarios.length);
+
   gameArea.innerHTML =
     '<div class="round-card final-screen">' +
       '<div class="round-label">Complete</div>' +
@@ -456,6 +510,11 @@ function renderFinal(){
       '<div class="stat-grid">' +
         '<div class="stat-box"><div class="num">' + score + '</div><div class="lbl">Correct</div></div>' +
         '<div class="stat-box"><div class="num">' + (scenarios.length - score) + '</div><div class="lbl">Missed</div></div>' +
+      '</div>' +
+      '<div class="code-box">' +
+        '<div class="code-box-label">Your completion code — paste this into the Week 1 submission box in Canvas</div>' +
+        '<div class="code-box-value" id="completion-code">' + code + '</div>' +
+        '<button class="next-btn" type="button" id="copy-code-btn" onclick="copyCode(\'' + code + '\', this)">Copy Code</button>' +
       '</div>' +
       '<button class="replay-btn" type="button" onclick="restartGame()">Play Again</button>' +
     '</div>';
