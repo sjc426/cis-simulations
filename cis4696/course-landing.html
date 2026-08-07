@@ -58,6 +58,8 @@
   .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
   h1.title{font-size:50px;font-weight:900;letter-spacing:-0.025em;margin:0 0 12px;max-width:820px;text-shadow:0 0 40px rgba(57,255,136,.3), 0 4px 30px rgba(0,0,0,.7);}
   h1.title .grad{background:linear-gradient(90deg,var(--green2),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  h1.title .flicker{color:var(--text);text-shadow:0 0 8px rgba(57,255,136,.65), 0 0 22px rgba(57,255,136,.4), 0 0 44px rgba(57,255,136,.2);transition:opacity .04s linear, text-shadow .04s linear;}
+  h1.title .flicker.off{opacity:.22;text-shadow:none;}
   .subtitle{color:var(--muted);font-size:17px;max-width:640px;margin:0 0 20px;text-shadow:0 2px 12px rgba(0,0,0,.6);}
 
   .stat-strip{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px;}
@@ -209,7 +211,7 @@
 
   <div class="hero" id="overview">
     <div class="eyebrow"><span style="width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;box-shadow:0 0 8px var(--amber);"></span> CIS 4696 · FALL 2026</div>
-    <h1 class="title">Ethical Hacking &amp; <span class="grad">Intrusion Forensics</span></h1>
+    <h1 class="title">Ethical <span class="flicker">Hacking</span> &amp; <span class="grad">Intrusion Forensics</span></h1>
     <p class="subtitle">Sixteen weeks, one real target: Altoro Mutual, a deliberately vulnerable banking app maintained by IBM for security training. You'll pick every lock yourself before you teach a machine to do it — then flip the script and catch the attacks you just ran.</p>
 
     <div class="stat-strip">
@@ -423,6 +425,38 @@ function drawBg(){
 }
 function loopBg(){if(!reduceMotion){drawBg();}requestAnimationFrame(loopBg);}
 resizeBg();setTimeout(resizeBg, 300);loopBg();
+
+/* ---------- LED / NEON FLICKER ON "HACKING" ---------- */
+(function(){
+  var el = document.querySelector('h1.title .flicker');
+  if(!el || reduceMotion) return;
+  function blip(cb, minMs, maxMs){
+    el.classList.add('off');
+    setTimeout(function(){
+      el.classList.remove('off');
+      if(cb) cb();
+    }, minMs + Math.random()*(maxMs-minMs));
+  }
+  function scheduleNext(){
+    var delay = 1800 + Math.random()*4800;
+    setTimeout(function(){
+      var roll = Math.random();
+      if(roll < 0.3){
+        // quick stutter — two fast blips
+        blip(function(){
+          setTimeout(function(){ blip(scheduleNext, 50, 130); }, 80+Math.random()*140);
+        }, 50, 130);
+      } else if(roll < 0.55){
+        // longer dropout, like the connection cut out for a beat
+        blip(scheduleNext, 250, 550);
+      } else {
+        // single short flicker
+        blip(scheduleNext, 60, 150);
+      }
+    }, delay);
+  }
+  scheduleNext();
+})();
 
 /* ---------- BOOT CONSOLE (jittered, personalized prompt) ---------- */
 function tryGetCanvasFirstName(){
