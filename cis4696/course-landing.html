@@ -166,7 +166,7 @@
   .grade-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px;}
   .grade-bar{flex:1;height:8px;border-radius:5px;background:rgba(255,255,255,.06);overflow:hidden;}
   .grade-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--green),var(--purple));}
-  .grade-label{width:170px;color:var(--muted);}
+  .grade-label{width:230px;flex-shrink:0;color:var(--muted);font-size:12px;}
   .grade-pct{width:36px;text-align:right;font-family:'JetBrains Mono',monospace;color:var(--text);}
 
   .instructor-card{max-width:1100px;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:12px;padding:28px;display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
@@ -321,13 +321,13 @@
     <div class="info-grid reveal">
       <div class="info-card">
         <h3>Grading Breakdown *</h3>
-        <div class="grade-row"><span class="grade-label">Weekly Labs</span><div class="grade-bar"><div class="grade-fill" style="width:20%"></div></div><span class="grade-pct">20%</span></div>
-        <div class="grade-row"><span class="grade-label">Discussions</span><div class="grade-bar"><div class="grade-fill" style="width:15%"></div></div><span class="grade-pct">15%</span></div>
-        <div class="grade-row"><span class="grade-label">Quizzes &amp; Knowledge Checks</span><div class="grade-bar"><div class="grade-fill" style="width:20%"></div></div><span class="grade-pct">20%</span></div>
-        <div class="grade-row"><span class="grade-label">Pentest Report Milestones (WI)</span><div class="grade-bar"><div class="grade-fill" style="width:10%"></div></div><span class="grade-pct">10%</span></div>
-        <div class="grade-row"><span class="grade-label">Midterm Exam</span><div class="grade-bar"><div class="grade-fill" style="width:15%"></div></div><span class="grade-pct">15%</span></div>
-        <div class="grade-row"><span class="grade-label">Final Exam</span><div class="grade-bar"><div class="grade-fill" style="width:20%"></div></div><span class="grade-pct">20%</span></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;">* reconstructed from live Canvas assignment point values — confirm against the real syllabus before publishing</div>
+        <div class="grade-row"><span class="grade-label">Hands-On Lab Activities (10 × 10pt)</span><div class="grade-bar"><div class="grade-fill" style="width:15%"></div></div><span class="grade-pct">15%</span></div>
+        <div class="grade-row"><span class="grade-label">Discussion Forum (WI, 8 × 10pt)</span><div class="grade-bar"><div class="grade-fill" style="width:15%"></div></div><span class="grade-pct">15%</span></div>
+        <div class="grade-row"><span class="grade-label">Ethical Hacking Report — Milestones 1–4 (WI)</span><div class="grade-bar"><div class="grade-fill" style="width:19%"></div></div><span class="grade-pct">19%</span></div>
+        <div class="grade-row"><span class="grade-label">Attendance (weekly, 5pt/meeting)</span><div class="grade-bar"><div class="grade-fill" style="width:10%"></div></div><span class="grade-pct">10%</span></div>
+        <div class="grade-row"><span class="grade-label">Quizzes (5 × 15pt)</span><div class="grade-bar"><div class="grade-fill" style="width:11%"></div></div><span class="grade-pct">11%</span></div>
+        <div class="grade-row"><span class="grade-label">Midterm + Final Exam (100pt each, written + lab practical)</span><div class="grade-bar"><div class="grade-fill" style="width:30%"></div></div><span class="grade-pct">30%</span></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;">* 670 points total — confirmed by Prof. Chang for this term</div>
       </div>
       <div class="info-card">
         <h3>Tools &amp; Accounts Needed</h3>
@@ -348,7 +348,8 @@
         <h3>Prof. Sonny J. Chang</h3>
         <div class="role">Instructor · CIS 4696 · Temple University</div>
         <div class="detail">Course: ST-CIS-4696-001-58761-202636</div>
-        <div class="detail">Lectures: Tuesdays 12:30–1:50pm via Zoom &nbsp;·&nbsp; Start: Aug 24, 2026</div>
+        <div class="detail">Meetings: Tuesdays 5:30–8:00pm EDT &nbsp;·&nbsp; Tuttleman Learning Center 00402</div>
+        <div class="detail">Term: Aug 24 – Dec 15, 2026</div>
         <div class="detail">Office Hours: Tue &amp; Thu 11:30am–12:30pm · or by appointment</div>
         <div class="detail">tud91218@temple.edu</div>
       </div>
