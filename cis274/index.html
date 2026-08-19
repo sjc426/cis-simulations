@@ -326,6 +326,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 .roster-name{display:inline-block;animation-name:ledFlicker;animation-timing-function:linear;animation-iteration-count:infinite;}
 .tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
 .tag.enrolled-cycle{animation:tagCycle 4s linear infinite;}
+
+.mission-active{display:none;opacity:0;margin:0 0 32px;border:1px solid var(--green-dim);background:rgba(0,255,65,0.04);padding:32px 20px;text-align:center;transition:opacity 0.6s;}
+.mission-active-status{font-family:var(--font-mono);font-size:11px;color:var(--green);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;}
+.mission-active-week{font-size:3.5rem;font-weight:900;color:var(--green);line-height:1;margin-bottom:4px;}
+.mission-active-of{font-family:var(--font-mono);font-size:12px;color:var(--green-dim);letter-spacing:0.15em;margin-bottom:28px;}
+.mission-bar-wrap{max-width:600px;margin:0 auto 8px;height:10px;border-radius:2px;overflow:hidden;background:rgba(0,255,65,0.08);}
+.mission-bar-fill{height:100%;background:var(--green);transition:width 1s ease;}
+.mission-bar-label{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);letter-spacing:0.1em;}
 </style>
 </head>
 <body>
@@ -451,6 +459,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
       <div class="clock-unit"><span class="clock-num" id="cd-hours">20</span><span class="clock-label">Hours</span></div>
       <div class="clock-unit"><span class="clock-num" id="cd-mins">45</span><span class="clock-label">Minutes</span></div>
       <div class="clock-unit"><span class="clock-num" id="cd-secs">10</span><span class="clock-label">Seconds</span></div>
+    <div class="mission-active" id="missionActive">
+      <div class="mission-active-status">// MISSION ACTIVE - FALL 2026</div>
+      <div class="mission-active-week" id="maWeek">WEEK --</div>
+      <div class="mission-active-of" id="maOf">OF 15 - ETHICAL HACKING IN PROGRESS</div>
+      <div class="mission-bar-wrap"><div class="mission-bar-fill" id="maBar" style="width:0%"></div></div>
+      <div class="mission-bar-label" id="maBarLabel"></div>
     </div>
 
     <div class="two-col">
@@ -1058,10 +1072,16 @@ function updateClock(){
   const now=new Date();
   const diff=target-now;
   if(diff<=0){
-    document.getElementById('cd-days').textContent='00';
-    document.getElementById('cd-hours').textContent='00';
-    document.getElementById('cd-mins').textContent='00';
-    document.getElementById('cd-secs').textContent='00';
+    if(document.getElementById('missionActive').style.display!=='block'){
+      const cd=document.querySelector('.clock-display');cd.style.cssText+=';opacity:0;transition:opacity 0.6s;';
+      setTimeout(()=>{cd.style.display='none';const ma=document.getElementById('missionActive');ma.style.display='block';setTimeout(()=>{ma.style.opacity='1';},30);},650);
+    }
+    const start=new Date('2026-09-08T08:00:00');
+    const week=Math.min(15,Math.floor((new Date()-start)/604800000)+1);
+    const pct=Math.round(week/15*100);
+    document.getElementById('maWeek').textContent='WEEK '+week;
+    document.getElementById('maBar').style.width=pct+'%';
+    document.getElementById('maBarLabel').textContent='Week '+week+' of 15 - '+pct+'% through the semester';
     return;
   }
   const d=Math.floor(diff/86400000);

@@ -401,6 +401,14 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-fa
   #sitenav nav a{font-size:9px;padding:3px 6px}
   .stat-row{grid-template-columns:repeat(2,1fr)}
 }
+
+.mission-active{display:none;opacity:0;margin:0 0 32px;border:1px solid var(--blue-dim);background:rgba(4,159,217,0.04);padding:32px 20px;text-align:center;transition:opacity 0.6s;}
+.mission-active-status{font-family:var(--font-mono);font-size:11px;color:var(--blue);letter-spacing:0.2em;text-transform:uppercase;margin-bottom:20px;}
+.mission-active-week{font-size:3.5rem;font-weight:900;color:var(--blue);line-height:1;margin-bottom:4px;}
+.mission-active-of{font-family:var(--font-mono);font-size:12px;color:var(--blue-dim);letter-spacing:0.15em;margin-bottom:28px;}
+.mission-bar-wrap{max-width:600px;margin:0 auto 8px;height:10px;border-radius:2px;overflow:hidden;background:rgba(4,159,217,0.10);}
+.mission-bar-fill{height:100%;background:var(--blue);transition:width 1s ease;}
+.mission-bar-label{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);letter-spacing:0.1em;}
 </style>
 </head>
 <body>
@@ -577,6 +585,12 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-fa
       <div class="clock-unit"><span class="clock-num" id="cdHours" aria-label="hours">--</span><span class="clock-label">Hours</span></div>
       <div class="clock-unit"><span class="clock-num" id="cdMins" aria-label="minutes">--</span><span class="clock-label">Minutes</span></div>
       <div class="clock-unit"><span class="clock-num" id="cdSecs" aria-label="seconds">--</span><span class="clock-label">Seconds</span></div>
+    <div class="mission-active" id="missionActive">
+      <div class="mission-active-status">// MISSION ACTIVE - FALL 2026</div>
+      <div class="mission-active-week" id="maWeek">WEEK --</div>
+      <div class="mission-active-of" id="maOf">OF 15 - ROUTING & SWITCHING IN PROGRESS</div>
+      <div class="mission-bar-wrap"><div class="mission-bar-fill" id="maBar" style="width:0%"></div></div>
+      <div class="mission-bar-label" id="maBarLabel"></div>
     </div>
     <div class="mission-brief" role="note" aria-label="Course mission brief">
       <div class="brief-line">// MISSION BRIEF — CIS 256 FA26</div>
@@ -1129,7 +1143,19 @@ buildFeed(document.getElementById('netFeed'),netEvents,400);
 function updateClock(){
   const target=new Date('2026-09-08T08:00:00');
   const diff=target-new Date();
-  if(diff<=0){['cdDays','cdHours','cdMins','cdSecs'].forEach(id=>{document.getElementById(id).textContent='00'});return;}
+  if(diff<=0){
+    if(document.getElementById('missionActive').style.display!=='block'){
+      const cd=document.querySelector('.clock-display');cd.style.cssText+=';opacity:0;transition:opacity 0.6s;';
+      setTimeout(()=>{cd.style.display='none';const ma=document.getElementById('missionActive');ma.style.display='block';setTimeout(()=>{ma.style.opacity='1';},30);},650);
+    }
+    const start=new Date('2026-09-08T08:00:00');
+    const week=Math.min(15,Math.floor((new Date()-start)/604800000)+1);
+    const pct=Math.round(week/15*100);
+    document.getElementById('maWeek').textContent='WEEK '+week;
+    document.getElementById('maBar').style.width=pct+'%';
+    document.getElementById('maBarLabel').textContent='Week '+week+' of 15 - '+pct+'% through the semester';
+    return;
+  }
   const d=Math.floor(diff/86400000),h=Math.floor((diff%86400000)/3600000),m=Math.floor((diff%3600000)/60000),s=Math.floor((diff%60000)/1000);
   document.getElementById('cdDays').textContent=String(d).padStart(2,'0');
   document.getElementById('cdHours').textContent=String(h).padStart(2,'0');
