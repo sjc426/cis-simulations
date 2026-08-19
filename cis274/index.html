@@ -631,14 +631,22 @@ const bootLines=[
   rLine.className='terminal-line prompt active';
   rLine.textContent='> Loading class roster ...';
   el.appendChild(rLine);
-  await new Promise(r=>setTimeout(r,600));
+  await new Promise(r=>setTimeout(r,400));
+  var rN=ROSTER_FIRST_NAMES.slice().sort();
+  for(var k=0;k<rN.length;k++){
+    await new Promise(r=>setTimeout(r,90+Math.random()*60));
+    var nDiv=document.createElement('div');
+    nDiv.className='terminal-line dim active';
+    var dur=(1.8+Math.random()*2.2).toFixed(2);
+    nDiv.innerHTML='  <span class="roster-name" style="animation-duration:'+dur+'s;">'+rN[k]+'</span>';
+    el.appendChild(nDiv);
+  }
+  await new Promise(r=>setTimeout(r,300));
   var eDiv=document.createElement('div');
   eDiv.className='terminal-line info active';
-  var rN=ROSTER_FIRST_NAMES.slice().sort(function(){return Math.random()-0.5;});
-  var fH=rN.map(function(n,i){var d=(i*0.18).toFixed(2);var dur=(1.8+Math.random()*2.2).toFixed(2);return '<span class="roster-name" style="animation-delay:'+d+'s;animation-duration:'+dur+'s;">'+n+'</span>';}).join(', ');
-  eDiv.innerHTML='<span class="tag enrolled-cycle">Enrolled</span>: '+fH+' — <span class="warn">MAX CAPACITY</span>';
+  eDiv.innerHTML='<span class="tag enrolled-cycle">Enrolled</span> '+rN.length+' operators — <span class="warn">MAX CAPACITY</span>';
   el.appendChild(eDiv);
-  await new Promise(r=>setTimeout(r,800));
+  await new Promise(r=>setTimeout(r,600));
   var sDiv=document.createElement('div');
   sDiv.className='terminal-line prompt active';
   sDiv.textContent='> System ready.';
