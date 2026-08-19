@@ -410,6 +410,8 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-fa
 .mission-bar-fill{height:100%;background:var(--blue);transition:width 1s ease;}
 .mission-bar-label{font-family:var(--font-mono);font-size:11px;color:var(--blue-dim);letter-spacing:0.1em;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
 </head>
 <body>
 
@@ -585,6 +587,7 @@ footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-fa
       <div class="clock-unit"><span class="clock-num" id="cdHours" aria-label="hours">--</span><span class="clock-label">Hours</span></div>
       <div class="clock-unit"><span class="clock-num" id="cdMins" aria-label="minutes">--</span><span class="clock-label">Minutes</span></div>
       <div class="clock-unit"><span class="clock-num" id="cdSecs" aria-label="seconds">--</span><span class="clock-label">Seconds</span></div>
+    </div>
     <div class="mission-active" id="missionActive">
       <div class="mission-active-status">// MISSION ACTIVE - FALL 2026</div>
       <div class="mission-active-week" id="maWeek">WEEK --</div>
@@ -881,83 +884,31 @@ const aiSeq=[
   let packetT=0,packetEdgeIdx=0;
   const packetPath=['internet','r1','r2','sw1','pc1'];
 
-  // ── WORLD MAP — simplified continent outlines as canvas paths ──────────────
-  // Scaled to fit canvas W×H using equirectangular approximation
-  // Paths are hand-simplified polygons of the major landmasses
+  // ── WORLD MAP — D3 geoEquirectangular + topojson (realistic) ──────────────
+  var _cisLand=null,_cisPath256=null;
   function drawWorldMap(){
-    const scx=x=>x*W, scy=y=>y*H;
     ctx.save();
-
-    // ── Ocean base fill (very subtle deep blue tint) ──
-    ctx.fillStyle='rgba(4,30,60,0.35)';
-    ctx.fillRect(0,0,W,H);
-
-    // ── Lat/lon grid — drawn FIRST, behind continents ──
-    ctx.strokeStyle='rgba(0,188,235,0.18)';
-    ctx.lineWidth=0.6;
-    for(let gx=0;gx<=1.01;gx+=0.1){
-      ctx.beginPath();ctx.moveTo(scx(gx),0);ctx.lineTo(scx(gx),H);ctx.stroke();
+    ctx.fillStyle='rgba(4,30,60,0.38)';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(0,188,235,0.14)';ctx.lineWidth=0.6;ctx.setLineDash([]);
+    for(var gx=0;gx<=1.01;gx+=0.1){ctx.beginPath();ctx.moveTo(gx*W,0);ctx.lineTo(gx*W,H);ctx.stroke();}
+    for(var gy=0;gy<=1.01;gy+=0.2){ctx.beginPath();ctx.moveTo(0,gy*H);ctx.lineTo(W,gy*H);ctx.stroke();}
+    ctx.strokeStyle='rgba(0,229,255,0.22)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(0,H*0.5);ctx.lineTo(W,H*0.5);ctx.stroke();
+    if(_cisLand&&_cisPath256){
+      ctx.fillStyle='rgba(4,80,140,0.50)';
+      ctx.beginPath();_cisPath256(_cisLand);ctx.fill();
+      ctx.strokeStyle='rgba(0,188,235,0.80)';ctx.lineWidth=0.9;
+      ctx.beginPath();_cisPath256(_cisLand);ctx.stroke();
     }
-    for(let gy=0;gy<=1.01;gy+=0.2){
-      ctx.beginPath();ctx.moveTo(0,scy(gy));ctx.lineTo(W,scy(gy));ctx.stroke();
-    }
-    // Equator highlight
-    ctx.strokeStyle='rgba(0,229,255,0.25)';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(0,scy(0.5));ctx.lineTo(W,scy(0.5));ctx.stroke();
-
-    // ── Continent fill and stroke ──
-    function landPath(pts){
-      ctx.beginPath();
-      ctx.moveTo(scx(pts[0][0]),scy(pts[0][1]));
-      for(let i=1;i<pts.length;i++)ctx.lineTo(scx(pts[i][0]),scy(pts[i][1]));
-      ctx.closePath();
-      ctx.fillStyle='rgba(4,80,140,0.45)';   // solid blue landmass
-      ctx.fill();
-      ctx.strokeStyle='rgba(0,188,235,0.80)'; // bright cyan outline
-      ctx.lineWidth=1.2;
-      ctx.stroke();
-    }
-
-    // North America
-    landPath([[0.05,0.12],[0.07,0.08],[0.12,0.07],[0.18,0.08],[0.22,0.10],[0.26,0.12],[0.27,0.15],
-              [0.24,0.18],[0.26,0.22],[0.28,0.26],[0.26,0.30],[0.24,0.34],[0.22,0.38],[0.18,0.42],
-              [0.16,0.44],[0.14,0.42],[0.12,0.38],[0.10,0.34],[0.08,0.28],[0.06,0.22],[0.05,0.18]]);
-    // Central America
-    landPath([[0.20,0.42],[0.22,0.44],[0.22,0.47],[0.20,0.48],[0.19,0.46],[0.19,0.44]]);
-    // South America
-    landPath([[0.22,0.48],[0.25,0.46],[0.28,0.47],[0.30,0.50],[0.32,0.54],[0.32,0.60],[0.30,0.66],
-              [0.28,0.72],[0.26,0.78],[0.24,0.82],[0.22,0.80],[0.20,0.76],[0.18,0.70],[0.18,0.64],
-              [0.20,0.58],[0.20,0.52]]);
-    // Europe
-    landPath([[0.44,0.10],[0.46,0.08],[0.50,0.09],[0.53,0.10],[0.54,0.13],[0.52,0.16],[0.50,0.18],
-              [0.48,0.20],[0.46,0.20],[0.44,0.18],[0.43,0.15]]);
-    // Scandinavia
-    landPath([[0.46,0.07],[0.48,0.05],[0.50,0.06],[0.50,0.09],[0.48,0.10],[0.46,0.09]]);
-    // Africa
-    landPath([[0.44,0.22],[0.47,0.20],[0.52,0.21],[0.56,0.23],[0.58,0.27],[0.58,0.34],[0.56,0.40],
-              [0.54,0.48],[0.52,0.56],[0.50,0.62],[0.48,0.66],[0.46,0.64],[0.44,0.58],[0.42,0.50],
-              [0.42,0.42],[0.42,0.34],[0.43,0.28]]);
-    // Asia (main body)
-    landPath([[0.54,0.10],[0.58,0.08],[0.64,0.08],[0.70,0.10],[0.76,0.12],[0.80,0.15],[0.82,0.18],
-              [0.84,0.22],[0.84,0.28],[0.82,0.32],[0.80,0.34],[0.76,0.35],[0.72,0.34],[0.68,0.32],
-              [0.66,0.30],[0.64,0.28],[0.62,0.26],[0.60,0.24],[0.58,0.22],[0.56,0.20],[0.54,0.18],
-              [0.53,0.15]]);
-    // India
-    landPath([[0.62,0.28],[0.64,0.30],[0.65,0.34],[0.64,0.38],[0.62,0.40],[0.60,0.38],[0.59,0.34],[0.60,0.30]]);
-    // SE Asia peninsula
-    landPath([[0.72,0.34],[0.74,0.36],[0.74,0.40],[0.72,0.42],[0.70,0.40],[0.70,0.36]]);
-    // Australia
-    landPath([[0.74,0.60],[0.78,0.58],[0.82,0.58],[0.86,0.60],[0.88,0.64],[0.88,0.70],[0.86,0.74],
-              [0.82,0.76],[0.78,0.76],[0.74,0.74],[0.72,0.70],[0.72,0.64]]);
-    // Greenland
-    landPath([[0.18,0.06],[0.22,0.04],[0.26,0.05],[0.28,0.08],[0.26,0.11],[0.22,0.12],[0.18,0.10]]);
-    // UK / Ireland
-    landPath([[0.43,0.11],[0.44,0.10],[0.45,0.12],[0.44,0.14],[0.43,0.13]]);
-    // Japan
-    landPath([[0.82,0.18],[0.84,0.17],[0.85,0.20],[0.84,0.22],[0.82,0.21]]);
-
     ctx.restore();
   }
+  (function(){
+    var proj=d3.geoEquirectangular().scale(W/6.3).translate([W/2,H/2]);
+    _cisPath256=d3.geoPath().context(ctx).projection(proj);
+    fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+      .then(function(r){return r.json();})
+      .then(function(world){_cisLand=topojson.feature(world,world.objects.land);});
+  })();
 
   // ── EDGE drawing: thick glowing links ───────────────────────────────────────
   function drawEdgeFull(a,b,progress){
