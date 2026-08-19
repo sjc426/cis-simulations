@@ -170,8 +170,8 @@ body::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;backgr
    SECTION 3 — THREAT GLOBE
 ══════════════════════════════════════════ */
 #globe-section{position:relative;z-index:10;padding:80px 20px;border-bottom:1px solid var(--border)}
-.globe-container{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
-#globe-canvas{width:100%;aspect-ratio:1;max-width:380px;margin:0 auto;display:block}
+.globe-container{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;overflow:visible;}
+#globe-canvas{max-width:380px;margin:0 auto;display:block;overflow:visible;}
 .globe-data{padding:10px}
 .threat-feed{margin-top:20px}
 .feed-title{font-family:var(--font-mono);font-size:11px;color:var(--red);letter-spacing:0.2em;margin-bottom:12px;text-transform:uppercase}
@@ -414,7 +414,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <h2 class="section-title">GLOBAL <span>THREAT MAP</span></h2>
   </div>
   <div class="globe-container">
-    <canvas id="globe-canvas" width="380" height="380"></canvas>
+    <svg id="globe-canvas"></svg>
     <div class="globe-data">
       <p class="globe-desc">Every second, thousands of cyberattacks cross the globe. <strong>This is what you will learn to defend against — and simulate legally.</strong> CIS 274 trains you to think like the attacker.</p>
       <div class="threat-feed">
@@ -593,6 +593,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
   </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script>
 // ── PARTICLE BACKGROUND ─────────────────────────────────────────
 (function(){
@@ -819,191 +821,103 @@ function activateTerminal(){
 }
 // ── THREAT GLOBE ────────────────────────────────────────────────
 (function(){
-  const c=document.getElementById('globe-canvas');
-  const ctx=c.getContext('2d');
-  const W=380,H=380,R=150,cx=W/2,cy=H/2;
-  let angle=0;
-
-  // ── CONTINENT POLYGONS (lat/lon pairs) ──
-  // Simplified but recognizable outlines
-  const continents = [
-    // North America
-    [[72,-140],[70,-130],[68,-100],[70,-85],[73,-80],[68,-75],[60,-65],[50,-55],[47,-53],[45,-60],[42,-70],[35,-75],[25,-80],[20,-87],[15,-85],[10,-83],[8,-77],[9,-79],[20,-105],[22,-110],[30,-115],[32,-117],[38,-122],[48,-124],[55,-130],[60,-135],[68,-140],[72,-140]],
-    // South America
-    [[-5,-80],[-2,-50],[0,-50],[5,-52],[10,-62],[12,-71],[10,-75],[-5,-81],[-18,-70],[-33,-71],[-40,-62],[-52,-68],[-55,-65],[-55,-68],[-40,-73],[-30,-71],[-22,-43],[-10,-37],[-5,-35],[0,-50],[-5,-80]],
-    // Europe
-    [[72,28],[70,25],[65,15],[62,5],[58,5],[52,3],[48,0],[44,0],[38,0],[36,5],[37,14],[42,18],[40,28],[42,40],[48,40],[55,35],[60,25],[64,26],[68,28],[72,28]],
-    // Africa
-    [[37,10],[30,32],[15,42],[12,44],[2,40],[-5,39],[-26,33],[-35,18],[-34,26],[-17,35],[-10,40],[0,42],[10,44],[20,38],[30,32],[37,10]],
-    [[37,10],[35,-5],[30,-13],[20,-17],[10,-16],[5,-5],[0,9],[0,10],[5,3],[10,-1],[20,15],[30,30],[37,10]],
-    // Asia
-    [[72,140],[65,141],[60,140],[55,135],[50,142],[45,135],[40,125],[35,120],[30,120],[25,120],[20,110],[15,108],[10,105],[5,100],[0,104],[5,80],[10,77],[20,73],[25,67],[30,60],[35,60],[40,52],[42,40],[48,40],[55,60],[60,55],[65,58],[70,68],[72,68],[75,100],[72,140]],
-    // Australia
-    [[-15,130],[-12,136],[-15,145],[-22,150],[-32,152],[-38,145],[-38,140],[-35,137],[-32,133],[-26,113],[-22,113],[-17,122],[-15,130]],
-    // Greenland
-    [[83,-45],[82,-20],[76,-18],[72,-22],[70,-52],[72,-60],[76,-68],[80,-65],[83,-45]],
-    // Japan
-    [[35,135],[36,136],[38,140],[43,141],[42,143],[38,141],[34,136],[33,131],[35,135]],
-    // UK
-    [[58,-3],[57,0],[53,0],[50,0],[51,-5],[55,-5],[58,-3]]
+  var size=380,scale=size*0.40,cx=size/2,cy=size/2,rot=[-20,-20];
+  var svg=d3.select('#globe-canvas').attr('width',size).attr('height',size);
+  var proj=d3.geoOrthographic().scale(scale).translate([cx,cy]).clipAngle(90).rotate(rot);
+  var pathGen=d3.geoPath().projection(proj);
+  var defs=svg.append('defs');
+  var sg=defs.append('radialGradient').attr('id','sg274').attr('cx','35%').attr('cy','35%');
+  sg.append('stop').attr('offset','0%').attr('stop-color','#0a2010');
+  sg.append('stop').attr('offset','60%').attr('stop-color','#041008');
+  sg.append('stop').attr('offset','100%').attr('stop-color','#010301');
+  var ag=defs.append('radialGradient').attr('id','ag274').attr('cx','50%').attr('cy','50%');
+  ag.append('stop').attr('offset','82%').attr('stop-color','rgba(0,255,65,0)');
+  ag.append('stop').attr('offset','100%').attr('stop-color','rgba(0,255,65,0.18)');
+  defs.append('clipPath').attr('id','clip274').append('circle').attr('cx',cx).attr('cy',cy).attr('r',scale);
+  var fl=defs.append('filter').attr('id','rglow274').attr('x','-60%').attr('y','-60%').attr('width','220%').attr('height','220%');
+  fl.append('feGaussianBlur').attr('in','SourceGraphic').attr('stdDeviation','3').attr('result','blur');
+  var fm=fl.append('feMerge');
+  fm.append('feMergeNode').attr('in','blur');fm.append('feMergeNode').attr('in','SourceGraphic');
+  var rg=defs.append('radialGradient').attr('id','rg274').attr('cx','50%').attr('cy','50%').attr('r','50%');
+  rg.append('stop').attr('offset','80%').attr('stop-color','rgba(0,255,65,0)');
+  rg.append('stop').attr('offset','100%').attr('stop-color','rgba(0,255,65,0.15)');
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',scale+22).attr('fill','url(#ag274)');
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',scale).attr('fill','url(#sg274)').attr('stroke','rgba(0,255,65,0.6)').attr('stroke-width',1.5);
+  var clipG=svg.append('g').attr('clip-path','url(#clip274)');
+  var gratP=clipG.append('path').attr('fill','none').attr('stroke','rgba(0,255,65,0.22)').attr('stroke-width',0.6);
+  var landP=clipG.append('path').attr('fill','rgba(0,180,60,0.22)').attr('stroke','rgba(0,255,65,0.55)').attr('stroke-width',0.8);
+  var atkG=svg.append('g');
+  var cityG=svg.append('g').attr('clip-path','url(#clip274)');
+  svg.append('circle').attr('cx',cx).attr('cy',cy).attr('r',scale).attr('fill','url(#rg274)');
+  var cities=[
+    {name:'Philadelphia',lat:40, lon:-75,color:'#00ff41',home:true},
+    {name:'New York',    lat:41, lon:-74,color:'#00ff41'},
+    {name:'London',      lat:51, lon:0,  color:'#00e5ff'},
+    {name:'Moscow',      lat:56, lon:37, color:'#ff2040'},
+    {name:'Beijing',     lat:40, lon:116,color:'#ff2040'},
+    {name:'Seoul',       lat:37, lon:127,color:'#ff2040'},
+    {name:'Tehran',      lat:36, lon:51, color:'#ff2040'},
+    {name:'Lagos',       lat:7,  lon:3,  color:'#ffaa00'},
+    {name:'Sao Paulo',   lat:-24,lon:-47,color:'#00e5ff'},
+    {name:'Tokyo',       lat:36, lon:140,color:'#00e5ff'},
+    {name:'Sydney',      lat:-34,lon:151,color:'#00e5ff'},
+    {name:'Dubai',       lat:25, lon:55, color:'#ffaa00'},
   ];
-
-  const cities=[
-    {name:'Philadelphia',lat:40,lon:-75,color:'#00ff41',home:true},
-    {name:'New York',lat:41,lon:-74,color:'#00ff41'},
-    {name:'London',lat:51,lon:-0,color:'#00e5ff'},
-    {name:'Moscow',lat:56,lon:37,color:'#ff2040'},
-    {name:'Beijing',lat:40,lon:116,color:'#ff2040'},
-    {name:'Seoul',lat:37,lon:127,color:'#ff2040'},
-    {name:'Tehran',lat:36,lon:51,color:'#ff2040'},
-    {name:'Lagos',lat:7,lon:3,color:'#ffaa00'},
-    {name:'Sao Paulo',lat:-24,lon:-47,color:'#00e5ff'},
-    {name:'Tokyo',lat:36,lon:140,color:'#00e5ff'},
-    {name:'Sydney',lat:-34,lon:151,color:'#00e5ff'},
-    {name:'Dubai',lat:25,lon:55,color:'#ffaa00'},
-  ];
-
-  function latLonTo3D(lat,lon){
-    const phi=(90-lat)*Math.PI/180;
-    const theta=(lon+angle)*Math.PI/180;
-    return{
-      x:R*Math.sin(phi)*Math.cos(theta),
-      y:R*Math.cos(phi),
-      z:R*Math.sin(phi)*Math.sin(theta)
-    };
+  function vis(lon,lat){
+    var r=proj.rotate(),l0=-r[0]*Math.PI/180,p0=-r[1]*Math.PI/180,l1=lon*Math.PI/180,p1=lat*Math.PI/180;
+    return Math.sin(p0)*Math.sin(p1)+Math.cos(p0)*Math.cos(p1)*Math.cos(l1-l0)>0;
   }
-  function project(p){return{x:cx+p.x,y:cy-p.y,z:p.z}}
-
-  // Draw a continent polygon clipped to front hemisphere
-  function drawContinent(coords){
-    // Convert all points
-    const pts = coords.map(([lat,lon])=>{
-      const p3 = latLonTo3D(lat,lon);
-      return {proj:project(p3), z:p3.z};
-    });
-    // Only draw if majority of points are on front face
-    const frontCount = pts.filter(p=>p.z>=0).length;
-    if(frontCount < 2) return;
-    ctx.beginPath();
-    let started=false;
-    pts.forEach(p=>{
-      if(p.z>=0){
-        if(!started){ctx.moveTo(p.proj.x,p.proj.y);started=true;}
-        else ctx.lineTo(p.proj.x,p.proj.y);
-      } else { started=false; }
-    });
-    ctx.closePath();
-    ctx.fillStyle='rgba(0,180,60,0.22)';
-    ctx.fill();
-    ctx.strokeStyle='rgba(0,255,65,0.55)';
-    ctx.lineWidth=0.8;
-    ctx.stroke();
-  }
-
-  const attacks=[];
+  var attacks=[];
   function spawnAttack(){
-    const attackers=cities.filter(c=>['Moscow','Beijing','Seoul','Tehran'].includes(c.name));
-    const defenders=cities.filter(c=>['Philadelphia','New York','London'].includes(c.name));
-    const src=attackers[Math.floor(Math.random()*attackers.length)];
-    const dst=defenders[Math.floor(Math.random()*defenders.length)];
-    attacks.push({src,dst,progress:0,speed:0.004+Math.random()*0.003});
+    var atkers=cities.filter(function(c){return ['Moscow','Beijing','Seoul','Tehran'].indexOf(c.name)>=0;});
+    var dfnds=cities.filter(function(c){return ['Philadelphia','New York','London'].indexOf(c.name)>=0;});
+    var src=atkers[Math.floor(Math.random()*atkers.length)];
+    var dst=dfnds[Math.floor(Math.random()*dfnds.length)];
+    attacks.push({src:src,dst:dst,progress:0,speed:0.004+Math.random()*0.003});
   }
   setInterval(spawnAttack,1800);spawnAttack();
-
-  function drawGlobe(){
-    ctx.clearRect(0,0,W,H);
-
-    // Atmosphere glow
-    const atmGrad=ctx.createRadialGradient(cx,cy,R-10,cx,cy,R+22);
-    atmGrad.addColorStop(0,'rgba(0,255,65,0.20)');
-    atmGrad.addColorStop(0.5,'rgba(0,255,65,0.07)');
-    atmGrad.addColorStop(1,'rgba(0,255,65,0)');
-    ctx.beginPath();ctx.arc(cx,cy,R+22,0,Math.PI*2);
-    ctx.fillStyle=atmGrad;ctx.fill();
-
-    // Globe sphere base
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
-    const grad=ctx.createRadialGradient(cx-40,cy-40,R*0.1,cx+20,cy+20,R*1.1);
-    grad.addColorStop(0,'#0a2010');
-    grad.addColorStop(0.5,'#041008');
-    grad.addColorStop(1,'#010301');
-    ctx.fillStyle=grad;ctx.fill();
-    ctx.strokeStyle='rgba(0,255,65,0.6)';ctx.lineWidth=1.5;ctx.stroke();
-
-    // Clip to globe circle for all interior drawing
-    ctx.save();
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.clip();
-
-    // Grid lines (lat/lon)
-    for(let lat=-60;lat<=60;lat+=30){
-      ctx.beginPath();let first=true;
-      for(let lon=-180;lon<=180;lon+=4){
-        const p=project(latLonTo3D(lat,lon));
-        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
-        else first=true;
-      }
-      ctx.strokeStyle='rgba(0,255,65,0.30)';ctx.lineWidth=0.7;ctx.stroke();
-    }
-    for(let lon=-180;lon<=180;lon+=30){
-      ctx.beginPath();let first=true;
-      for(let lat=-85;lat<=85;lat+=4){
-        const p=project(latLonTo3D(lat,lon));
-        if(p.z>0){first?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y);first=false;}
-        else first=true;
-      }
-      ctx.strokeStyle='rgba(0,255,65,0.30)';ctx.lineWidth=0.7;ctx.stroke();
-    }
-
-    // Continents
-    continents.forEach(drawContinent);
-
-    // Attack arcs
-    attacks.forEach((atk,i)=>{
+  function render(){
+    rot[0]+=0.12;proj.rotate(rot);
+    gratP.attr('d',pathGen(d3.geoGraticule().step([30,30])()));
+    if(landP.datum()) landP.attr('d',pathGen);
+    atkG.selectAll('*').remove();
+    attacks=attacks.filter(function(a){return a.progress<=1.3;});
+    attacks.forEach(function(atk){
       atk.progress+=atk.speed;
-      if(atk.progress>1){attacks.splice(i,1);return;}
-      const s3=latLonTo3D(atk.src.lat,atk.src.lon);
-      const d3=latLonTo3D(atk.dst.lat,atk.dst.lon);
-      if(s3.z<0&&d3.z<0)return;
-      const sp=project(s3),dp=project(d3);
-      const mx=(sp.x+dp.x)/2,my=(sp.y+dp.y)/2-55;
-      const t=atk.progress;
-      const px=Math.pow(1-t,2)*sp.x+2*(1-t)*t*mx+Math.pow(t,2)*dp.x;
-      const py=Math.pow(1-t,2)*sp.y+2*(1-t)*t*my+Math.pow(t,2)*dp.y;
-      ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);
-      ctx.fillStyle='rgba(255,32,64,0.95)';
-      ctx.shadowColor='#ff2040';ctx.shadowBlur=10;
-      ctx.fill();ctx.shadowBlur=0;
-    });
-
-    // City dots
-    cities.forEach(city=>{
-      const p=project(latLonTo3D(city.lat,city.lon));
-      if(p.z<0)return;
-      ctx.beginPath();ctx.arc(p.x,p.y,city.home?5:3,0,Math.PI*2);
-      ctx.fillStyle=city.color;
-      ctx.shadowColor=city.color;ctx.shadowBlur=6;
-      ctx.fill();ctx.shadowBlur=0;
-      if(city.home){
-        ctx.beginPath();ctx.arc(p.x,p.y,9,0,Math.PI*2);
-        ctx.strokeStyle='rgba(0,255,65,0.5)';ctx.lineWidth=1;ctx.stroke();
+      if(atk.progress>1.3) return;
+      var interp=d3.geoInterpolate([atk.src.lon,atk.src.lat],[atk.dst.lon,atk.dst.lat]);
+      var N=50,fullC=[];
+      for(var s=0;s<=N;s++) fullC.push(interp(s/N));
+      atkG.append('path').attr('d',pathGen({type:'Feature',geometry:{type:'LineString',coordinates:fullC}}))
+        .attr('fill','none').attr('stroke','rgba(255,32,64,0.18)').attr('stroke-width',1).attr('stroke-dasharray','4,3');
+      var maxT=Math.min(atk.progress,1.0),partC=[];
+      for(var s=0;s<=40;s++) partC.push(interp((s/40)*maxT));
+      atkG.append('path').attr('d',pathGen({type:'Feature',geometry:{type:'LineString',coordinates:partC}}))
+        .attr('fill','none').attr('stroke','rgba(255,32,64,0.88)').attr('stroke-width',2).attr('stroke-linecap','round');
+      var tipPx=proj(interp(maxT));
+      if(tipPx) atkG.append('circle').attr('cx',tipPx[0]).attr('cy',tipPx[1]).attr('r',3.5).attr('fill','#ff2040').attr('filter','url(#rglow274)');
+      if(atk.progress>0.88&&atk.progress<1.3){
+        var dstPx=proj([atk.dst.lon,atk.dst.lat]);
+        if(dstPx){var pulse=(atk.progress-0.88)/0.42;
+          atkG.append('circle').attr('cx',dstPx[0]).attr('cy',dstPx[1]).attr('r',4+pulse*16).attr('fill','none').attr('stroke','rgba(255,32,64,'+(0.7*(1-pulse))+')').attr('stroke-width',1.5);}
       }
     });
-
-    ctx.restore();
-
-    // Rim highlight (specular)
-    const rimGrad=ctx.createRadialGradient(cx-50,cy-50,R*0.6,cx,cy,R);
-    rimGrad.addColorStop(0,'rgba(0,255,65,0.0)');
-    rimGrad.addColorStop(0.85,'rgba(0,255,65,0.0)');
-    rimGrad.addColorStop(1,'rgba(0,255,65,0.15)');
-    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
-    ctx.fillStyle=rimGrad;ctx.fill();
-
-    angle+=0.12;
-    requestAnimationFrame(drawGlobe);
+    cityG.selectAll('*').remove();
+    cities.forEach(function(city){
+      if(!vis(city.lon,city.lat)) return;
+      var p=proj([city.lon,city.lat]);if(!p) return;
+      if(city.home){cityG.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',9).attr('fill','none').attr('stroke','rgba(0,255,65,0.5)').attr('stroke-width',1);}
+      cityG.append('circle').attr('cx',p[0]).attr('cy',p[1]).attr('r',city.home?5:3).attr('fill',city.color);
+      cityG.append('text').attr('x',p[0]+(p[0]>cx?7:-7)).attr('y',p[1]+3).attr('text-anchor',p[0]>cx?'start':'end')
+        .attr('font-size','8px').attr('font-family','monospace').attr('fill',city.color).attr('opacity',0.85).text(city.name);
+    });
   }
-  drawGlobe();
+  fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+    .then(function(r){return r.json();})
+    .then(function(world){landP.datum(topojson.feature(world,world.objects.land));d3.timer(render);})
+    .catch(function(){d3.timer(render);});
 })();
+
 // ── THREAT FEED ─────────────────────────────────────────────────
 const threatData=[
   {src:'CN-Beijing',dst:'US-Philly',type:'SQLi'},
