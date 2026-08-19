@@ -320,7 +320,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
   .hero-title .flicker-hacking{opacity:1;color:var(--white);text-shadow:none;}
   .hero-title .flicker-pentest{opacity:1;color:var(--green);text-shadow:none;}
 }
-.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes ledFlicker{0%,100%{opacity:1}4%{opacity:.4}8%{opacity:1}15%{opacity:.7}20%{opacity:1}55%{opacity:1}57%{opacity:.3}60%{opacity:1}}
+@keyframes tagCycle{0%,100%{background:var(--green);color:#000}50%{background:var(--green-dim);color:var(--green)}}
+.roster-name{display:inline-block;animation-name:ledFlicker;animation-timing-function:linear;animation-iteration-count:infinite;}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;}
+.tag.enrolled-cycle{animation:tagCycle 4s linear infinite;}
+</style>
 </head>
 <body>
 
@@ -594,6 +600,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 })();
 
 // ── BOOT SEQUENCE ───────────────────────────────────────────────
+var ROSTER_FIRST_NAMES=["Ameryth","Aneudy","Clifton","Elijah","Enmanuel","Jaclyn","Jadha","Jontae","Jude","Leonard","Mariam","Sasha","Tran","Tyler","Yasir"];
 const bootLines=[
   {t:'dim', text:'BIOS v2.74 ... OK'},
   {t:'dim', text:'Loading kernel modules ... OK'},
@@ -607,7 +614,6 @@ const bootLines=[
   {t:'prompt',text:'> Loading mission parameters ...'},
   {t:'info', text:'COURSE: CIS 274 — ETHICAL HACKING & PENETRATION TESTING'},
   {t:'info', text:'SEMESTER: FALL 2026 | INSTITUTION: CCP'},
-  {t:'prompt',text:'> System ready.'},
 ];
 
 (async function bootAnim(){
@@ -619,6 +625,24 @@ const bootLines=[
     div.textContent=bootLines[i].text;
     el.appendChild(div);
   }
+  // Roster anim
+  await new Promise(r=>setTimeout(r,220));
+  var rLine=document.createElement('div');
+  rLine.className='terminal-line prompt active';
+  rLine.textContent='> Loading class roster ...';
+  el.appendChild(rLine);
+  await new Promise(r=>setTimeout(r,600));
+  var eDiv=document.createElement('div');
+  eDiv.className='terminal-line info active';
+  var rN=ROSTER_FIRST_NAMES.slice().sort(function(){return Math.random()-0.5;});
+  var fH=rN.map(function(n,i){var d=(i*0.18).toFixed(2);var dur=(1.8+Math.random()*2.2).toFixed(2);return '<span class="roster-name" style="animation-delay:'+d+'s;animation-duration:'+dur+'s;">'+n+'</span>';}).join(', ');
+  eDiv.innerHTML='<span class="tag enrolled-cycle">Enrolled</span>: '+fH+' — <span class="warn">MAX CAPACITY</span>';
+  el.appendChild(eDiv);
+  await new Promise(r=>setTimeout(r,800));
+  var sDiv=document.createElement('div');
+  sDiv.className='terminal-line prompt active';
+  sDiv.textContent='> System ready.';
+  el.appendChild(sDiv);
   await new Promise(r=>setTimeout(r,400));
   document.getElementById('heroTitle').classList.add('visible');
   await new Promise(r=>setTimeout(r,300));
