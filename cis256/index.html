@@ -374,7 +374,7 @@ body{padding-top:44px}
 .prof-badge{border:1px solid var(--border2);padding:12px 20px;text-align:center;flex-shrink:0}
 .prof-badge-label{font-family:var(--font-mono);font-size:9px;color:var(--blue-dim);letter-spacing:0.2em;text-transform:uppercase;display:block;margin-bottom:4px}
 .prof-badge-val{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--gold)}
-footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-family:var(--font-mono);font-size:10px;color:#1e3a50;letter-spacing:0.1em}
+footer{border-top:1px solid var(--border);padding:20px;text-align:center;font-family:var(--font-mono);font-size:10px;color:#ffffff}
 
 /* ADA: reduced motion */
 @media(prefers-reduced-motion:reduce){
@@ -755,17 +755,17 @@ const aiSeq=[
 
   // Node definitions with Cisco icon types
   const nodes=[
-    {id:'internet',label:'INTERNET', x:0.5, y:0.08,color:'#6ec6e6',r:14,type:'cloud'},
-    {id:'r1',      label:'R1',       x:0.5, y:0.28,color:'#049fd9',r:13,type:'router'},
-    {id:'r2',      label:'R2',       x:0.22,y:0.48,color:'#049fd9',r:13,type:'router'},
-    {id:'r3',      label:'R3',       x:0.78,y:0.48,color:'#049fd9',r:13,type:'router'},
-    {id:'sw1',     label:'SW1',      x:0.22,y:0.70,color:'#00bceb',r:12,type:'l3switch'},
-    {id:'sw2',     label:'SW2',      x:0.50,y:0.70,color:'#00bceb',r:12,type:'switch'},
-    {id:'sw3',     label:'SW3',      x:0.78,y:0.70,color:'#00bceb',r:12,type:'switch'},
-    {id:'ap1',     label:'AP1',      x:0.08,y:0.88,color:'#C69214',r:11,type:'ap'},
-    {id:'ai1',     label:'AI-NODE',  x:0.50,y:0.90,color:'#00e5ff',r:12,type:'ai'},
-    {id:'pc1',     label:'PC',       x:0.34,y:0.90,color:'#6ec6e6',r:9, type:'pc'},
-    {id:'srv1',    label:'SRV',      x:0.66,y:0.90,color:'#6ec6e6',r:9, type:'server'},
+    {id:'internet',label:'INTERNET', x:0.40,y:0.15,color:'#6ec6e6',r:14,type:'cloud',  lon:-40,   lat:45  },
+    {id:'r1',      label:'R1·NYC',   x:0.29,y:0.19,color:'#049fd9',r:13,type:'router', lon:-74.0, lat:40.7},
+    {id:'r2',      label:'R2·LAX',   x:0.17,y:0.24,color:'#049fd9',r:13,type:'router', lon:-118.2,lat:34.1},
+    {id:'r3',      label:'R3·CDG',   x:0.51,y:0.10,color:'#049fd9',r:13,type:'router', lon:2.3,   lat:48.9},
+    {id:'sw1',     label:'SW1·ORD',  x:0.26,y:0.18,color:'#00bceb',r:12,type:'l3switch',lon:-87.6,lat:41.9},
+    {id:'sw2',     label:'SW2·SIN',  x:0.79,y:0.49,color:'#00bceb',r:12,type:'switch', lon:103.8, lat:1.4 },
+    {id:'sw3',     label:'SW3·TYO',  x:0.89,y:0.22,color:'#00bceb',r:12,type:'switch', lon:139.7, lat:35.7},
+    {id:'ap1',     label:'AP·PHL',   x:0.29,y:0.19,color:'#C69214',r:11,type:'ap',     lon:-75.2, lat:40.0},
+    {id:'ai1',     label:'AI·SJC',   x:0.16,y:0.21,color:'#00e5ff',r:12,type:'ai',     lon:-121.9,lat:37.3},
+    {id:'pc1',     label:'PC·ATL',   x:0.27,y:0.24,color:'#6ec6e6',r:9, type:'pc',     lon:-84.4, lat:33.7},
+    {id:'srv1',    label:'SRV·BER',  x:0.54,y:0.09,color:'#6ec6e6',r:9, type:'server', lon:13.4,  lat:52.5},
   ];
   const edges=[
     ['internet','r1'],
@@ -907,7 +907,13 @@ const aiSeq=[
     _cisPath256=d3.geoPath().context(ctx).projection(proj);
     fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
       .then(function(r){return r.json();})
-      .then(function(world){_cisLand=topojson.feature(world,world.objects.land);});
+      .then(function(world){
+        _cisLand=topojson.feature(world,world.objects.land);
+        // Snap nodes to real geographic pixel positions
+        nodes.forEach(function(n){
+          if(n.lon!=null){var pt=proj([n.lon,n.lat]);if(pt){n.px=pt[0];n.py=pt[1];}}
+        });
+      });
   })();
 
   // ── EDGE drawing: thick glowing links ───────────────────────────────────────
