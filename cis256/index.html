@@ -766,6 +766,14 @@ const aiSeq=[
     {id:'ai1',     label:'AI·SJC',   x:0.16,y:0.21,color:'#00e5ff',r:12,type:'ai',     lon:-121.9,lat:37.3},
     {id:'pc1',     label:'PC·ATL',   x:0.27,y:0.24,color:'#6ec6e6',r:9, type:'pc',     lon:-84.4, lat:33.7},
     {id:'srv1',    label:'SRV·BER',  x:0.54,y:0.09,color:'#6ec6e6',r:9, type:'server', lon:13.4,  lat:52.5},
+    // ── Global expansion nodes ──
+    {id:'r_can',   label:'R·YYZ',    x:0.28,y:0.16,color:'#049fd9',r:12,type:'router', lon:-79.4, lat:43.7},
+    {id:'r_ak',    label:'R·ANC',    x:0.09,y:0.05,color:'#049fd9',r:11,type:'router', lon:-149.9,lat:61.2},
+    {id:'sw_bra',  label:'SW·GRU',   x:0.37,y:0.68,color:'#00bceb',r:12,type:'switch', lon:-46.6, lat:-23.5},
+    {id:'sw_arg',  label:'SW·EZE',   x:0.34,y:0.77,color:'#00bceb',r:11,type:'switch', lon:-58.4, lat:-34.6},
+    {id:'r_afn',   label:'R·LOS',    x:0.51,y:0.45,color:'#049fd9',r:12,type:'router', lon:3.4,   lat:6.5},
+    {id:'r_afs',   label:'R·JNB',    x:0.57,y:0.71,color:'#049fd9',r:11,type:'router', lon:28.0,  lat:-26.2},
+    {id:'r_aus',   label:'R·SYD',    x:0.89,y:0.77,color:'#049fd9',r:12,type:'router', lon:151.2, lat:-33.9},
   ];
   const edges=[
     ['internet','r1'],
@@ -774,6 +782,11 @@ const aiSeq=[
     ['sw1','ap1'],['sw1','pc1'],
     ['sw2','ai1'],
     ['sw3','srv1'],
+    // Global expansion edges
+    ['r1','r_can'],['r_can','r_ak'],['r2','r_ak'],
+    ['r1','sw_bra'],['sw_bra','sw_arg'],
+    ['r3','r_afn'],['r_afn','r_afs'],
+    ['sw2','r_aus'],['sw3','r_aus'],
   ];
   nodes.forEach(n=>{n.px=n.x*W;n.py=n.y*H});
   const nodeMap={};nodes.forEach(n=>nodeMap[n.id]=n);
@@ -882,7 +895,7 @@ const aiSeq=[
   let nodeAlpha=new Array(nodes.length).fill(0);
   let edgeDrawn=new Array(edges.length).fill(0);
   let packetT=0,packetEdgeIdx=0;
-  const packetPath=['internet','r1','r2','sw1','pc1'];
+  const packetPath=['r_ak','r2','internet','r1','r_can','r1','sw_bra','sw_arg','sw_bra','r1','r3','r_afn','r_afs','r_afn','r3','sw3','r_aus','sw3','sw2','r_aus'];
 
   // ── WORLD MAP — D3 geoEquirectangular + topojson (realistic) ──────────────
   var _cisLand=null,_cisPath256=null;
