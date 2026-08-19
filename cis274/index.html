@@ -631,17 +631,18 @@ const bootLines=[
   rLine.className='terminal-line prompt active';
   rLine.textContent='> Loading class roster ...';
   el.appendChild(rLine);
-  await new Promise(r=>setTimeout(r,400));
+  await new Promise(r=>setTimeout(r,500));
   var rN=ROSTER_FIRST_NAMES.slice().sort();
-  for(var k=0;k<rN.length;k++){
-    await new Promise(r=>setTimeout(r,90+Math.random()*60));
-    var nDiv=document.createElement('div');
-    nDiv.className='terminal-line dim active';
-    var dur=(1.8+Math.random()*2.2).toFixed(2);
-    nDiv.innerHTML='  <span class="roster-name" style="animation-duration:'+dur+'s;">'+rN[k]+'</span>';
-    el.appendChild(nDiv);
+  function makeRosterRow(names,startIdx){
+    var div=document.createElement('div');
+    div.className='terminal-line dim active';
+    div.innerHTML='  '+names.map(function(n,i){var d=((startIdx+i)*0.15).toFixed(2);var dur=(1.8+Math.random()*2.2).toFixed(2);return '<span class="roster-name" style="animation-delay:'+d+'s;animation-duration:'+dur+'s;">'+n+'</span>';}).join(', ');
+    return div;
   }
-  await new Promise(r=>setTimeout(r,300));
+  el.appendChild(makeRosterRow(rN.slice(0,10),0));
+  await new Promise(r=>setTimeout(r,350));
+  el.appendChild(makeRosterRow(rN.slice(10),10));
+  await new Promise(r=>setTimeout(r,400));
   var eDiv=document.createElement('div');
   eDiv.className='terminal-line info active';
   eDiv.innerHTML='<span class="tag enrolled-cycle">Enrolled</span> '+rN.length+' operators — <span class="warn">MAX CAPACITY</span>';
