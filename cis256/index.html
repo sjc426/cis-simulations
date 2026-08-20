@@ -1213,25 +1213,7 @@ document.querySelectorAll('section').forEach(s=>{if(s.id!=='boot')observer.obser
     });
   }
 
-  function speakReady(){
-    if(!enabled||!window.speechSynthesis) return;
-    setTimeout(function(){
-      window.speechSynthesis.cancel();
-      var msg=new SpeechSynthesisUtterance('Systems online. Welcome, engineer. This course will take you deep into network routing and switching — the backbone of every enterprise. I am glad you are here. The network is yours to configure. Let us begin.');
-      msg.rate=0.88;msg.pitch=0.92;msg.volume=0.95;
-      var go=function(){
-        var voices=window.speechSynthesis.getVoices();
-        var pick=voices.find(function(v){
-          var n=v.name.toLowerCase();
-          return v.lang.startsWith('en')&&(n.indexOf('david')>=0||n.indexOf('mark')>=0||n.indexOf('daniel')>=0||n.indexOf('alex')>=0||n.indexOf('james')>=0||n.indexOf('tom')>=0||n.indexOf('guy')>=0||n.indexOf('reed')>=0);
-        })||voices.find(function(v){return v.lang.startsWith('en');});
-        if(pick) msg.voice=pick;
-        window.speechSynthesis.speak(msg);
-      };
-      if(window.speechSynthesis.getVoices().length>0){go();}
-      else{window.speechSynthesis.onvoiceschanged=function(){go();window.speechSynthesis.onvoiceschanged=null;};}
-    },900);
-  }
+  function speakReady(){if(!enabled) return;var aud=new Audio('https://lab.goask.dev/audio/cis256-welcome.mp3');aud.volume=0.85;aud.play().catch(function(){});}
 
   function activateAudio(){
     if(audioLive) return;
