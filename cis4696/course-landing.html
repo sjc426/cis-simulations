@@ -882,25 +882,7 @@ sections.forEach(function(s){navIo.observe(s);});
     });
   }
 
-  function speakReady(){
-    if(!enabled||!window.speechSynthesis) return;
-    setTimeout(function(){
-      window.speechSynthesis.cancel();
-      var msg=new SpeechSynthesisUtterance('Systems online. Welcome, analyst. This course will train you to think like an attacker and respond like a defender. Ethical hacking and intrusion forensics await. I am glad you are here. The network is yours to protect. Let us begin.');
-      msg.rate=0.88;msg.pitch=1.05;msg.volume=0.95;
-      var go=function(){
-        var voices=window.speechSynthesis.getVoices();
-        var pick=voices.find(function(v){
-          var n=v.name.toLowerCase();
-          return v.lang.startsWith('en')&&(n.indexOf('female')>=0||n.indexOf('zira')>=0||n.indexOf('samantha')>=0||n.indexOf('victoria')>=0||n.indexOf('karen')>=0||n.indexOf('moira')>=0||n.indexOf('fiona')>=0);
-        })||voices.find(function(v){return v.lang.startsWith('en');});
-        if(pick) msg.voice=pick;
-        window.speechSynthesis.speak(msg);
-      };
-      if(window.speechSynthesis.getVoices().length>0){go();}
-      else{window.speechSynthesis.onvoiceschanged=function(){go();window.speechSynthesis.onvoiceschanged=null;};}
-    },900);
-  }
+  function speakReady(){if(!enabled) return;var aud=new Audio('https://lab.goask.dev/audio/cis4696-welcome.mp3');aud.volume=0.85;aud.play().catch(function(){});}
 
   function bootBeep(idx){
     if(!ctx||!enabled||!audioLive) return;
