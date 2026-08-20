@@ -334,6 +334,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 .mission-bar-wrap{max-width:600px;margin:0 auto 8px;height:10px;border-radius:2px;overflow:hidden;background:rgba(0,255,65,0.08);}
 .mission-bar-fill{height:100%;background:var(--green);transition:width 1s ease;}
 .mission-bar-label{font-family:var(--font-mono);font-size:11px;color:var(--green-dim);letter-spacing:0.1em;}
+
+/* ---------- AUDIO TOGGLE ---------- */
+#audioToggle{
+  background:none;border:1px solid rgba(0,255,65,.35);border-radius:6px;
+  color:rgba(0,255,65,.6);font-size:15px;padding:3px 9px;cursor:pointer;
+  transition:color .2s,border-color .2s,box-shadow .2s;
+  margin-left:8px;line-height:1.4;user-select:none;font-family:inherit;flex-shrink:0;
+}
+#audioToggle:hover{color:#00ff41;border-color:#00ff41;box-shadow:0 0 8px rgba(0,255,65,0.3);}
+#audioToggle.on{color:#00ff41;border-color:#00ff41;box-shadow:0 0 10px rgba(0,255,65,0.4);}
 </style>
 </head>
 <body>
@@ -349,6 +359,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,[tabindex]:focus-visibl
     <a href="#countdown-section" aria-label="Go to mission countdown">Countdown</a>
     <a href="#prof-section" aria-label="Go to instructor information">Prof. Chang</a>
   </nav>
+  <button id="audioToggle" title="Enable audio">&#x1F507;</button>
 </header>
 <canvas id="particles" role="presentation" aria-hidden="true" width="1536" height="703"></canvas>
 
@@ -1070,6 +1081,118 @@ function focusTerminal(){
 </script>
 </main>
 
+<script>
+/* ---------- WEB AUDIO ENGINE (CIS274) ---------- */
+(function(){
+  var AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC) return;
+  var ctx=null,masterGain=null,enabled=true,audioLive=false;
+
+  function initCtx(){
+    if(ctx) return;
+    ctx=new AC();
+    masterGain=ctx.createGain();
+    masterGain.gain.setValueAtTime(0.85,ctx.currentTime);
+    masterGain.connect(ctx.destination);
+  }
+
+  function setBtn(on){
+    var b=document.getElementById('audioToggle');if(!b) return;
+    b.textContent=on?'\uD83D\uDD0A':'\uD83D\uDD07';b.title=on?'Mute audio':'Enable audio';
+    b.classList.toggle('on',on);
+  }
+
+  function playPowerOn(){
+    if(!ctx||!enabled||!audioLive) return;
+    var osc=ctx.createOscillator(),g=ctx.createGain();
+    osc.connect(g);g.connect(masterGain);osc.type='sine';
+    osc.frequency.setValueAtTime(60,ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(260,ctx.currentTime+0.8);
+    g.gain.setValueAtTime(0,ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.18,ctx.currentTime+0.08);
+    g.gain.linearRampToValueAtTime(0,ctx.currentTime+0.8);
+    osc.start();osc.stop(ctx.currentTime+0.85);
+  }
+
+  function bootCompleteChime(){
+    if(!ctx||!enabled||!audioLive) return;
+    [523,659,784,1047].forEach(function(f,i){
+      var osc=ctx.createOscillator(),g=ctx.createGain();
+      osc.connect(g);g.connect(masterGain);osc.type='sine';
+      osc.frequency.setValueAtTime(f,ctx.currentTime+i*0.16);
+      g.gain.setValueAtTime(0,ctx.currentTime+i*0.16);
+      g.gain.linearRampToValueAtTime(0.18,ctx.currentTime+i*0.16+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+i*0.16+0.38);
+      osc.start(ctx.currentTime+i*0.16);osc.stop(ctx.currentTime+i*0.16+0.42);
+    });
+  }
+
+  function speakReady(){
+    if(!enabled||!window.speechSynthesis) return;
+    setTimeout(function(){
+      window.speechSynthesis.cancel();
+      var msg=new SpeechSynthesisUtterance('Systems online. Welcome, operator. This course will train you to think like an attacker and act like a defender. Ethical hacking and penetration testing await. I am glad you are here. The mission is yours to complete. Let us begin.');
+      msg.rate=0.88;msg.pitch=1.05;msg.volume=0.95;
+      var go=function(){
+        var voices=window.speechSynthesis.getVoices();
+        var pick=voices.find(function(v){
+          var n=v.name.toLowerCase();
+          return v.lang.startsWith('en')&&(n.indexOf('female')>=0||n.indexOf('zira')>=0||n.indexOf('samantha')>=0||n.indexOf('victoria')>=0||n.indexOf('karen')>=0||n.indexOf('moira')>=0||n.indexOf('fiona')>=0);
+        })||voices.find(function(v){return v.lang.startsWith('en');});
+        if(pick) msg.voice=pick;
+        window.speechSynthesis.speak(msg);
+      };
+      if(window.speechSynthesis.getVoices().length>0){go();}
+      else{window.speechSynthesis.onvoiceschanged=function(){go();window.speechSynthesis.onvoiceschanged=null;};}
+    },900);
+  }
+
+  function activateAudio(){
+    if(audioLive) return;
+    audioLive=true;
+    setBtn(true);
+    playPowerOn();
+    setTimeout(bootCompleteChime,900);
+    setTimeout(speakReady,900);
+  }
+
+  function tryAutoResume(){
+    initCtx();
+    ctx.resume().then(function(){
+      if(ctx.state==='running'&&enabled) activateAudio();
+    }).catch(function(){});
+  }
+
+  function setupFallback(){
+    var evts=['click','keydown','scroll','touchstart'];
+    evts.forEach(function(e){
+      document.addEventListener(e,function u(){
+        if(!audioLive){initCtx();ctx.resume().then(function(){if(ctx.state==='running'&&enabled) activateAudio();});}
+        document.removeEventListener(e,u);
+      },{once:true,passive:true});
+    });
+  }
+
+  var btn=document.getElementById('audioToggle');
+  if(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(!audioLive){
+        initCtx();
+        ctx.resume().then(function(){if(ctx.state==='running'&&enabled) activateAudio();});
+        return;
+      }
+      enabled=!enabled;
+      setBtn(enabled);
+      if(!enabled&&window.speechSynthesis) window.speechSynthesis.cancel();
+    });
+  }
+
+  document.readyState==='loading'
+    ? document.addEventListener('DOMContentLoaded',function(){tryAutoResume();setupFallback();})
+    : (tryAutoResume(),setupFallback());
+})();
+</script>
 </body></html>
 
 
