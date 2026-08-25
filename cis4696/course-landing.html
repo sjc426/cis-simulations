@@ -584,7 +584,7 @@ var wkIdx = currentWeekIndex();
 var pastWeek1 = wkIdx >= 1;
 var realFirstName = tryGetCanvasFirstName();
 // Real enrolled names — CIS 4696 Fall 2026, pulled 2026-08-19 via Canvas
-var ROSTER_FIRST_NAMES = ["Anastasia","Ash","Erielle","Ian","Jay","Kyle","Milan","Oliver","Shaw","Tahera"];
+var ROSTER_FIRST_NAMES = ["Anastasia","Ash","Erielle","Ian","Kyle","Milan","Oliver","Shaw","Tahera"];
 function pickRosterName(){
   if(!ROSTER_FIRST_NAMES.length) return null;
   return ROSTER_FIRST_NAMES[Math.floor(Math.random()*ROSTER_FIRST_NAMES.length)].toLowerCase();
@@ -621,7 +621,7 @@ setTimeout(function(){
     var del=(Math.random()*6).toFixed(1)+'s';
     return '<span class="eng-name" style="animation-delay:'+del+';animation-duration:'+dur+'">'+n.toLowerCase()+'</span>';
   }).join(' ');
-  div.innerHTML='<span class="tag">Hackers Online</span>: '+nameSpans+' <span style="color:var(--green)">— 10 active — clearance granted — operation underway</span>';
+  div.innerHTML='<span class="tag">Hackers Online</span>: '+nameSpans+' <span style="color:var(--green)">— 9 active — clearance granted — operation underway</span>';
   bootEl.appendChild(div);
 },rosterAt);
 
